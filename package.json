@@ -5,29 +5,34 @@
   "main": "index.js",
   "scripts": {
     "dev": "netlify dev",
-    "build": "echo 'Build completed'",
+    "build": "echo 'Build completed - Functions ready'",
     "deploy": "netlify deploy --prod",
-    "test": "echo 'No tests specified'"
+    "test": "echo 'No tests specified'",
+    "test-functions": "netlify functions:invoke health --no-identity",
+    "create-data-dir": "mkdir -p public/data/workouts"
   },
   "keywords": [
     "fitness",
     "workout",
     "personal-trainer",
     "pwa",
-    "netlify"
+    "netlify",
+    "serverless"
   ],
   "author": "JS Fit App",
   "license": "MIT",
   "devDependencies": {
     "netlify-cli": "^17.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@netlify/functions": "^2.4.0"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/usuario/jsfitapp.git"
+    "url": "https://github.com/VANBAHIA/jsfitapp.git"
   },
   "homepage": "https://jsfitapp.netlify.app",
   "netlify": {

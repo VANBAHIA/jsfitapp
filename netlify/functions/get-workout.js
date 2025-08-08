@@ -1,114 +1,149 @@
 // netlify/functions/get-workout.js
-const fs = require('fs').promises;
+const fs = require('fs');
 const path = require('path');
 
-// Diretório onde os arquivos JSON estão salvos
-const WORKOUTS_DIR = path.join(process.cwd(), 'public', 'data', 'workouts');
-
 exports.handler = async (event, context) => {
-  // Headers CORS
+  // Configurar CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Content-Type': 'application/json'
   };
 
-  // Preflight request
+  // Responder a requisições OPTIONS (preflight)
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
+    return {
+      statusCode: 200,
+      headers,
+      body: ''
+    };
   }
 
-  // Apenas GET permitido
+  // Verificar método HTTP
   if (event.httpMethod !== 'GET') {
     return {
       statusCode: 405,
       headers,
-      body: JSON.stringify({ error: 'Method not allowed' })
+      body: JSON.stringify({
+        success: false,
+        error: 'Method Not Allowed',
+        message: 'Apenas GET é permitido para este endpoint'
+      })
     };
   }
 
   try {
-    // Extrair shareId da URL
-    const pathSegments = event.path.split('/');
-    const shareId = pathSegments[pathSegments.length - 1]?.toUpperCase();
+    // Extrair ID da URL path
+    const pathParts = event.path.split('/');
+    const workoutId = pathParts[pathParts.length - 1];
 
-    // Validar shareId
-    if (!shareId || !/^[A-Z0-9]{6}$/.test(shareId)) {
+    // Validar ID
+    if (!workoutId || workoutId === 'get-workout') {
       return {
         statusCode: 400,
         headers,
         body: JSON.stringify({
-          error: 'ID inválido. Deve ter exatamente 6 caracteres alfanuméricos'
+          success: false,
+          error: 'Bad Request',
+          message: 'ID do treino é obrigatório na URL'
         })
       };
     }
 
-    // Caminho do arquivo
-    const filePath = path.join(WORKOUTS_DIR, `${shareId}.json`);
+    // Validar formato do ID (6 caracteres)
+    if (workoutId.length !== 6) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          error: 'Bad Request',
+          message: 'ID deve ter exatamente 6 caracteres'
+        })
+      };
+    }
+
+    // Definir caminho do arquivo
+    const dataDir = path.join(process.cwd(), 'public', 'data', 'workouts');
+    const filePath = path.join(dataDir, `${workoutId.toUpperCase()}.json`);
 
     // Verificar se arquivo existe
-    try {
-      await fs.access(filePath);
-    } catch {
+    if (!fs.existsSync(filePath)) {
+      console.log(`[GetWorkout] Treino ${workoutId} não encontrado`);
+      
       return {
         statusCode: 404,
         headers,
         body: JSON.stringify({
-          error: 'Plano não encontrado',
-          shareId: shareId
+          success: false,
+          error: 'Not Found',
+          message: `Treino com ID ${workoutId} não encontrado`
         })
       };
     }
 
     // Ler arquivo JSON
-    const fileContent = await fs.readFile(filePath, 'utf8');
+    const fileContent = fs.readFileSync(filePath, 'utf8');
     const workoutData = JSON.parse(fileContent);
 
-    // Registrar acesso (log)
-    console.log(`Workout ${shareId} accessed successfully`);
+    // Verificar integridade dos dados
+    if (!workoutData.id || !workoutData.plan) {
+      console.error(`[GetWorkout] Dados corrompidos para treino ${workoutId}`);
+      
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          error: 'Internal Server Error',
+          message: 'Dados do treino estão corrompidos'
+        })
+      };
+    }
 
-    // Retornar dados do plano
+    console.log(`[GetWorkout] Treino ${workoutId} encontrado e retornado com sucesso`);
+
+    // Resposta de sucesso
+    const response = {
+      success: true,
+      message: 'Treino encontrado',
+      data: workoutData,
+      timestamp: new Date().toISOString()
+    };
+
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({
-        success: true,
-        data: {
-          id: workoutData.id,
-          plan: workoutData.plan,
-          timestamp: workoutData.timestamp,
-          version: workoutData.version,
-          lastModified: workoutData.metadata?.lastModified
-        },
-        metadata: {
-          accessedAt: new Date().toISOString(),
-          source: 'file-storage'
-        }
-      })
+      body: JSON.stringify(response)
     };
 
   } catch (error) {
-    console.error('Error reading workout:', error);
-    
-    // Se erro de parsing JSON
+    console.error('[GetWorkout] Erro ao buscar treino:', error);
+
+    // Verificar se é erro de JSON parse
     if (error instanceof SyntaxError) {
       return {
         statusCode: 500,
         headers,
         body: JSON.stringify({
-          error: 'Arquivo de plano corrompido',
-          details: 'Por favor, solicite um novo ID ao personal trainer'
+          success: false,
+          error: 'Internal Server Error',
+          message: 'Arquivo de treino corrompido'
         })
       };
     }
-    
+
+    // Erro interno do servidor
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
-        error: 'Erro interno do servidor ao ler arquivo',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        success: false,
+        error: 'Internal Server Error',
+        message: 'Erro interno do servidor',
+        details: error.message,
+        timestamp: new Date().toISOString()
       })
     };
   }

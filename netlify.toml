@@ -7,21 +7,24 @@
 [functions]
   directory = "netlify/functions"
 
-# Redirecionamentos da API
+# Redirecionamentos da API - CORRIGIDOS
 [[redirects]]
   from = "/api/workouts/:id"
-  to = "/.netlify/functions/get-workout/:id"
+  to = "/.netlify/functions/get-workout"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/api/workouts"
   to = "/.netlify/functions/save-workout"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/api/health"
   to = "/.netlify/functions/health"
   status = 200
+  force = true
 
 # Redirecionamentos das aplicações
 [[redirects]]
@@ -53,6 +56,14 @@
 # Headers específicos para as APIs
 [[headers]]
   for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+
+# Headers específicos para as Functions
+[[headers]]
+  for = "/.netlify/functions/*"
   [headers.values]
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
