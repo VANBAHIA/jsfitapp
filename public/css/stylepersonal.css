@@ -1,0 +1,489 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.app-container {
+    max-width: 414px;
+    margin: 0 auto;
+    background: white;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* iOS Status Bar */
+.status-bar {
+    height: 44px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 17px;
+    border-bottom: 0.5px solid #e5e5ea;
+}
+
+/* Header */
+.header {
+    background: white;
+    padding: 12px 16px;
+    border-bottom: 0.5px solid #e5e5ea;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+}
+
+.header-back {
+    background: none;
+    border: none;
+    padding: 8px;
+    margin: -8px;
+    color: #007AFF;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.header-title {
+    flex: 1;
+    font-size: 17px;
+    font-weight: 600;
+    color: #1d1d1f;
+}
+
+.header-action {
+    background: none;
+    border: none;
+    padding: 8px;
+    color: #007AFF;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+/* Content */
+.content {
+    padding: 20px 16px;
+    padding-bottom: 100px;
+}
+
+/* Cards */
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border: 0.5px solid #e5e5ea;
+}
+
+.plan-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.plan-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin-bottom: 4px;
+}
+
+.plan-subtitle {
+    font-size: 14px;
+    color: #8e8e93;
+    margin-bottom: 2px;
+}
+
+.plan-date {
+    font-size: 12px;
+    color: #8e8e93;
+}
+
+.plan-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 16px;
+    background: #f2f2f7;
+    color: #007AFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.action-btn:active {
+    background: #e5e5ea;
+}
+
+.action-btn.danger {
+    color: #ff3b30;
+}
+
+.action-btn.success {
+    color: #34c759;
+}
+
+/* Buttons */
+.btn-primary {
+    background: #007AFF;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 24px;
+    font-size: 17px;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.btn-primary:active {
+    background: #0056b3;
+}
+
+.btn-secondary {
+    background: #f2f2f7;
+    color: #1d1d1f;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 24px;
+    font-size: 17px;
+    font-weight: 500;
+    width: 100%;
+    cursor: pointer;
+}
+
+.btn-secondary:active {
+    background: #e5e5ea;
+}
+
+.btn-danger {
+    background: #ff3b30;
+    color: white;
+}
+
+.btn-danger:active {
+    background: #d70015;
+}
+
+.btn-share {
+    background: #34c759;
+    color: white;
+}
+
+.btn-share:active {
+    background: #28a745;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1d1d1f;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e5e5ea;
+    border-radius: 12px;
+    font-size: 16px;
+    background: #f2f2f7;
+    color: #1d1d1f;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #007AFF;
+    background: white;
+}
+
+.form-textarea {
+    height: 80px;
+    resize: none;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.form-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+}
+
+/* Exercise List */
+.exercise-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.exercise-info {
+    flex: 1;
+}
+
+.exercise-name {
+    font-weight: 600;
+    font-size: 16px;
+    color: #1d1d1f;
+    margin-bottom: 4px;
+}
+
+.exercise-details {
+    font-size: 14px;
+    color: #8e8e93;
+    display: flex;
+    gap: 12px;
+}
+
+.exercise-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.empty-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    color: #8e8e93;
+}
+
+.empty-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin-bottom: 8px;
+}
+
+.empty-subtitle {
+    font-size: 14px;
+    color: #8e8e93;
+    line-height: 1.4;
+}
+
+/* Workout Preview */
+.workout-preview {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.workout-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 12px;
+}
+
+.workout-name {
+    font-weight: 600;
+    color: #1d1d1f;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.workout-count {
+    color: #8e8e93;
+}
+
+/* Share ID Display */
+.share-id-card {
+    background: linear-gradient(135deg, #34c759 0%, #28a745 100%);
+    color: white;
+    margin-bottom: 16px;
+}
+
+.share-id-content {
+    text-align: center;
+    padding: 8px 0;
+}
+
+.share-id-title {
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0.9;
+    margin-bottom: 8px;
+}
+
+.share-id-value {
+    font-size: 24px;
+    font-weight: 700;
+    font-family: 'SF Mono', Monaco, monospace;
+    letter-spacing: 2px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 12px 16px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.share-id-subtitle {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-top: 8px;
+}
+
+/* API Status */
+.api-status {
+    background: #f8f9fa;
+    border: 1px solid #e5e5ea;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: #6b7280;
+    text-align: center;
+}
+
+.api-status.success {
+    background: #dcfce7;
+    border-color: #16a34a;
+    color: #16a34a;
+}
+
+.api-status.error {
+    background: #fef2f2;
+    border-color: #ef4444;
+    color: #dc2626;
+}
+
+.api-status.loading {
+    background: #f0f9ff;
+    border-color: #0ea5e9;
+    color: #0369a1;
+}
+
+/* JSON Preview */
+.json-preview {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 12px;
+}
+
+/* iOS Safe Area */
+.safe-bottom {
+    height: env(safe-area-inset-bottom);
+    min-height: 20px;
+}
+
+/* Hide elements */
+.hidden {
+    display: none !important;
+}
+
+/* Loading indicator */
+.loading {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e5e5ea;
+    border-top: 2px solid #007AFF;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Haptic feedback simulation */
+.btn-primary:active,
+.action-btn:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+}
+
+/* Slide animations */
+.slide-enter {
+    animation: slideIn 0.3s ease-out;
+}
+
+.slide-exit {
+    animation: slideOut 0.3s ease-in;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+}

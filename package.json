@@ -1,0 +1,37 @@
+{
+  "name": "jsfitapp",
+  "version": "1.0.0",
+  "description": "Sistema de compartilhamento de treinos entre personal trainers e alunos",
+  "main": "index.js",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'Build completed'",
+    "deploy": "netlify deploy --prod",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": [
+    "fitness",
+    "workout",
+    "personal-trainer",
+    "pwa",
+    "netlify"
+  ],
+  "author": "JS Fit App",
+  "license": "MIT",
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/usuario/jsfitapp.git"
+  },
+  "homepage": "https://jsfitapp.netlify.app",
+  "netlify": {
+    "functions": "netlify/functions",
+    "publish": "public"
+  }
+}
