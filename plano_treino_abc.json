@@ -1,0 +1,281 @@
+{
+  "version": "1.0",
+  "exported": "2025-08-07T00:00:00.000Z",
+  "plan": {
+    "id": 1728942000000,
+    "shareId": null,
+    "nome": "Treino ABC - Intermediário",
+    "dias": 3,
+    "dataInicio": "2025-08-07",
+    "dataFim": "2025-11-07",
+    "perfil": {
+      "idade": 40,
+      "altura": "1,68m",
+      "peso": "68kg",
+      "porte": "medio",
+      "objetivo": "Hipertrofia e condicionamento físico"
+    },
+    "treinos": [
+      {
+        "id": "A",
+        "nome": "A - Peito, Ombros e Tríceps",
+        "foco": "Membros superiores - Músculos empurradores",
+        "exercicios": [
+          {
+            "id": 1,
+            "nome": "Supino Reto com Barra",
+            "descricao": "Exercício principal para peitorais. Mantenha os pés firmes no chão, escápulas retraídas e desça a barra até o peito controladamente.",
+            "series": 4,
+            "repeticoes": "8-10",
+            "carga": "40-50kg",
+            "concluido": false
+          },
+          {
+            "id": 2,
+            "nome": "Supino Inclinado com Halteres",
+            "descricao": "Foca na porção superior do peitoral. Banco inclinado a 30-45°, amplitude completa do movimento.",
+            "series": 3,
+            "repeticoes": "10-12",
+            "carga": "16-20kg cada",
+            "concluido": false
+          },
+          {
+            "id": 3,
+            "nome": "Crucifixo Reto",
+            "descricao": "Movimento de isolamento para peitorais. Desça os halteres em arco até sentir alongamento no peito.",
+            "series": 3,
+            "repeticoes": "12-15",
+            "carga": "12-16kg cada",
+            "concluido": false
+          },
+          {
+            "id": 4,
+            "nome": "Desenvolvimento com Halteres",
+            "descricao": "Exercício principal para ombros. Sente-se com apoio nas costas, empurre os halteres acima da cabeça.",
+            "series": 4,
+            "repeticoes": "10-12",
+            "carga": "14-18kg cada",
+            "concluido": false
+          },
+          {
+            "id": 5,
+            "nome": "Elevação Lateral",
+            "descricao": "Isolamento para deltóide médio. Eleve os braços lateralmente até a altura dos ombros, controle a descida.",
+            "series": 3,
+            "repeticoes": "12-15",
+            "carga": "8-12kg cada",
+            "concluido": false
+          },
+          {
+            "id": 6,
+            "nome": "Elevação Frontal",
+            "descricao": "Trabalha deltóide anterior. Eleve alternadamente os halteres à frente até altura dos ombros.",
+            "series": 3,
+            "repeticoes": "12-15",
+            "carga": "8-12kg cada",
+            "concluido": false
+          },
+          {
+            "id": 7,
+            "nome": "Tríceps Testa",
+            "descricao": "Isolamento para tríceps. Deitado, flexione apenas os cotovelos mantendo-os fixos.",
+            "series": 3,
+            "repeticoes": "12-15",
+            "carga": "20-25kg",
+            "concluido": false
+          },
+          {
+            "id": 8,
+            "nome": "Tríceps Corda na Polia",
+            "descricao": "Finalização para tríceps. Puxe a corda para baixo separando as pontas no final do movimento.",
+            "series": 3,
+            "repeticoes": "15-20",
+            "carga": "20-30kg",
+            "concluido": false
+          }
+        ],
+        "concluido": false,
+        "execucoes": 0
+      },
+      {
+        "id": "B",
+        "nome": "B - Costas e Bíceps",
+        "foco": "Membros superiores - Músculos puxadores",
+        "exercicios": [
+          {
+            "id": 9,
+            "nome": "Puxada Alta Pegada Aberta",
+            "descricao": "Exercício principal para dorsais. Puxe a barra até a altura do peito, contraia as escápulas.",
+            "series": 4,
+            "repeticoes": "8-10",
+            "carga": "45-55kg",
+            "concluido": false
+          },
+          {
+            "id": 10,
+            "nome": "Remada Curvada com Barra",
+            "descricao": "Trabalha toda a musculatura das costas. Mantenha o tronco inclinado e puxe a barra até o abdômen.",
+            "series": 4,
+            "repeticoes": "10-12",
+            "carga": "35-45kg",
+            "concluido": false
+          },
+          {
+            "id": 11,
+            "nome": "Remada Sentada",
+            "descricao": "Movimento de puxada horizontal. Mantenha o tronco ereto e puxe o cabo até o abdômen.",
+            "series": 3,
+            "repeticoes": "12-15",
+            "carga": "40-50kg",
+            "concluido": false
+          },
+          {
+            "id": 12,
+            "nome": "Pulldown",
+            "descricao": "Isolamento para dorsais. Puxe com pegada fechada focando na contração dos dorsais.",
+            "series": 3,
+            "repeticoes": "12-15",
+            "carga": "35-45kg",
+            "concluido": false
+          },
+          {
+            "id": 13,
+            "nome": "Rosca Direta com Barra",
+            "descricao": "Exercício principal para bíceps. Mantenha cotovelos fixos, curl completo da barra.",
+            "series": 4,
+            "repeticoes": "10-12",
+            "carga": "25-35kg",
+            "concluido": false
+          },
+          {
+            "id": 14,
+            "nome": "Rosca Alternada com Halteres",
+            "descricao": "Trabalha bíceps unilateralmente. Alterne os braços com movimento controlado e completo.",
+            "series": 3,
+            "repeticoes": "12-15",
+            "carga": "12-16kg cada",
+            "concluido": false
+          },
+          {
+            "id": 15,
+            "nome": "Rosca Martelo",
+            "descricao": "Foca braquial e bíceps. Pegada neutra, movimento alternado ou simultâneo.",
+            "series": 3,
+            "repeticoes": "12-15",
+            "carga": "12-16kg cada",
+            "concluido": false
+          },
+          {
+            "id": 16,
+            "nome": "Rosca no Cabo",
+            "descricao": "Finalização para bíceps com tensão constante. Use polia baixa com barra reta.",
+            "series": 3,
+            "repeticoes": "15-20",
+            "carga": "20-30kg",
+            "concluido": false
+          }
+        ],
+        "concluido": false,
+        "execucoes": 0
+      },
+      {
+        "id": "C",
+        "nome": "C - Pernas e Abdômen",
+        "foco": "Membros inferiores e core",
+        "exercicios": [
+          {
+            "id": 17,
+            "nome": "Agachamento Livre",
+            "descricao": "Exercício rei para pernas. Desça até coxas paralelas ao chão, mantenha joelhos alinhados.",
+            "series": 4,
+            "repeticoes": "10-12",
+            "carga": "50-65kg",
+            "concluido": false
+          },
+          {
+            "id": 18,
+            "nome": "Leg Press 45°",
+            "descricao": "Exercício seguro para quadríceps e glúteos. Amplitude completa, não trave os joelhos.",
+            "series": 4,
+            "repeticoes": "12-15",
+            "carga": "120-150kg",
+            "concluido": false
+          },
+          {
+            "id": 19,
+            "nome": "Cadeira Extensora",
+            "descricao": "Isolamento para quadríceps. Extensão completa com contração no final do movimento.",
+            "series": 3,
+            "repeticoes": "15-20",
+            "carga": "35-45kg",
+            "concluido": false
+          },
+          {
+            "id": 20,
+            "nome": "Mesa Flexora",
+            "descricao": "Isolamento para posteriores da coxa. Flexione até máxima contração dos isquiotibiais.",
+            "series": 3,
+            "repeticoes": "12-15",
+            "carga": "30-40kg",
+            "concluido": false
+          },
+          {
+            "id": 21,
+            "nome": "Stiff com Halteres",
+            "descricao": "Trabalha posteriores e glúteos. Desça os halteres próximos às pernas, sinta o alongamento.",
+            "series": 3,
+            "repeticoes": "12-15",
+            "carga": "16-22kg cada",
+            "concluido": false
+          },
+          {
+            "id": 22,
+            "nome": "Panturrilha em Pé",
+            "descricao": "Isolamento para gastrocnêmios. Suba nas pontas dos pés com amplitude completa.",
+            "series": 4,
+            "repeticoes": "15-20",
+            "carga": "60-80kg",
+            "concluido": false
+          },
+          {
+            "id": 23,
+            "nome": "Panturrilha Sentado",
+            "descricao": "Trabalha sóleo. Movimento controlado, pausa na contração máxima.",
+            "series": 3,
+            "repeticoes": "20-25",
+            "carga": "25-35kg",
+            "concluido": false
+          },
+          {
+            "id": 24,
+            "nome": "Abdominal Tradicional",
+            "descricao": "Exercício básico para reto abdominal. Flexão do tronco sem puxar o pescoço.",
+            "series": 3,
+            "repeticoes": "20-25",
+            "carga": "Peso corporal",
+            "concluido": false
+          },
+          {
+            "id": 25,
+            "nome": "Prancha Isométrica",
+            "descricao": "Exercício para core completo. Mantenha corpo alinhado, contração abdominal constante.",
+            "series": 3,
+            "repeticoes": "30-45s",
+            "carga": "Peso corporal",
+            "concluido": false
+          }
+        ],
+        "concluido": false,
+        "execucoes": 0
+      }
+    ],
+    "observacoes": {
+      "frequencia": "3x por semana (segunda, quarta, sexta ou terça, quinta, sábado)",
+      "progressao": "Aumente 2,5-5kg quando conseguir fazer todas as séries no limite superior de repetições",
+      "descanso": "60-90 segundos entre séries para exercícios multiarticulares, 45-60s para isolamento",
+      "hidratacao": "Beba água durante todo o treino, especialmente entre as séries",
+      "adaptacao": "Primeiras 2 semanas com cargas 10-15% menores para adaptação neuromuscular",
+      "consulta": "Consulte um educador físico para ajustes específicos e progressão adequada"
+    }
+  }
+}

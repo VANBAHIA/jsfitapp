@@ -1,5 +1,405 @@
-    </style>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Editor Treinos">
+    <title>Editor de Treinos - Personal</title>
+    
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSI0MCIgZmlsbD0iIzc5NDVmZiIvPjxwYXRoIGQ9Im05MCA0NWMtMjQuODUzIDAtNDUgMjAuMTQ3LTQ1IDQ1djQ1YzAgMjQuODUzIDIwLjE0NyA0NSA0NSA0NXM0NS0yMC4xNDcgNDUtNDV2LTQ1YzAtMjQuODUzLTIwLjE0Ny00NS00NS00NXoiIGZpbGw9IndoaXRlIi8+PC9zdmc+">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f7;
+            color: #1d1d1f;
+            line-height: 1.4;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app-container {
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        .status-bar {
+            background: #8b5cf6;
+            color: white;
+            text-align: center;
+            padding: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .header {
+            background: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e5e5e7;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-back {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #007aff;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+
+        .header-action {
+            background: #007aff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .view {
+            transition: transform 0.3s ease;
+        }
+
+        .view.hidden {
+            display: none;
+        }
+
+        .view.slide-enter {
+            transform: translateX(100%);
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        @keyframes slideIn {
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007aff, #0056cc);
+            color: white;
+            border: none;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary.btn-share {
+            background: linear-gradient(135deg, #34c759, #28a745);
+        }
+
+        .btn-secondary {
+            background: #f2f2f7;
+            color: #1d1d1f;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+        }
+
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8e8e93;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1d1d1f;
+        }
+
+        .empty-subtitle {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .plan-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .plan-subtitle {
+            font-size: 14px;
+            color: #8e8e93;
+            margin-bottom: 2px;
+        }
+
+        .plan-date {
+            font-size: 12px;
+            color: #8e8e93;
+        }
+
+        .plan-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: #f2f2f7;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .action-btn.danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* CORREÇÃO: Lista de treinos em coluna única */
+        .workout-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .workout-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f2f2f7;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .workout-name {
+            font-weight: 500;
+        }
+
+        .workout-count {
+            color: #8e8e93;
+            font-size: 12px;
+        }
+
+        .exercise-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .exercise-info {
+            flex: 1;
+        }
+
+        .exercise-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .exercise-details {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #8e8e93;
+        }
+
+        .exercise-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Share ID Card Styles */
+        .share-id-card {
+            background: linear-gradient(135deg, #34c759, #28a745);
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .share-id-content {
+            padding: 10px 0;
+        }
+
+        .share-id-title {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .share-id-value {
+            font-size: 32px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+        }
+
+        .share-id-subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* API Status Styles */
+        .api-status {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            text-align: center;
+            background: #f2f2f7;
+            color: #8e8e93;
+        }
+
+        .api-status.loading {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .api-status.success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .api-status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .plan-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .plan-actions {
+                align-self: flex-end;
+            }
+        }
+
+        .safe-bottom {
+            height: 20px;
+        }
+    </style>
 </head>
 <body>
     <div class="app-container" id="app">
@@ -755,7 +1155,7 @@
             }
         }
 
-        // Renderização de views (funções simplificadas - as mesmas do arquivo original)
+        // CORREÇÃO: Funções faltando adicionadas
         function renderPlansList() {
             const container = document.getElementById('plansList');
             
@@ -806,6 +1206,126 @@
                     </button>
                 </div>
             `).join('');
+        }
+
+        // CORREÇÃO: Função deletePlan adicionada
+        function deletePlan(planId) {
+            if (!confirm('Tem certeza que deseja excluir este plano? Esta ação não pode ser desfeita.')) {
+                return;
+            }
+
+            const planIndex = appState.workoutPlans.findIndex(p => p.id === planId);
+            if (planIndex >= 0) {
+                const plan = appState.workoutPlans[planIndex];
+                
+                // Remover plano compartilhado se existir
+                if (plan.shareId) {
+                    const sharedPlans = getSharedPlans();
+                    delete sharedPlans[plan.shareId];
+                    localStorage.setItem('sharedWorkoutPlans', JSON.stringify(sharedPlans));
+                }
+                
+                appState.workoutPlans.splice(planIndex, 1);
+                saveToLocalStorage();
+                renderPlansList();
+            }
+        }
+
+        // CORREÇÃO: Função duplicatePlan adicionada
+        function duplicatePlan(planId) {
+            const originalPlan = appState.workoutPlans.find(p => p.id === planId);
+            if (!originalPlan) return;
+
+            const duplicatedPlan = {
+                ...originalPlan,
+                id: Date.now(),
+                shareId: null,
+                nome: `${originalPlan.nome} - Cópia`,
+                treinos: originalPlan.treinos.map(treino => ({
+                    ...treino,
+                    exercicios: treino.exercicios.map(ex => ({
+                        ...ex,
+                        id: Date.now() + Math.random()
+                    }))
+                }))
+            };
+
+            appState.workoutPlans.push(duplicatedPlan);
+            saveToLocalStorage();
+            renderPlansList();
+            
+            alert('Plano duplicado com sucesso!');
+        }
+
+        // CORREÇÃO: Função exportJSON adicionada
+        function exportJSON(planId) {
+            const plan = appState.workoutPlans.find(p => p.id === planId);
+            if (!plan) return;
+
+            try {
+                const dataStr = JSON.stringify({
+                    version: "1.0",
+                    exported: new Date().toISOString(),
+                    plan: plan
+                }, null, 2);
+                
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = url;
+                downloadLink.download = `plano-treino-${plan.nome.toLowerCase().replace(/\s+/g, '-')}.json`;
+                
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                URL.revokeObjectURL(url);
+                
+                alert('Plano exportado com sucesso!');
+                
+            } catch (error) {
+                console.error('Erro ao exportar plano:', error);
+                alert('Erro ao exportar plano. Tente novamente.');
+            }
+        }
+
+        // CORREÇÃO: Função importJSON adicionada
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (!data.plan) {
+                        alert('Arquivo inválido. Formato não reconhecido.');
+                        return;
+                    }
+
+                    const importedPlan = {
+                        ...data.plan,
+                        id: Date.now(),
+                        shareId: null,
+                        nome: `${data.plan.nome} - Importado`
+                    };
+
+                    appState.workoutPlans.push(importedPlan);
+                    saveToLocalStorage();
+                    renderPlansList();
+                    
+                    alert('Plano importado com sucesso!');
+                    
+                } catch (error) {
+                    console.error('Erro ao importar arquivo:', error);
+                    alert('Erro ao importar arquivo. Verifique se o formato está correto.');
+                }
+            };
+            
+            reader.readAsText(file);
+            event.target.value = '';
         }
 
         function renderPlanDetails() {
@@ -887,14 +1407,226 @@
             }
         }
 
-        // Implementar outras funções de renderização e CRUD seguindo o mesmo padrão...
-        // (Por brevidade, vou incluir apenas as principais)
+        function renderEditPlan() {
+            const form = document.getElementById('planForm');
+            const title = document.getElementById('editPlanTitle');
+            
+            if (appState.selectedPlan) {
+                title.textContent = appState.selectedPlan.nome === "Novo Plano" ? 'Criar Plano' : 'Editar Plano';
+                
+                form.nome.value = appState.selectedPlan.nome || '';
+                form.dias.value = appState.selectedPlan.dias || 3;
+                form.dataInicio.value = appState.selectedPlan.dataInicio || '';
+                form.dataFim.value = appState.selectedPlan.dataFim || '';
+                form.idade.value = appState.selectedPlan.perfil?.idade || 30;
+                form.altura.value = appState.selectedPlan.perfil?.altura || '1,70m';
+                form.peso.value = appState.selectedPlan.perfil?.peso || '70kg';
+                form.porte.value = appState.selectedPlan.perfil?.porte || 'medio';
+                form.objetivo.value = appState.selectedPlan.perfil?.objetivo || 'Condicionamento geral';
+                form.frequencia.value = appState.selectedPlan.observacoes?.frequencia || '3x por semana';
+                form.progressao.value = appState.selectedPlan.observacoes?.progressao || 'Aumente a carga gradualmente';
+                form.descanso.value = appState.selectedPlan.observacoes?.descanso || '60-90 segundos entre séries';
+            }
+        }
 
+        function renderEditWorkout() {
+            const form = document.getElementById('workoutForm');
+            const title = document.getElementById('editWorkoutTitle');
+            
+            if (appState.selectedWorkout) {
+                title.textContent = appState.selectedWorkout.nome === "Novo Treino" ? 'Criar Treino' : 'Editar Treino';
+                
+                form.id.value = appState.selectedWorkout.id || '';
+                form.nome.value = appState.selectedWorkout.nome || '';
+                form.foco.value = appState.selectedWorkout.foco || '';
+            }
+        }
+
+        function renderWorkoutDetails() {
+            const title = document.getElementById('workoutDetailsTitle');
+            const container = document.getElementById('exercisesList');
+            
+            if (appState.selectedWorkout) {
+                title.textContent = `${appState.selectedWorkout.nome}`;
+                
+                if (appState.selectedWorkout.exercicios.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">💪</div>
+                            <div class="empty-title">Nenhum exercício adicionado</div>
+                            <div class="empty-subtitle">Adicione exercícios para completar este treino</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = appState.selectedWorkout.exercicios.map(exercicio => `
+                    <div class="exercise-item">
+                        <div class="exercise-info">
+                            <div class="exercise-name">${exercicio.nome}</div>
+                            <div class="exercise-details">
+                                <span>Séries: ${exercicio.series}</span>
+                                <span>Rep: ${exercicio.repeticoes}</span>
+                                <span>Carga: ${exercicio.carga}</span>
+                            </div>
+                            ${exercicio.descricao ? `<div style="margin-top: 8px; font-size: 12px; color: #8e8e93;">${exercicio.descricao}</div>` : ''}
+                        </div>
+                        <div class="exercise-actions">
+                            <button class="action-btn success" onclick="editExercise(${exercicio.id})" title="Editar">✏️</button>
+                            <button class="action-btn danger" onclick="deleteExercise(${exercicio.id})" title="Excluir">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function renderEditExercise() {
+            const form = document.getElementById('exerciseForm');
+            const title = document.getElementById('editExerciseTitle');
+            
+            if (appState.editingExercise) {
+                title.textContent = appState.editingExercise.nome === "Novo Exercício" ? 'Criar Exercício' : 'Editar Exercício';
+                
+                form.nome.value = appState.editingExercise.nome || '';
+                form.descricao.value = appState.editingExercise.descricao || '';
+                form.series.value = appState.editingExercise.series || 3;
+                form.repeticoes.value = appState.editingExercise.repeticoes || '12';
+                form.carga.value = appState.editingExercise.carga || '20kg';
+            }
+        }
+
+        // Funções principais de CRUD
         function createNewPlan() {
             appState.selectedPlan = { ...newPlanTemplate, id: Date.now() };
             showView('editPlan');
         }
 
+        function editPlan(planId) {
+            appState.selectedPlan = appState.workoutPlans.find(p => p.id === planId);
+            showView('editPlan');
+        }
+
+        function viewPlanDetails(planId) {
+            appState.selectedPlan = appState.workoutPlans.find(p => p.id === planId);
+            showView('planDetails');
+        }
+
+        function editCurrentPlan() {
+            showView('editPlan');
+        }
+
+        function createNewWorkout() {
+            appState.selectedWorkout = { ...newWorkoutTemplate, id: `${appState.selectedPlan.treinos.length + 1}` };
+            showView('editWorkout');
+        }
+
+        function editWorkout(workoutId) {
+            appState.selectedWorkout = appState.selectedPlan.treinos.find(w => w.id === workoutId);
+            showView('editWorkout');
+        }
+
+        function viewWorkoutDetails(workoutId) {
+            appState.selectedWorkout = appState.selectedPlan.treinos.find(w => w.id === workoutId);
+            showView('workoutDetails');
+        }
+
+        function editCurrentWorkout() {
+            showView('editWorkout');
+        }
+
+        function createNewExercise() {
+            appState.editingExercise = { ...newExerciseTemplate, id: Date.now() };
+            showView('editExercise');
+        }
+
+        function editExercise(exerciseId) {
+            appState.editingExercise = appState.selectedWorkout.exercicios.find(e => e.id === exerciseId);
+            showView('editExercise');
+        }
+
+        function deleteWorkout(workoutId) {
+            if (!confirm('Tem certeza que deseja excluir este treino?')) return;
+            
+            if (!appState.selectedPlan || !appState.selectedPlan.treinos) {
+                console.error('Nenhum plano selecionado ou treinos não encontrados');
+                return;
+            }
+            
+            console.log('Tentando excluir treino:', workoutId);
+            console.log('Treinos disponíveis:', appState.selectedPlan.treinos.map(t => t.id));
+            
+            const workoutIndex = appState.selectedPlan.treinos.findIndex(w => w.id == workoutId); // Usando == para comparação flexível
+            
+            if (workoutIndex >= 0) {
+                const removedWorkout = appState.selectedPlan.treinos.splice(workoutIndex, 1);
+                console.log('Treino removido:', removedWorkout);
+                
+                // Atualizar no array principal
+                const planIndex = appState.workoutPlans.findIndex(p => p.id === appState.selectedPlan.id);
+                if (planIndex >= 0) {
+                    appState.workoutPlans[planIndex] = { ...appState.selectedPlan };
+                }
+                
+                // Sincronizar com servidor se necessário
+                updateSharedPlan(appState.selectedPlan);
+                
+                // Salvar no localStorage
+                saveToLocalStorage();
+                
+                // Re-renderizar a tela
+                renderPlanDetails();
+                
+                alert('Treino excluído com sucesso!');
+            } else {
+                console.error('Treino não encontrado:', workoutId);
+                alert('Erro: Treino não encontrado.');
+            }
+        }
+
+        function deleteExercise(exerciseId) {
+            if (!confirm('Tem certeza que deseja excluir este exercício?')) return;
+            
+            if (!appState.selectedWorkout || !appState.selectedWorkout.exercicios) {
+                console.error('Nenhum treino selecionado ou exercícios não encontrados');
+                return;
+            }
+            
+            console.log('Tentando excluir exercício:', exerciseId);
+            console.log('Exercícios disponíveis:', appState.selectedWorkout.exercicios.map(e => e.id));
+            
+            const exerciseIndex = appState.selectedWorkout.exercicios.findIndex(e => e.id == exerciseId); // Usando == para comparação flexível
+            
+            if (exerciseIndex >= 0) {
+                const removedExercise = appState.selectedWorkout.exercicios.splice(exerciseIndex, 1);
+                console.log('Exercício removido:', removedExercise);
+                
+                // Atualizar nos arrays principais
+                const planIndex = appState.workoutPlans.findIndex(p => p.id === appState.selectedPlan.id);
+                if (planIndex >= 0) {
+                    const workoutIndex = appState.workoutPlans[planIndex].treinos.findIndex(w => w.id == appState.selectedWorkout.id);
+                    if (workoutIndex >= 0) {
+                        appState.workoutPlans[planIndex].treinos[workoutIndex] = { ...appState.selectedWorkout };
+                        appState.selectedPlan = appState.workoutPlans[planIndex]; // Sincronizar selectedPlan
+                    }
+                }
+                
+                // Sincronizar com servidor se necessário
+                updateSharedPlan(appState.selectedPlan);
+                
+                // Salvar no localStorage
+                saveToLocalStorage();
+                
+                // Re-renderizar a tela
+                renderWorkoutDetails();
+                
+                alert('Exercício excluído com sucesso!');
+            } else {
+                console.error('Exercício não encontrado:', exerciseId);
+                alert('Erro: Exercício não encontrado.');
+            }
+        }
+
+        // Funções de salvamento
         function savePlan() {
             const form = document.getElementById('planForm');
             const formData = new FormData(form);
@@ -935,6 +1667,69 @@
             showView('planDetails');
         }
 
+        function saveWorkout() {
+            const form = document.getElementById('workoutForm');
+            const formData = new FormData(form);
+            
+            const updatedWorkout = {
+                ...appState.selectedWorkout,
+                id: formData.get('id'),
+                nome: formData.get('nome'),
+                foco: formData.get('foco')
+            };
+
+            const existingIndex = appState.selectedPlan.treinos.findIndex(w => w.id === appState.selectedWorkout.id);
+            if (existingIndex >= 0) {
+                appState.selectedPlan.treinos[existingIndex] = updatedWorkout;
+            } else {
+                appState.selectedPlan.treinos.push(updatedWorkout);
+            }
+
+            appState.selectedWorkout = updatedWorkout;
+            
+            const planIndex = appState.workoutPlans.findIndex(p => p.id === appState.selectedPlan.id);
+            if (planIndex >= 0) {
+                appState.workoutPlans[planIndex] = appState.selectedPlan;
+            }
+            
+            updateSharedPlan(appState.selectedPlan);
+            saveToLocalStorage();
+            showView('workoutDetails');
+        }
+
+        function saveExercise() {
+            const form = document.getElementById('exerciseForm');
+            const formData = new FormData(form);
+            
+            const updatedExercise = {
+                ...appState.editingExercise,
+                nome: formData.get('nome'),
+                descricao: formData.get('descricao'),
+                series: parseInt(formData.get('series')),
+                repeticoes: formData.get('repeticoes'),
+                carga: formData.get('carga')
+            };
+
+            const existingIndex = appState.selectedWorkout.exercicios.findIndex(e => e.id === appState.editingExercise.id);
+            if (existingIndex >= 0) {
+                appState.selectedWorkout.exercicios[existingIndex] = updatedExercise;
+            } else {
+                appState.selectedWorkout.exercicios.push(updatedExercise);
+            }
+            
+            const planIndex = appState.workoutPlans.findIndex(p => p.id === appState.selectedPlan.id);
+            if (planIndex >= 0) {
+                const workoutIndex = appState.workoutPlans[planIndex].treinos.findIndex(w => w.id === appState.selectedWorkout.id);
+                if (workoutIndex >= 0) {
+                    appState.workoutPlans[planIndex].treinos[workoutIndex] = appState.selectedWorkout;
+                }
+            }
+            
+            updateSharedPlan(appState.selectedPlan);
+            saveToLocalStorage();
+            showView('workoutDetails');
+        }
+
         function saveToLocalStorage() {
             try {
                 localStorage.setItem('workoutPlansPersonal', JSON.stringify(appState.workoutPlans));
@@ -954,454 +1749,6 @@
                 appState.workoutPlans = [];
             }
         }
-
-        // Implementar outras funções necessárias...
-        // (As demais funções seguem o mesmo padrão do arquivo original)
-        
-        function renderEditPlan() {
-            const form = document.getElementById('planForm');
-            const title = document.getElementById('editPlanTitle');
-            
-            if (appState.selectedPlan) {
-                title.textContent = appState.selectedPlan.nome === "Novo Plano" ? 'Criar Plano' : 'Editar Plano';
-                
-                form.nome.value = appState.selectedPlan.nome || '';
-                form.dias.value = appState.selectedPlan.dias || 3;
-                form.dataInicio.value = appState.selectedPlan.dataInicio || '';
-                form.dataFim.value = appState.selectedPlan.dataFim || '';
-                form.idade.value = appState.selectedPlan.perfil?.idade || 30;
-                form.altura.value = appState.selectedPlan.perfil?.altura || '1,70m';
-                form.peso.value = appState.selectedPlan.perfil?.peso || '70kg';
-                form.porte.value = appState.selectedPlan.perfil?.porte || 'medio';
-                form.objetivo.value = appState.selectedPlan.perfil?.objetivo || 'Condicionamento geral';
-                form.frequencia.value = appState.selectedPlan.observacoes?.frequencia || '3x por semana';
-                form.progressao.value = appState.selectedPlan.observacoes?.progressao || 'Aumente a carga gradualmente';
-                form.descanso.value = appState.selectedPlan.observacoes?.descanso || '60-90 segundos entre séries';
-            }
-        }
-
-        // Adicionar demais funções básicas de CRUD...
-        function editPlan(planId) {
-            appState.selectedPlan = appState.workoutPlans.find(p => p.id === planId);
-            showView('editPlan');
-        }
-
-        function viewPlanDetails(planId) {
-            appState.selectedPlan = appState.workoutPlans.find(p => p.id === planId);
-            showView('planDetails');
-        }
-
-        function editCurrentPlan() {
-            showView('editPlan');
-        }
-
-        function createNewWorkout() {
-            appState.selectedWorkout = { ...newWorkoutTemplate, id: `${appState.selectedPlan.treinos.length + 1}` };
-            showView('editWorkout');
-        }
-
-        // Outras funções de renderização e CRUD seguem o mesmo padrão do arquivo original...
-
     </script>
 </body>
-</html><!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Editor Treinos">
-    <title>Editor de Treinos - Personal</title>
-    
-    <!-- iOS Icons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSI0MCIgZmlsbD0iIzc5NDVmZiIvPjxwYXRoIGQ9Im05MCA0NWMtMjQuODUzIDAtNDUgMjAuMTQ3LTQ1IDQ1djQ1YzAgMjQuODUzIDIwLjE0NyA0NSA0NSA0NXM0NS0yMC4xNDcgNDUtNDV2LTQ1YzAtMjQuODUzLTIwLjE0Ny00NS00NS00NXoiIGZpbGw9IndoaXRlIi8+PC9zdmc+">
-    
-    <link rel="stylesheet" type="text/css" href="css/stylepersonal.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f7;
-            color: #1d1d1f;
-            line-height: 1.4;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .app-container {
-            min-height: 100vh;
-            padding-bottom: 80px;
-        }
-
-        .status-bar {
-            background: #8b5cf6;
-            color: white;
-            text-align: center;
-            padding: 8px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .header {
-            background: white;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid #e5e5e7;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-back {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #007aff;
-            padding: 8px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .header-title {
-            font-size: 18px;
-            font-weight: 600;
-            flex: 1;
-            text-align: center;
-        }
-
-        .header-action {
-            background: #007aff;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .content {
-            padding: 20px;
-        }
-
-        .view {
-            transition: transform 0.3s ease;
-        }
-
-        .view.hidden {
-            display: none;
-        }
-
-        .view.slide-enter {
-            transform: translateX(100%);
-            animation: slideIn 0.3s ease forwards;
-        }
-
-        @keyframes slideIn {
-            to {
-                transform: translateX(0);
-            }
-        }
-
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #007aff, #0056cc);
-            color: white;
-            border: none;
-            padding: 16px 20px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-primary.btn-share {
-            background: linear-gradient(135deg, #34c759, #28a745);
-        }
-
-        .btn-secondary {
-            background: #f2f2f7;
-            color: #1d1d1f;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #1d1d1f;
-        }
-
-        .form-input, .form-textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #d2d2d7;
-            border-radius: 8px;
-            font-size: 16px;
-            background: white;
-        }
-
-        .form-textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .form-row-3 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #8e8e93;
-        }
-
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .empty-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #1d1d1f;
-        }
-
-        .empty-subtitle {
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .plan-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
-        }
-
-        .plan-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .plan-subtitle {
-            font-size: 14px;
-            color: #8e8e93;
-            margin-bottom: 2px;
-        }
-
-        .plan-date {
-            font-size: 12px;
-            color: #8e8e93;
-        }
-
-        .plan-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .action-btn {
-            background: #f2f2f7;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .action-btn.success {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .action-btn.danger {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .workout-preview {
-            display: grid;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .workout-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            background: #f2f2f7;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .workout-name {
-            font-weight: 500;
-        }
-
-        .workout-count {
-            color: #8e8e93;
-            font-size: 12px;
-        }
-
-        .exercise-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-            background: white;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
-        }
-
-        .exercise-info {
-            flex: 1;
-        }
-
-        .exercise-name {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .exercise-details {
-            display: flex;
-            gap: 16px;
-            font-size: 12px;
-            color: #8e8e93;
-        }
-
-        .exercise-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        /* Share ID Card Styles */
-        .share-id-card {
-            background: linear-gradient(135deg, #34c759, #28a745);
-            color: white;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .share-id-content {
-            padding: 10px 0;
-        }
-
-        .share-id-title {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 8px;
-        }
-
-        .share-id-value {
-            font-size: 32px;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            letter-spacing: 4px;
-            margin-bottom: 8px;
-        }
-
-        .share-id-subtitle {
-            font-size: 12px;
-            opacity: 0.8;
-        }
-
-        /* API Status Styles */
-        .api-status {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 14px;
-            text-align: center;
-            background: #f2f2f7;
-            color: #8e8e93;
-        }
-
-        .api-status.loading {
-            background: #e3f2fd;
-            color: #1565c0;
-        }
-
-        .api-status.success {
-            background: #e8f5e8;
-            color: #2e7d32;
-        }
-
-        .api-status.error {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        /* Responsive */
-        @media (max-width: 480px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-row-3 {
-                grid-template-columns: 1fr;
-            }
-            
-            .plan-header {
-                flex-direction: column;
-                gap: 12px;
-            }
-            
-            .plan-actions {
-                align-self: flex-end;
-            }
-        }
-
-        .safe-bottom {
-            height: 20px;
-        }
-    </style>
+</html>
