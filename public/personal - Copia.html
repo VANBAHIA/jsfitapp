@@ -13,210 +13,9 @@
     <link rel="stylesheet" type="text/css" href="css/stylepersonal.css">
 
     <style>
-        /* Componente de Status do Servidor */
-        .server-status-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 8px 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            min-width: 120px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .server-status-indicator:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-        }
-
-        .server-status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-            flex-shrink: 0;
-        }
-
-        .server-status-text {
-            flex: 1;
-            white-space: nowrap;
-        }
-
-        .server-status-time {
-            font-size: 10px;
-            opacity: 0.7;
-        }
-
-        /* Status States */
-        .server-status-online .server-status-dot {
-            background: #34c759;
-            box-shadow: 0 0 8px rgba(52, 199, 89, 0.5);
-        }
-
-        .server-status-offline .server-status-dot {
-            background: #ff3b30;
-            box-shadow: 0 0 8px rgba(255, 59, 48, 0.5);
-        }
-
-        .server-status-loading .server-status-dot {
-            background: #ff9500;
-            box-shadow: 0 0 8px rgba(255, 149, 0, 0.5);
-        }
-
-        .server-status-error .server-status-dot {
-            background: #ff3b30;
-            box-shadow: 0 0 8px rgba(255, 59, 48, 0.5);
-        }
-
-        /* Pulse Animation */
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        /* Detalhes expandidos */
-        .server-status-details {
-            position: fixed;
-            top: 60px;
-            right: 20px;
-            z-index: 999;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 16px;
-            padding: 16px;
-            color: white;
-            font-size: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-            min-width: 250px;
-            transform: translateY(-10px);
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s ease;
-        }
-
-        .server-status-details.show {
-            transform: translateY(0);
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .server-status-details-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            padding: 4px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .server-status-details-row:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-
-        .server-status-details-label {
-            opacity: 0.7;
-        }
-
-        .server-status-details-value {
-            font-weight: 600;
-        }
-
-        /* Responsividade */
-        @media (max-width: 480px) {
-            .server-status-indicator {
-                top: 10px;
-                right: 10px;
-                font-size: 11px;
-                padding: 6px 10px;
-                min-width: 100px;
-            }
-
-            .server-status-details {
-                top: 50px;
-                right: 10px;
-                min-width: 200px;
-                font-size: 11px;
-            }
-        }
-
-        /* Auto-hide após alguns segundos */
-        .server-status-indicator.auto-hide {
-            animation: fadeOut 0.5s ease 3s forwards;
-        }
-
-        @keyframes fadeOut {
-            to {
-                opacity: 0.3;
-                transform: scale(0.9);
-            }
-        }
-
-        /* Bounce para chamada de atenção */
-        .server-status-indicator.bounce {
-            animation: bounce 0.6s ease;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-10px);
-            }
-            60% {
-                transform: translateY(-5px);
-            }
-        }
-    </style>
+  </style>
 </head>
 <body>
-    <!-- Componente de Status do Servidor -->
-    <div id="serverStatusIndicator" class="server-status-indicator server-status-loading" onclick="toggleServerDetails()">
-        <div class="server-status-dot"></div>
-        <div class="server-status-text">Conectando...</div>
-        <div class="server-status-time" id="serverStatusTime">--:--</div>
-    </div>
-
-    <!-- Detalhes do Servidor (expandido) -->
-    <div id="serverStatusDetails" class="server-status-details">
-        <div class="server-status-details-row">
-            <span class="server-status-details-label">Status:</span>
-            <span class="server-status-details-value" id="serverDetailStatus">Verificando...</span>
-        </div>
-        <div class="server-status-details-row">
-            <span class="server-status-details-label">Última checagem:</span>
-            <span class="server-status-details-value" id="serverDetailTime">--:--:--</span>
-        </div>
-        <div class="server-status-details-row">
-            <span class="server-status-details-label">Latência:</span>
-            <span class="server-status-details-value" id="serverDetailLatency">-- ms</span>
-        </div>
-        <div class="server-status-details-row">
-            <span class="server-status-details-label">Endpoint:</span>
-            <span class="server-status-details-value" id="serverDetailEndpoint">API Health</span>
-        </div>
-        <div class="server-status-details-row">
-            <span class="server-status-details-label">Tentativas:</span>
-            <span class="server-status-details-value" id="serverDetailRetries">0</span>
-        </div>
-    </div>
-
     <div class="app-container" id="app">
         <div class="status-bar">
             Editor de Treinos - Personal
@@ -479,172 +278,6 @@
             retries: 3
         };
 
-        // Sistema de Monitoramento do Servidor
-        class ServerStatusMonitor {
-            constructor() {
-                this.status = 'loading';
-                this.lastCheck = null;
-                this.latency = null;
-                this.retryCount = 0;
-                this.checkInterval = null;
-                this.detailsVisible = false;
-                this.init();
-            }
-
-            init() {
-                this.updateUI();
-                this.startPeriodicCheck();
-                this.checkServerHealth();
-            }
-
-            async checkServerHealth() {
-                const startTime = Date.now();
-                this.updateStatus('loading', 'Verificando...');
-
-                try {
-                    const response = await fetch(`${API_CONFIG.baseUrl}/health`, {
-                        method: 'GET',
-                        cache: 'no-cache',
-                        timeout: API_CONFIG.timeout
-                    });
-
-                    const endTime = Date.now();
-                    this.latency = endTime - startTime;
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.success && data.status === 'online') {
-                            this.updateStatus('online', 'Online');
-                            this.retryCount = 0;
-                            appState.serverOnline = true;
-                        } else {
-                            throw new Error('Status inválido');
-                        }
-                    } else {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-
-                } catch (error) {
-                    console.error('[ServerMonitor] Erro na verificação:', error);
-                    this.latency = Date.now() - startTime;
-                    this.retryCount++;
-                    this.updateStatus('offline', 'Offline');
-                    appState.serverOnline = false;
-
-                    // Retry logic
-                    if (this.retryCount < API_CONFIG.retries) {
-                        setTimeout(() => this.checkServerHealth(), 2000);
-                    }
-                }
-
-                this.lastCheck = new Date();
-                this.updateUI();
-            }
-
-            updateStatus(status, text) {
-                this.status = status;
-                const indicator = document.getElementById('serverStatusIndicator');
-                const statusText = indicator.querySelector('.server-status-text');
-
-                // Remove classes anteriores
-                indicator.className = 'server-status-indicator';
-                
-                // Adiciona nova classe
-                indicator.classList.add(`server-status-${status}`);
-                
-                // Atualiza texto
-                statusText.textContent = text;
-
-                // Animação de bounce para mudanças importantes
-                if (status === 'online' || status === 'offline') {
-                    indicator.classList.add('bounce');
-                    setTimeout(() => indicator.classList.remove('bounce'), 600);
-                }
-
-                console.log(`[ServerMonitor] Status: ${status} - ${text}`);
-            }
-
-            updateUI() {
-                const timeElement = document.getElementById('serverStatusTime');
-                const detailStatus = document.getElementById('serverDetailStatus');
-                const detailTime = document.getElementById('serverDetailTime');
-                const detailLatency = document.getElementById('serverDetailLatency');
-                const detailRetries = document.getElementById('serverDetailRetries');
-
-                // Atualizar hora atual
-                const now = new Date();
-                timeElement.textContent = now.toLocaleTimeString('pt-BR', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                });
-
-                // Atualizar detalhes
-                detailStatus.textContent = this.getStatusText();
-                detailTime.textContent = this.lastCheck ? 
-                    this.lastCheck.toLocaleTimeString('pt-BR') : '--:--:--';
-                detailLatency.textContent = this.latency ? 
-                    `${this.latency} ms` : '-- ms';
-                detailRetries.textContent = this.retryCount.toString();
-            }
-
-            getStatusText() {
-                switch (this.status) {
-                    case 'online': return '✅ Servidor Online';
-                    case 'offline': return '❌ Servidor Offline';
-                    case 'loading': return '🔄 Verificando...';
-                    case 'error': return '⚠️ Erro de Conexão';
-                    default: return 'Desconhecido';
-                }
-            }
-
-            startPeriodicCheck() {
-                // Verificar a cada 30 segundos
-                this.checkInterval = setInterval(() => {
-                    this.checkServerHealth();
-                }, 30000);
-            }
-
-            toggleDetails() {
-                const details = document.getElementById('serverStatusDetails');
-                this.detailsVisible = !this.detailsVisible;
-
-                if (this.detailsVisible) {
-                    details.classList.add('show');
-                    this.updateUI(); // Atualizar dados quando mostrar
-                } else {
-                    details.classList.remove('show');
-                }
-            }
-
-            destroy() {
-                if (this.checkInterval) {
-                    clearInterval(this.checkInterval);
-                }
-            }
-        }
-
-        // Instância global do monitor
-        let serverMonitor;
-
-        // Função para toggle dos detalhes (chamada pelo HTML)
-        function toggleServerDetails() {
-            if (serverMonitor) {
-                serverMonitor.toggleDetails();
-            }
-        }
-
-        // Fechar detalhes quando clicar fora
-        document.addEventListener('click', function(event) {
-            const indicator = document.getElementById('serverStatusIndicator');
-            const details = document.getElementById('serverStatusDetails');
-            
-            if (!indicator.contains(event.target) && !details.contains(event.target)) {
-                if (serverMonitor && serverMonitor.detailsVisible) {
-                    serverMonitor.toggleDetails();
-                }
-            }
-        });
-
         // API para comunicação com servidor usando arquivos JSON
         class WorkoutAPI {
             static async saveToServer(shareId, planData) {
@@ -865,8 +498,9 @@
             showApiStatus('Verificando servidor...', 'loading');
 
             try {
-                // Usar status do monitor em vez de verificar novamente
-                const serverOnline = appState.serverOnline;
+                // Verificar se servidor está online
+                const serverOnline = await WorkoutAPI.checkServerHealth();
+                appState.serverOnline = serverOnline;
 
                 if (!serverOnline) {
                     showApiStatus('⚠️ Servidor offline - salvando apenas localmente', 'error');
@@ -877,180 +511,6 @@
                     appState.selectedPlan.shareId = generateShareId();
                     
                     const planIndex = appState.workoutPlans.findIndex(p => p.id === appState.selectedPlan.id);
-                if (planIndex >= 0) {
-                    appState.workoutPlans[planIndex] = { ...appState.selectedPlan };
-                }
-                
-                updateSharedPlan(appState.selectedPlan);
-                saveToLocalStorage();
-                renderPlanDetails();
-                
-                alert('Treino excluído com sucesso!');
-            } else {
-                console.error('Treino não encontrado:', workoutId);
-                alert('Erro: Treino não encontrado.');
-            }
-        }
-
-        function deleteExercise(exerciseId) {
-            if (!confirm('Tem certeza que deseja excluir este exercício?')) return;
-            
-            if (!appState.selectedWorkout || !appState.selectedWorkout.exercicios) {
-                console.error('Nenhum treino selecionado ou exercícios não encontrados');
-                return;
-            }
-            
-            const exerciseIndex = appState.selectedWorkout.exercicios.findIndex(e => e.id == exerciseId);
-            
-            if (exerciseIndex >= 0) {
-                appState.selectedWorkout.exercicios.splice(exerciseIndex, 1);
-                
-                const planIndex = appState.workoutPlans.findIndex(p => p.id === appState.selectedPlan.id);
-                if (planIndex >= 0) {
-                    const workoutIndex = appState.workoutPlans[planIndex].treinos.findIndex(w => w.id == appState.selectedWorkout.id);
-                    if (workoutIndex >= 0) {
-                        appState.workoutPlans[planIndex].treinos[workoutIndex] = { ...appState.selectedWorkout };
-                        appState.selectedPlan = appState.workoutPlans[planIndex];
-                    }
-                }
-                
-                updateSharedPlan(appState.selectedPlan);
-                saveToLocalStorage();
-                renderWorkoutDetails();
-                
-                alert('Exercício excluído com sucesso!');
-            } else {
-                console.error('Exercício não encontrado:', exerciseId);
-                alert('Erro: Exercício não encontrado.');
-            }
-        }
-
-        // Funções de salvamento
-        function savePlan() {
-            const form = document.getElementById('planForm');
-            const formData = new FormData(form);
-            
-            const updatedPlan = {
-                ...appState.selectedPlan,
-                nome: formData.get('nome'),
-                dias: parseInt(formData.get('dias')),
-                dataInicio: formData.get('dataInicio'),
-                dataFim: formData.get('dataFim'),
-                perfil: {
-                    idade: parseInt(formData.get('idade')),
-                    altura: formData.get('altura'),
-                    peso: formData.get('peso'),
-                    porte: formData.get('porte'),
-                    objetivo: formData.get('objetivo')
-                },
-                observacoes: {
-                    ...appState.selectedPlan.observacoes,
-                    frequencia: formData.get('frequencia'),
-                    progressao: formData.get('progressao'),
-                    descanso: formData.get('descanso')
-                }
-            };
-
-            const existingIndex = appState.workoutPlans.findIndex(p => p.id === updatedPlan.id);
-            if (existingIndex >= 0) {
-                appState.workoutPlans[existingIndex] = updatedPlan;
-            } else {
-                appState.workoutPlans.push(updatedPlan);
-            }
-
-            appState.selectedPlan = updatedPlan;
-            
-            updateSharedPlan(updatedPlan);
-            
-            saveToLocalStorage();
-            showView('planDetails');
-        }
-
-        function saveWorkout() {
-            const form = document.getElementById('workoutForm');
-            const formData = new FormData(form);
-            
-            const updatedWorkout = {
-                ...appState.selectedWorkout,
-                id: formData.get('id'),
-                nome: formData.get('nome'),
-                foco: formData.get('foco')
-            };
-
-            const existingIndex = appState.selectedPlan.treinos.findIndex(w => w.id === appState.selectedWorkout.id);
-            if (existingIndex >= 0) {
-                appState.selectedPlan.treinos[existingIndex] = updatedWorkout;
-            } else {
-                appState.selectedPlan.treinos.push(updatedWorkout);
-            }
-
-            appState.selectedWorkout = updatedWorkout;
-            
-            const planIndex = appState.workoutPlans.findIndex(p => p.id === appState.selectedPlan.id);
-            if (planIndex >= 0) {
-                appState.workoutPlans[planIndex] = appState.selectedPlan;
-            }
-            
-            updateSharedPlan(appState.selectedPlan);
-            saveToLocalStorage();
-            showView('workoutDetails');
-        }
-
-        function saveExercise() {
-            const form = document.getElementById('exerciseForm');
-            const formData = new FormData(form);
-            
-            const updatedExercise = {
-                ...appState.editingExercise,
-                nome: formData.get('nome'),
-                descricao: formData.get('descricao'),
-                series: parseInt(formData.get('series')),
-                repeticoes: formData.get('repeticoes'),
-                carga: formData.get('carga')
-            };
-
-            const existingIndex = appState.selectedWorkout.exercicios.findIndex(e => e.id === appState.editingExercise.id);
-            if (existingIndex >= 0) {
-                appState.selectedWorkout.exercicios[existingIndex] = updatedExercise;
-            } else {
-                appState.selectedWorkout.exercicios.push(updatedExercise);
-            }
-            
-            const planIndex = appState.workoutPlans.findIndex(p => p.id === appState.selectedPlan.id);
-            if (planIndex >= 0) {
-                const workoutIndex = appState.workoutPlans[planIndex].treinos.findIndex(w => w.id === appState.selectedWorkout.id);
-                if (workoutIndex >= 0) {
-                    appState.workoutPlans[planIndex].treinos[workoutIndex] = appState.selectedWorkout;
-                }
-            }
-            
-            updateSharedPlan(appState.selectedPlan);
-            saveToLocalStorage();
-            showView('workoutDetails');
-        }
-
-        function saveToLocalStorage() {
-            try {
-                localStorage.setItem('workoutPlansPersonal', JSON.stringify(appState.workoutPlans));
-            } catch (error) {
-                console.error('Erro ao salvar no localStorage:', error);
-            }
-        }
-
-        function loadFromLocalStorage() {
-            try {
-                const saved = localStorage.getItem('workoutPlansPersonal');
-                if (saved) {
-                    appState.workoutPlans = JSON.parse(saved);
-                }
-            } catch (error) {
-                console.error('Erro ao carregar do localStorage:', error);
-                appState.workoutPlans = [];
-            }
-        }
-    </script>
-</body>
-</html>State.selectedPlan.id);
                     if (planIndex >= 0) {
                         appState.workoutPlans[planIndex] = appState.selectedPlan;
                     }
@@ -1233,8 +693,8 @@
         document.addEventListener('DOMContentLoaded', async function() {
             loadFromLocalStorage();
             
-            // Inicializar monitor do servidor
-            serverMonitor = new ServerStatusMonitor();
+            // Verificar servidor
+            appState.serverOnline = await WorkoutAPI.checkServerHealth();
             
             renderCurrentView();
             
@@ -1256,13 +716,6 @@
                 }
                 lastTouchEnd = now;
             }, false);
-        });
-
-        // Cleanup ao sair da página
-        window.addEventListener('beforeunload', function() {
-            if (serverMonitor) {
-                serverMonitor.destroy();
-            }
         });
 
         // Navegação
@@ -1316,7 +769,7 @@
             }
         }
 
-        // Funções de renderização (mantidas do código original)
+        // CORREÇÃO: Funções faltando adicionadas
         function renderPlansList() {
             const container = document.getElementById('plansList');
             
@@ -1369,6 +822,7 @@
             `).join('');
         }
 
+        // CORREÇÃO: Função deletePlan adicionada
         function deletePlan(planId) {
             if (!confirm('Tem certeza que deseja excluir este plano? Esta ação não pode ser desfeita.')) {
                 return;
@@ -1391,6 +845,7 @@
             }
         }
 
+        // CORREÇÃO: Função duplicatePlan adicionada
         function duplicatePlan(planId) {
             const originalPlan = appState.workoutPlans.find(p => p.id === planId);
             if (!originalPlan) return;
@@ -1416,6 +871,7 @@
             alert('Plano duplicado com sucesso!');
         }
 
+        // CORREÇÃO: Função exportJSON adicionada
         function exportJSON(planId) {
             const plan = appState.workoutPlans.find(p => p.id === planId);
             if (!plan) return;
@@ -1448,6 +904,7 @@
             }
         }
 
+        // CORREÇÃO: Função importJSON adicionada
         function importJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1709,9 +1166,203 @@
                 return;
             }
             
-            const workoutIndex = appState.selectedPlan.treinos.findIndex(w => w.id == workoutId);
+            console.log('Tentando excluir treino:', workoutId);
+            console.log('Treinos disponíveis:', appState.selectedPlan.treinos.map(t => t.id));
+            
+            const workoutIndex = appState.selectedPlan.treinos.findIndex(w => w.id == workoutId); // Usando == para comparação flexível
             
             if (workoutIndex >= 0) {
-                appState.selectedPlan.treinos.splice(workoutIndex, 1);
+                const removedWorkout = appState.selectedPlan.treinos.splice(workoutIndex, 1);
+                console.log('Treino removido:', removedWorkout);
                 
-                const planIndex = appState.workoutPlans.findIndex(p => p.id === app
+                // Atualizar no array principal
+                const planIndex = appState.workoutPlans.findIndex(p => p.id === appState.selectedPlan.id);
+                if (planIndex >= 0) {
+                    appState.workoutPlans[planIndex] = { ...appState.selectedPlan };
+                }
+                
+                // Sincronizar com servidor se necessário
+                updateSharedPlan(appState.selectedPlan);
+                
+                // Salvar no localStorage
+                saveToLocalStorage();
+                
+                // Re-renderizar a tela
+                renderPlanDetails();
+                
+                alert('Treino excluído com sucesso!');
+            } else {
+                console.error('Treino não encontrado:', workoutId);
+                alert('Erro: Treino não encontrado.');
+            }
+        }
+
+        function deleteExercise(exerciseId) {
+            if (!confirm('Tem certeza que deseja excluir este exercício?')) return;
+            
+            if (!appState.selectedWorkout || !appState.selectedWorkout.exercicios) {
+                console.error('Nenhum treino selecionado ou exercícios não encontrados');
+                return;
+            }
+            
+            console.log('Tentando excluir exercício:', exerciseId);
+            console.log('Exercícios disponíveis:', appState.selectedWorkout.exercicios.map(e => e.id));
+            
+            const exerciseIndex = appState.selectedWorkout.exercicios.findIndex(e => e.id == exerciseId); // Usando == para comparação flexível
+            
+            if (exerciseIndex >= 0) {
+                const removedExercise = appState.selectedWorkout.exercicios.splice(exerciseIndex, 1);
+                console.log('Exercício removido:', removedExercise);
+                
+                // Atualizar nos arrays principais
+                const planIndex = appState.workoutPlans.findIndex(p => p.id === appState.selectedPlan.id);
+                if (planIndex >= 0) {
+                    const workoutIndex = appState.workoutPlans[planIndex].treinos.findIndex(w => w.id == appState.selectedWorkout.id);
+                    if (workoutIndex >= 0) {
+                        appState.workoutPlans[planIndex].treinos[workoutIndex] = { ...appState.selectedWorkout };
+                        appState.selectedPlan = appState.workoutPlans[planIndex]; // Sincronizar selectedPlan
+                    }
+                }
+                
+                // Sincronizar com servidor se necessário
+                updateSharedPlan(appState.selectedPlan);
+                
+                // Salvar no localStorage
+                saveToLocalStorage();
+                
+                // Re-renderizar a tela
+                renderWorkoutDetails();
+                
+                alert('Exercício excluído com sucesso!');
+            } else {
+                console.error('Exercício não encontrado:', exerciseId);
+                alert('Erro: Exercício não encontrado.');
+            }
+        }
+
+        // Funções de salvamento
+        function savePlan() {
+            const form = document.getElementById('planForm');
+            const formData = new FormData(form);
+            
+            const updatedPlan = {
+                ...appState.selectedPlan,
+                nome: formData.get('nome'),
+                dias: parseInt(formData.get('dias')),
+                dataInicio: formData.get('dataInicio'),
+                dataFim: formData.get('dataFim'),
+                perfil: {
+                    idade: parseInt(formData.get('idade')),
+                    altura: formData.get('altura'),
+                    peso: formData.get('peso'),
+                    porte: formData.get('porte'),
+                    objetivo: formData.get('objetivo')
+                },
+                observacoes: {
+                    ...appState.selectedPlan.observacoes,
+                    frequencia: formData.get('frequencia'),
+                    progressao: formData.get('progressao'),
+                    descanso: formData.get('descanso')
+                }
+            };
+
+            const existingIndex = appState.workoutPlans.findIndex(p => p.id === updatedPlan.id);
+            if (existingIndex >= 0) {
+                appState.workoutPlans[existingIndex] = updatedPlan;
+            } else {
+                appState.workoutPlans.push(updatedPlan);
+            }
+
+            appState.selectedPlan = updatedPlan;
+            
+            updateSharedPlan(updatedPlan);
+            
+            saveToLocalStorage();
+            showView('planDetails');
+        }
+
+        function saveWorkout() {
+            const form = document.getElementById('workoutForm');
+            const formData = new FormData(form);
+            
+            const updatedWorkout = {
+                ...appState.selectedWorkout,
+                id: formData.get('id'),
+                nome: formData.get('nome'),
+                foco: formData.get('foco')
+            };
+
+            const existingIndex = appState.selectedPlan.treinos.findIndex(w => w.id === appState.selectedWorkout.id);
+            if (existingIndex >= 0) {
+                appState.selectedPlan.treinos[existingIndex] = updatedWorkout;
+            } else {
+                appState.selectedPlan.treinos.push(updatedWorkout);
+            }
+
+            appState.selectedWorkout = updatedWorkout;
+            
+            const planIndex = appState.workoutPlans.findIndex(p => p.id === appState.selectedPlan.id);
+            if (planIndex >= 0) {
+                appState.workoutPlans[planIndex] = appState.selectedPlan;
+            }
+            
+            updateSharedPlan(appState.selectedPlan);
+            saveToLocalStorage();
+            showView('workoutDetails');
+        }
+
+        function saveExercise() {
+            const form = document.getElementById('exerciseForm');
+            const formData = new FormData(form);
+            
+            const updatedExercise = {
+                ...appState.editingExercise,
+                nome: formData.get('nome'),
+                descricao: formData.get('descricao'),
+                series: parseInt(formData.get('series')),
+                repeticoes: formData.get('repeticoes'),
+                carga: formData.get('carga')
+            };
+
+            const existingIndex = appState.selectedWorkout.exercicios.findIndex(e => e.id === appState.editingExercise.id);
+            if (existingIndex >= 0) {
+                appState.selectedWorkout.exercicios[existingIndex] = updatedExercise;
+            } else {
+                appState.selectedWorkout.exercicios.push(updatedExercise);
+            }
+            
+            const planIndex = appState.workoutPlans.findIndex(p => p.id === appState.selectedPlan.id);
+            if (planIndex >= 0) {
+                const workoutIndex = appState.workoutPlans[planIndex].treinos.findIndex(w => w.id === appState.selectedWorkout.id);
+                if (workoutIndex >= 0) {
+                    appState.workoutPlans[planIndex].treinos[workoutIndex] = appState.selectedWorkout;
+                }
+            }
+            
+            updateSharedPlan(appState.selectedPlan);
+            saveToLocalStorage();
+            showView('workoutDetails');
+        }
+
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('workoutPlansPersonal', JSON.stringify(appState.workoutPlans));
+            } catch (error) {
+                console.error('Erro ao salvar no localStorage:', error);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem('workoutPlansPersonal');
+                if (saved) {
+                    appState.workoutPlans = JSON.parse(saved);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar do localStorage:', error);
+                appState.workoutPlans = [];
+            }
+        }
+    </script>
+</body>
+</html>
