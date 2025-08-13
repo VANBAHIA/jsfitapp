@@ -11,31 +11,65 @@
     <!-- iOS Icons -->
     <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSI0MCIgZmlsbD0iIzc5NDVmZiIvPjxwYXRoIGQ9Im05MCA0NWMtMjQuODUzIDAtNDUgMjAuMTQ3LTQ1IDQ1djQ1YzAgMjQuODUzIDIwLjE0NyA0NSA0NSA0NXM0NS0yMC4xNDcgNDUtNDV2LTQ1YzAtMjQuODUzLTIwLjE0Ny00NS00NS00NXoiIGZpbGw9IndoaXRlIi8+PC9zdmc+">
     <link rel="stylesheet" type="text/css" href="css/style.css">
- 
-    <style>
-  </style>
 </head>
 <body>
     <div class="app-container" id="app">
         <div class="status-bar">
-            Editor de Treinos - Personal
+            JS Fit App - Editor de Treinos Personal
         </div>
         
         <!-- Home View -->
         <div id="homeView" class="view">
             <div class="header">
-                <div class="header-title">Meus Treinos</div>
-                <input type="file" id="importInput" accept=".json" style="display: none;">
-                <button class="header-action" onclick="document.getElementById('importInput').click()">
-                    Importar
-                </button>
+                <div class="header-title">Meus Planos de Treino</div>
+                <div class="header-actions">
+                    <input type="file" id="importInput" accept=".json" style="display: none;">
+                    <input type="file" id="backupInput" accept=".json" style="display: none;" onchange="restoreBackup(event)">
+                    
+                    <button class="header-action" onclick="document.getElementById('importInput').click()" title="Importar Plano">
+                        📁
+                    </button>
+                    <button class="header-action" onclick="backupData()" title="Fazer Backup">
+                        💾
+                    </button>
+                    <button class="header-action" onclick="document.getElementById('backupInput').click()" title="Restaurar Backup">
+                        📤
+                    </button>
+                </div>
             </div>
             
             <div class="content">
-                <button class="btn-primary" onclick="createNewPlan()">
-                    <span>➕</span>
-                    Criar Novo Plano
-                </button>
+                <!-- Botões de Ação Principal -->
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="createNewPlan()">
+                        <span>➕</span>
+                        Criar Novo Plano
+                    </button>
+                    
+                    <button class="btn-primary btn-template" onclick="createABCDEPlan()">
+                        <span>🏋️</span>
+                        Criar Plano ABCDE
+                    </button>
+                </div>
+
+                <!-- Importar Plano Compartilhado -->
+                <div class="card import-card">
+                    <h3>Importar Plano Compartilhado</h3>
+                    <div class="import-form">
+                        <input 
+                            type="text" 
+                            id="shareIdInput" 
+                            class="form-input" 
+                            placeholder="Digite o ID de 6 caracteres" 
+                            maxlength="6"
+                            style="text-transform: uppercase;"
+                        >
+                        <button class="btn-secondary" onclick="importSharedPlan()">
+                            <span>🔍</span>
+                            Buscar
+                        </button>
+                    </div>
+                </div>
                 
                 <div id="plansList"></div>
             </div>
@@ -52,6 +86,7 @@
             <div class="content">
                 <form id="planForm">
                     <div class="card">
+                        <h3>📋 Informações Básicas</h3>
                         <div class="form-group">
                             <label class="form-label">Nome do Plano</label>
                             <input type="text" class="form-input" name="nome" required>
@@ -60,7 +95,12 @@
                         <div class="form-row-3">
                             <div class="form-group">
                                 <label class="form-label">Dias/Semana</label>
-                                <input type="number" class="form-input" name="dias" min="1" max="7" required>
+                                <select class="form-input" name="dias" required>
+                                    <option value="3">3 dias</option>
+                                    <option value="4">4 dias</option>
+                                    <option value="5" selected>5 dias</option>
+                                    <option value="6">6 dias</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Início</label>
@@ -74,7 +114,7 @@
                     </div>
                     
                     <div class="card">
-                        <h3 style="margin-bottom: 16px; font-size: 16px;">👤 Perfil</h3>
+                        <h3>👤 Perfil do Atleta</h3>
                         
                         <div class="form-row">
                             <div class="form-group">
@@ -93,7 +133,7 @@
                                 <input type="text" class="form-input" name="peso" placeholder="70kg">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Porte</label>
+                                <label class="form-label">Porte Físico</label>
                                 <select class="form-input" name="porte">
                                     <option value="pequeno">Pequeno</option>
                                     <option value="medio">Médio</option>
@@ -103,27 +143,74 @@
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Objetivo</label>
-                            <input type="text" class="form-input" name="objetivo" placeholder="Condicionamento geral">
+                            <label class="form-label">Objetivo Principal</label>
+                            <select class="form-input" name="objetivo">
+                                <option value="Hipertrofia e ganho de massa muscular">Hipertrofia e ganho de massa muscular</option>
+                                <option value="Condicionamento geral">Condicionamento geral</option>
+                                <option value="Perda de peso">Perda de peso</option>
+                                <option value="Definição muscular">Definição muscular</option>
+                                <option value="Força">Ganho de força</option>
+                                <option value="Resistência">Resistência</option>
+                            </select>
                         </div>
                     </div>
                     
                     <div class="card">
-                        <h3 style="margin-bottom: 16px; font-size: 16px;">📝 Observações</h3>
+                        <h3>📝 Orientações e Observações</h3>
                         
                         <div class="form-group">
-                            <label class="form-label">Frequência</label>
-                            <input type="text" class="form-input" name="frequencia" placeholder="3x por semana">
+                            <label class="form-label">Frequência Semanal</label>
+                            <input type="text" class="form-input" name="frequencia" placeholder="5x por semana (ABCDE) com 2 dias de descanso">
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Progressão</label>
-                            <input type="text" class="form-input" name="progressao" placeholder="Aumente a carga gradualmente">
+                            <label class="form-label">Progressão de Carga</label>
+                            <input type="text" class="form-input" name="progressao" placeholder="Aumente a carga em 2,5-5kg quando conseguir executar todas as séries">
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Descanso</label>
-                            <input type="text" class="form-input" name="descanso" placeholder="60-90 segundos entre séries">
+                            <label class="form-label">Tempo de Descanso</label>
+                            <input type="text" class="form-input" name="descanso" placeholder="2-3 minutos para compostos, 60-90 segundos para isolamentos">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Hidratação</label>
+                            <input type="text" class="form-input" name="hidratacao" placeholder="Beba pelo menos 3L de água por dia">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Alimentação</label>
+                            <input type="text" class="form-input" name="alimentacao" placeholder="Consuma 2,2g de proteína por kg de peso corporal">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Suplementação</label>
+                            <input type="text" class="form-input" name="suplementacao" placeholder="Consulte nutricionista">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Sono e Recuperação</label>
+                            <input type="text" class="form-input" name="sono" placeholder="7-9 horas por noite">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Aquecimento</label>
+                            <input type="text" class="form-input" name="aquecimento" placeholder="Sempre faça aquecimento específico">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Técnica</label>
+                            <input type="text" class="form-input" name="tecnica" placeholder="Priorize a execução perfeita">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Periodização</label>
+                            <input type="text" class="form-input" name="periodizacao" placeholder="Deload a cada 6-8 semanas">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Acompanhamento</label>
+                            <input type="text" class="form-input" name="consulta" placeholder="Acompanhamento profissional essencial">
                         </div>
                     </div>
                 </form>
@@ -135,14 +222,21 @@
             <div class="header">
                 <button class="header-back" onclick="goBack()">‹</button>
                 <div class="header-title" id="planDetailsTitle">Detalhes do Plano</div>
-                <button class="header-action" onclick="editCurrentPlan()">Editar</button>
+                <div class="header-actions">
+                    <button class="header-action" onclick="generatePlanReport(appState.selectedPlan.id)" title="Gerar Relatório">📊</button>
+                    <button class="header-action" onclick="resetPlanProgress(appState.selectedPlan.id)" title="Resetar Progresso">🔄</button>
+                    <button class="header-action" onclick="editCurrentPlan()">✏️</button>
+                </div>
             </div>
             
             <div class="content">
+                <!-- Informações do Plano -->
+                <div id="planInfo"></div>
+
                 <!-- Share ID Card -->
                 <div id="shareIdCard" class="card share-id-card hidden">
                     <div class="share-id-content">
-                        <div class="share-id-title">ID de Compartilhamento</div>
+                        <div class="share-id-title">🔗 ID de Compartilhamento</div>
                         <div class="share-id-value" id="shareIdValue">------</div>
                         <div class="share-id-subtitle">Compartilhe este ID com seus alunos</div>
                     </div>
@@ -158,15 +252,23 @@
                     Plano não compartilhado
                 </div>
 
-                <button class="btn-primary" onclick="createNewWorkout()">
-                    <span>➕</span>
-                    Adicionar Treino
-                </button>
+                <!-- Ações Principais -->
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="createNewWorkout()">
+                        <span>➕</span>
+                        Criar Treino
+                    </button>
 
-                <button class="btn-primary btn-share" onclick="shareCurrentPlan()">
-                    <span>🔗</span>
-                    Gerar ID de Compartilhamento
-                </button>
+                    <button class="btn-primary btn-template" onclick="showWorkoutTemplates()" style="display: none;" id="templateBtn">
+                        <span>📋</span>
+                        Templates
+                    </button>
+
+                    <button class="btn-primary btn-share" onclick="shareCurrentPlan()">
+                        <span>🔗</span>
+                        Compartilhar Plano
+                    </button>
+                </div>
 
                 <div id="copyIdSection" class="hidden" style="margin-top: 16px;">
                     <button class="btn-secondary" onclick="copyShareId()">
@@ -190,9 +292,12 @@
             <div class="content">
                 <form id="workoutForm">
                     <div class="card">
+                        <h3>🏋️ Configurações do Treino</h3>
+                        
                         <div class="form-group">
                             <label class="form-label">ID do Treino</label>
-                            <input type="text" class="form-input" name="id" placeholder="A, B, C ou 1, 2, 3" required>
+                            <input type="text" class="form-input" name="id" placeholder="A, B, C, D, E..." required>
+                            <small class="form-help">Use letras (A, B, C...) ou números (1, 2, 3...)</small>
                         </div>
                         
                         <div class="form-group">
@@ -202,7 +307,16 @@
                         
                         <div class="form-group">
                             <label class="form-label">Foco do Treino</label>
-                            <input type="text" class="form-input" name="foco" placeholder="Membros superiores - Empurrar">
+                            <select class="form-input" name="foco">
+                                <option value="Hipertrofia - Peitorais e Tríceps">Hipertrofia - Peitorais e Tríceps</option>
+                                <option value="Hipertrofia - Dorsais e Bíceps">Hipertrofia - Dorsais e Bíceps</option>
+                                <option value="Hipertrofia - Deltoides e Trapézio">Hipertrofia - Deltoides e Trapézio</option>
+                                <option value="Hipertrofia - Anterior de coxa e glúteos">Hipertrofia - Anterior de coxa e glúteos</option>
+                                <option value="Hipertrofia - Isquiotibiais, glúteos e abdômen">Hipertrofia - Isquiotibiais, glúteos e abdômen</option>
+                                <option value="Condicionamento geral">Condicionamento geral</option>
+                                <option value="Força">Força</option>
+                                <option value="Resistência">Resistência</option>
+                            </select>
                         </div>
                     </div>
                 </form>
@@ -214,10 +328,17 @@
             <div class="header">
                 <button class="header-back" onclick="goBack()">‹</button>
                 <div class="header-title" id="workoutDetailsTitle">Exercícios</div>
-                <button class="header-action" onclick="editCurrentWorkout()">Editar</button>
+                <div class="header-actions">
+                    <button class="header-action" onclick="completeWorkout(appState.selectedWorkout.id)" title="Marcar como Concluído">✅</button>
+                    <button class="header-action" onclick="setupWorkoutReminder()" title="Definir Lembrete">⏰</button>
+                    <button class="header-action" onclick="editCurrentWorkout()">✏️</button>
+                </div>
             </div>
             
             <div class="content">
+                <!-- Informações do Treino -->
+                <div id="workoutInfo"></div>
+
                 <button class="btn-primary" onclick="createNewExercise()">
                     <span>➕</span>
                     Adicionar Exercício
@@ -238,14 +359,16 @@
             <div class="content">
                 <form id="exerciseForm">
                     <div class="card">
+                        <h3>💪 Configurações do Exercício</h3>
+                        
                         <div class="form-group">
                             <label class="form-label">Nome do Exercício</label>
-                            <input type="text" class="form-input" name="nome" placeholder="Supino Reto" required>
+                            <input type="text" class="form-input" name="nome" placeholder="Supino Reto com Barra" required>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Descrição</label>
-                            <textarea class="form-input form-textarea" name="descricao" placeholder="Descrição da execução do exercício"></textarea>
+                            <label class="form-label">Descrição Técnica</label>
+                            <textarea class="form-input form-textarea" name="descricao" placeholder="Exercício principal para desenvolvimento do peitoral maior. Mantenha os ombros estáveis e execute movimento controlado." rows="3"></textarea>
                         </div>
                         
                         <div class="form-row-3">
@@ -255,11 +378,24 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Repetições</label>
-                                <input type="text" class="form-input" name="repeticoes" placeholder="12 ou 30s" required>
+                                <input type="text" class="form-input" name="repeticoes" placeholder="8-12 ou 30s" required>
+                                <small class="form-help">Ex: 12, 8-10, 30s, máx</small>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Carga</label>
-                                <input type="text" class="form-input" name="carga" placeholder="20kg" required>
+                                <input type="text" class="form-input" name="carga" placeholder="80kg" required>
+                                <small class="form-help">Ex: 20kg, 15kg cada, peso corporal</small>
+                            </div>
+                        </div>
+
+                        <!-- Sugestões de Exercícios -->
+                        <div class="exercise-suggestions">
+                            <label class="form-label">Sugestões Rápidas:</label>
+                            <div class="suggestion-buttons">
+                                <button type="button" class="btn-suggestion" onclick="fillExerciseSuggestion('Supino Reto com Barra', 'Exercício principal para desenvolvimento do peitoral maior', 4, '8-10', '80kg')">Supino Reto</button>
+                                <button type="button" class="btn-suggestion" onclick="fillExerciseSuggestion('Agachamento com Barra', 'Exercício rei para pernas e glúteos', 4, '8-10', '100kg')">Agachamento</button>
+                                <button type="button" class="btn-suggestion" onclick="fillExerciseSuggestion('Levantamento Terra', 'Exercício fundamental para posterior de coxa e lombar', 4, '6-8', '120kg')">Terra</button>
+                                <button type="button" class="btn-suggestion" onclick="fillExerciseSuggestion('Desenvolvimento com Barra', 'Exercício principal para deltoides', 4, '8-10', '50kg')">Desenvolvimento</button>
                             </div>
                         </div>
                     </div>
@@ -269,6 +405,29 @@
         
         <div class="safe-bottom"></div>
     </div>
+
+    <!-- Scripts -->
+    <script>
+        // Função para preencher sugestões de exercícios
+        function fillExerciseSuggestion(nome, descricao, series, repeticoes, carga) {
+            const form = document.getElementById('exerciseForm');
+            form.nome.value = nome;
+            form.descricao.value = descricao;
+            form.series.value = series;
+            form.repeticoes.value = repeticoes;
+            form.carga.value = carga;
+        }
+
+        // Auto-uppercase para input de share ID
+        document.addEventListener('DOMContentLoaded', function() {
+            const shareIdInput = document.getElementById('shareIdInput');
+            if (shareIdInput) {
+                shareIdInput.addEventListener('input', function(e) {
+                    this.value = this.value.toUpperCase();
+                });
+            }
+        });
+    </script>
     <script src="personal.js"></script> 
 </body>
 </html>

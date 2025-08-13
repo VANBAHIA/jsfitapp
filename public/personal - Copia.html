@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Editor Treinos">
+    <title>Editor de Treinos - Personal</title>
+    
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSI0MCIgZmlsbD0iIzc5NDVmZiIvPjxwYXRoIGQ9Im05MCA0NWMtMjQuODUzIDAtNDUgMjAuMTQ3LTQ1IDQ1djQ1YzAgMjQuODUzIDIwLjE0NyA0NSA0NSA0NXM0NS0yMC4xNDcgNDUtNDV2LTQ1YzAtMjQuODUzLTIwLjE0Ny00NS00NS00NXoiIGZpbGw9IndoaXRlIi8+PC9zdmc+">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+ 
+    <style>
+  </style>
+</head>
+<body>
+    <div class="app-container" id="app">
+        <div class="status-bar">
+            Editor de Treinos - Personal
+        </div>
+        
+        <!-- Home View -->
+        <div id="homeView" class="view">
+            <div class="header">
+                <div class="header-title">Meus Treinos</div>
+                <input type="file" id="importInput" accept=".json" style="display: none;">
+                <button class="header-action" onclick="document.getElementById('importInput').click()">
+                    Importar
+                </button>
+            </div>
+            
+            <div class="content">
+                <button class="btn-primary" onclick="createNewPlan()">
+                    <span>➕</span>
+                    Criar Novo Plano
+                </button>
+                
+                <div id="plansList"></div>
+            </div>
+        </div>
+        
+        <!-- Edit Plan View -->
+        <div id="editPlanView" class="view hidden">
+            <div class="header">
+                <button class="header-back" onclick="goBack()">‹</button>
+                <div class="header-title" id="editPlanTitle">Editar Plano</div>
+                <button class="header-action" onclick="savePlan()">Salvar</button>
+            </div>
+            
+            <div class="content">
+                <form id="planForm">
+                    <div class="card">
+                        <div class="form-group">
+                            <label class="form-label">Nome do Plano</label>
+                            <input type="text" class="form-input" name="nome" required>
+                        </div>
+                        
+                        <div class="form-row-3">
+                            <div class="form-group">
+                                <label class="form-label">Dias/Semana</label>
+                                <input type="number" class="form-input" name="dias" min="1" max="7" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Início</label>
+                                <input type="date" class="form-input" name="dataInicio" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Fim</label>
+                                <input type="date" class="form-input" name="dataFim" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 style="margin-bottom: 16px; font-size: 16px;">👤 Perfil</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Idade</label>
+                                <input type="number" class="form-input" name="idade" min="15" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Altura</label>
+                                <input type="text" class="form-input" name="altura" placeholder="1,70m">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Peso</label>
+                                <input type="text" class="form-input" name="peso" placeholder="70kg">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Porte</label>
+                                <select class="form-input" name="porte">
+                                    <option value="pequeno">Pequeno</option>
+                                    <option value="medio">Médio</option>
+                                    <option value="grande">Grande</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Objetivo</label>
+                            <input type="text" class="form-input" name="objetivo" placeholder="Condicionamento geral">
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 style="margin-bottom: 16px; font-size: 16px;">📝 Observações</h3>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Frequência</label>
+                            <input type="text" class="form-input" name="frequencia" placeholder="3x por semana">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Progressão</label>
+                            <input type="text" class="form-input" name="progressao" placeholder="Aumente a carga gradualmente">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Descanso</label>
+                            <input type="text" class="form-input" name="descanso" placeholder="60-90 segundos entre séries">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Plan Details View -->
+        <div id="planDetailsView" class="view hidden">
+            <div class="header">
+                <button class="header-back" onclick="goBack()">‹</button>
+                <div class="header-title" id="planDetailsTitle">Detalhes do Plano</div>
+                <button class="header-action" onclick="editCurrentPlan()">Editar</button>
+            </div>
+            
+            <div class="content">
+                <!-- Share ID Card -->
+                <div id="shareIdCard" class="card share-id-card hidden">
+                    <div class="share-id-content">
+                        <div class="share-id-title">ID de Compartilhamento</div>
+                        <div class="share-id-value" id="shareIdValue">------</div>
+                        <div class="share-id-subtitle">Compartilhe este ID com seus alunos</div>
+                    </div>
+                </div>
+
+                <!-- API Status -->
+                <div id="apiStatus" class="api-status hidden">
+                    Conectando com servidor...
+                </div>
+
+                <!-- Storage Status -->
+                <div id="storageStatus" class="api-status">
+                    Plano não compartilhado
+                </div>
+
+                <button class="btn-primary" onclick="createNewWorkout()">
+                    <span>➕</span>
+                    Adicionar Treino
+                </button>
+
+                <button class="btn-primary btn-share" onclick="shareCurrentPlan()">
+                    <span>🔗</span>
+                    Gerar ID de Compartilhamento
+                </button>
+
+                <div id="copyIdSection" class="hidden" style="margin-top: 16px;">
+                    <button class="btn-secondary" onclick="copyShareId()">
+                        <span>📋</span>
+                        Copiar ID do Treino
+                    </button>
+                </div>
+                
+                <div id="workoutsList"></div>
+            </div>
+        </div>
+        
+        <!-- Edit Workout View -->
+        <div id="editWorkoutView" class="view hidden">
+            <div class="header">
+                <button class="header-back" onclick="goBack()">‹</button>
+                <div class="header-title" id="editWorkoutTitle">Editar Treino</div>
+                <button class="header-action" onclick="saveWorkout()">Salvar</button>
+            </div>
+            
+            <div class="content">
+                <form id="workoutForm">
+                    <div class="card">
+                        <div class="form-group">
+                            <label class="form-label">ID do Treino</label>
+                            <input type="text" class="form-input" name="id" placeholder="A, B, C ou 1, 2, 3" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Nome do Treino</label>
+                            <input type="text" class="form-input" name="nome" placeholder="A - Peito e Tríceps" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Foco do Treino</label>
+                            <input type="text" class="form-input" name="foco" placeholder="Membros superiores - Empurrar">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Workout Details View -->
+        <div id="workoutDetailsView" class="view hidden">
+            <div class="header">
+                <button class="header-back" onclick="goBack()">‹</button>
+                <div class="header-title" id="workoutDetailsTitle">Exercícios</div>
+                <button class="header-action" onclick="editCurrentWorkout()">Editar</button>
+            </div>
+            
+            <div class="content">
+                <button class="btn-primary" onclick="createNewExercise()">
+                    <span>➕</span>
+                    Adicionar Exercício
+                </button>
+                
+                <div id="exercisesList"></div>
+            </div>
+        </div>
+        
+        <!-- Edit Exercise View -->
+        <div id="editExerciseView" class="view hidden">
+            <div class="header">
+                <button class="header-back" onclick="goBack()">‹</button>
+                <div class="header-title" id="editExerciseTitle">Editar Exercício</div>
+                <button class="header-action" onclick="saveExercise()">Salvar</button>
+            </div>
+            
+            <div class="content">
+                <form id="exerciseForm">
+                    <div class="card">
+                        <div class="form-group">
+                            <label class="form-label">Nome do Exercício</label>
+                            <input type="text" class="form-input" name="nome" placeholder="Supino Reto" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Descrição</label>
+                            <textarea class="form-input form-textarea" name="descricao" placeholder="Descrição da execução do exercício"></textarea>
+                        </div>
+                        
+                        <div class="form-row-3">
+                            <div class="form-group">
+                                <label class="form-label">Séries</label>
+                                <input type="number" class="form-input" name="series" min="1" max="10" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Repetições</label>
+                                <input type="text" class="form-input" name="repeticoes" placeholder="12 ou 30s" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Carga</label>
+                                <input type="text" class="form-input" name="carga" placeholder="20kg" required>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="safe-bottom"></div>
+    </div>
+    <script src="personal.js"></script> 
+</body>
+</html>

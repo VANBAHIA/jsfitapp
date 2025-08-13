@@ -6,7 +6,7 @@ const CACHE_URLS = [
   '/aluno.html',
   '/personal.html',
   '/manifest.json',
-  '/css/stylealuno.css',
+  '/css/style.css',
   '/css/stylepersonal.css'
 ];
 
