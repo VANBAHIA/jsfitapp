@@ -1039,7 +1039,7 @@
             };
 
             // Validation
-            if (!aiData.nome.trim()) {
+            if (!aiData.nome) {
                 showMessage('Por favor, preencha o nome do aluno', 'error');
                 return;
             }
@@ -1047,80 +1047,35 @@
             // Show generating indicator
             const indicator = document.getElementById('generatingIndicator');
             const progressFill = document.getElementById('progressFill');
-            
-            if (!indicator || !progressFill) {
-                showMessage('Erro ao inicializar geração do plano', 'error');
-                return;
-            }
-
             indicator.classList.add('active');
-            progressFill.style.width = '0%';
-
-            // Clear any existing interval
-            if (currentProgressInterval) {
-                clearInterval(currentProgressInterval);
-            }
 
             // Simulate AI generation with progress
             let progress = 0;
-            currentProgressInterval = setInterval(() => {
+            const progressInterval = setInterval(() => {
                 progress += Math.random() * 15;
                 if (progress > 90) progress = 90;
                 progressFill.style.width = progress + '%';
             }, 200);
 
             // Generate plan after delay
-            const generationTimeout = setTimeout(() => {
-                try {
-                    clearInterval(currentProgressInterval);
-                    currentProgressInterval = null;
-                    progressFill.style.width = '100%';
+            setTimeout(() => {
+                clearInterval(progressInterval);
+                progressFill.style.width = '100%';
 
-                    // Create AI-generated plan
-                    console.log('Criando plano IA com dados:', aiData);
-                    aiGeneratedPlan = createAIPlan(aiData);
-                    console.log('Plano criado:', aiGeneratedPlan);
-                    
-                    // Save the generated plan immediately
-                    const existingIndex = savedPlans.findIndex(p => p.id === aiGeneratedPlan.id);
-                    if (existingIndex >= 0) {
-                        savedPlans[existingIndex] = { ...aiGeneratedPlan };
-                    } else {
-                        savedPlans.push({ ...aiGeneratedPlan });
-                    }
-                    
-                    console.log('Salvando plano no localStorage...');
-                    localStorage.setItem('jsfitapp_plans', JSON.stringify(savedPlans));
-                    console.log('Plano salvo com sucesso');
-                    
-                    // Hide indicator and show success
-                    setTimeout(() => {
-                        indicator.classList.remove('active');
-                        showMessage('Plano gerado e salvo com sucesso pela IA!', 'success');
-                        
-                        // Clear AI form
-                        clearAIForm();
-                        
-                        // Show plan list after short delay
-                        setTimeout(() => {
-                            console.log('Redirecionando para lista de planos...');
-                            showPlanList();
-                        }, 1000);
-                        
-                    }, 500);
-
-                } catch (error) {
-                    console.error('Erro ao gerar plano:', error);
-                    clearInterval(currentProgressInterval);
-                    currentProgressInterval = null;
+                // Create AI-generated plan
+                aiGeneratedPlan = createAIPlan(aiData);
+                
+                // Fill the manual form with AI data
+                fillFormWithAIPlan(aiGeneratedPlan);
+                
+                // Hide indicator and show plan creator
+                setTimeout(() => {
                     indicator.classList.remove('active');
-                    showMessage('Erro ao gerar plano: ' + error.message, 'error');
-                }
+                    showPlanCreator();
+                    showMessage('Plano gerado com sucesso pela IA! Revise e ajuste conforme necessário.', 'success');
+                }, 500);
 
             }, 2000 + Math.random() * 2000); // 2-4 seconds
-
-            // Store timeout reference for potential cleanup
-            indicator.dataset.timeoutId = generationTimeout;
         }
 
         function createAIPlan(aiData) {
