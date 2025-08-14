@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="JS Fit App">
+    <title>JS Fit App - Criador de Planos de Treino</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzc5NDVmZiIvPgo8cGF0aCBkPSJtMTYgOGMtNC40MTggMC04IDMuNTgyLTggOHY4YzAgNC40MTggMy41ODIgOCA4IDhzOC0zLjU4MiA4LTh2LThjMC00LjQxOC0zLjU4Mi04LTgtOHoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPg==">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #7945ff, #667eea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .main-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #7945ff, #667eea);
+            box-shadow: 0 4px 15px rgba(121, 69, 255, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(121, 69, 255, 0.6);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #48bb78, #38b2ac);
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.6);
+        }
+        
+        .btn-ai {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .btn-ai:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+        
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .content-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+        }
+        
+        .form-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #7945ff;
+            box-shadow: 0 0 0 3px rgba(121, 69, 255, 0.1);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .plan-type-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .plan-type-btn {
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .plan-type-btn.active {
+            border-color: #7945ff;
+            background: linear-gradient(135deg, #7945ff, #667eea);
+            color: white;
+        }
+        
+        .plan-type-btn:hover:not(.active) {
+            border-color: #7945ff;
+            transform: translateY(-2px);
+        }
+        
+        .success-message, .error-message {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .success-message {
+            background: linear-gradient(135deg, #48bb78, #38b2ac);
+            color: white;
+        }
+        
+        .error-message {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            color: white;
+        }
+        
+        .ai-form-section {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .ai-form-section h3 {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .generating-indicator {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: #f8fafc;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .generating-indicator.active {
+            display: block;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e2e8f0;
+            border-top: 5px solid #7945ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #7945ff, #667eea);
+            transition: width 0.3s ease;
+        }
+
+        .plan-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .plan-card h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .plan-card p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .plan-card-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🏋️ JS Fit App</h1>
+            <p>Criador de Planos de Treino Personalizados</p>
+            <div class="main-actions">
+                <button class="btn btn-primary" onclick="app.showPlanCreator()">
+                    ➕ Novo Plano
+                </button>
+                <button class="btn btn-secondary" onclick="app.showPlanList()">
+                    📋 Meus Planos
+                </button>
+                <button class="btn btn-ai" onclick="app.showAIPlanCreator()">
+                    🤖 Criar com IA
+                </button>
+                <label class="btn btn-outline" for="importFile">
+                    📂 Importar Plano
+                </label>
+            </div>
+        </header>
+
+        <!-- AI Plan Creator -->
+        <div id="aiPlanCreator" class="content-card" style="display: none;">
+            <div class="ai-form-section">
+                <h3>🤖 Criador de Plano com IA</h3>
+                <p>Preencha as informações básicas e deixe a IA criar um plano personalizado para você!</p>
+            </div>
+
+            <div class="form-section">
+                <h2>👤 Dados do Aluno</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nome do Aluno</label>
+                        <input type="text" id="aiStudentName" class="form-input" placeholder="Digite o nome completo">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Idade</label>
+                        <input type="number" id="aiStudentAge" class="form-input" placeholder="25" min="15" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Altura</label>
+                        <input type="text" id="aiStudentHeight" class="form-input" placeholder="1,75m">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Peso</label>
+                        <input type="text" id="aiStudentWeight" class="form-input" placeholder="75kg">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>🎯 Configurações do Plano</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Objetivo Principal</label>
+                        <select id="aiPlanObjective" class="form-select">
+                            <option value="Hipertrofia e ganho de massa muscular">Hipertrofia e ganho de massa muscular</option>
+                            <option value="Perda de peso e definição">Perda de peso e definição</option>
+                            <option value="Condicionamento geral">Condicionamento geral</option>
+                            <option value="Força e potência">Força e potência</option>
+                            <option value="Resistência muscular">Resistência muscular</option>
+                            <option value="Reabilitação">Reabilitação</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nível de Experiência</label>
+                        <select id="aiExperienceLevel" class="form-select">
+                            <option value="iniciante">Iniciante (0-6 meses)</option>
+                            <option value="intermediario">Intermediário (6 meses - 2 anos)</option>
+                            <option value="avancado">Avançado (2+ anos)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Dias Disponíveis por Semana</label>
+                        <select id="aiAvailableDays" class="form-select">
+                            <option value="2">2 dias</option>
+                            <option value="3" selected>3 dias</option>
+                            <option value="4">4 dias</option>
+                            <option value="5">5 dias</option>
+                            <option value="6">6 dias</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tempo por Sessão (minutos)</label>
+                        <select id="aiSessionTime" class="form-select">
+                            <option value="45">45 minutos</option>
+                            <option value="60" selected>60 minutos</option>
+                            <option value="75">75 minutos</option>
+                            <option value="90">90 minutos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>🏋️ Preferências de Treino</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Equipamentos Disponíveis</label>
+                        <select id="aiEquipment" class="form-select">
+                            <option value="academia_completa">Academia Completa</option>
+                            <option value="home_gym">Home Gym (Halteres + Barra)</option>
+                            <option value="peso_corporal">Apenas Peso Corporal</option>
+                            <option value="funcional">Equipamentos Funcionais</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Foco Muscular Preferido</label>
+                        <select id="aiMusclePreference" class="form-select">
+                            <option value="equilibrado">Desenvolvimento Equilibrado</option>
+                            <option value="superior">Foco Membros Superiores</option>
+                            <option value="inferior">Foco Membros Inferiores</option>
+                            <option value="core">Foco Core e Funcional</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Limitações ou Lesões</label>
+                    <textarea id="aiLimitations" class="form-textarea" placeholder="Descreva qualquer limitação física, lesão prévia ou exercício que deve ser evitado..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Observações Especiais</label>
+                    <textarea id="aiSpecialNotes" class="form-textarea" placeholder="Exercícios preferidos, horários de treino, metas específicas, etc..."></textarea>
+                </div>
+            </div>
+
+            <div class="generating-indicator" id="generatingIndicator">
+                <div class="spinner"></div>
+                <h3>🤖 IA Criando Seu Plano...</h3>
+                <p>Analisando suas informações e gerando o plano personalizado. Isso pode levar alguns segundos.</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-ai" onclick="app.generateAIPlan()">
+                    🤖 Gerar Plano com IA
+                </button>
+                <button class="btn btn-outline" onclick="app.showPlanList()">
+                    📋 Ver Meus Planos
+                </button>
+            </div>
+        </div>
+
+        <!-- Plan Creator -->
+        <div id="planCreator" class="content-card" style="display: none;">
+            <div class="form-section">
+                <h2>👤 Dados do Aluno</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nome do Aluno</label>
+                        <input type="text" id="studentName" class="form-input" placeholder="Digite o nome completo">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Idade</label>
+                        <input type="number" id="studentAge" class="form-input" placeholder="25" min="15" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Altura</label>
+                        <input type="text" id="studentHeight" class="form-input" placeholder="1,75m">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Peso</label>
+                        <input type="text" id="studentWeight" class="form-input" placeholder="75kg">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>🎯 Configurações do Plano</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nome do Plano</label>
+                        <input type="text" id="planName" class="form-input" placeholder="Plano Hipertrofia 2024">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Objetivo</label>
+                        <select id="planObjective" class="form-select">
+                            <option value="Hipertrofia e ganho de massa muscular">Hipertrofia e ganho de massa muscular</option>
+                            <option value="Condicionamento geral">Condicionamento geral</option>
+                            <option value="Perda de peso">Perda de peso</option>
+                            <option value="Definição muscular">Definição muscular</option>
+                            <option value="Força">Ganho de força</option>
+                            <option value="Resistência">Resistência</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Data de Início</label>
+                        <input type="date" id="planStartDate" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Data de Fim</label>
+                        <input type="date" id="planEndDate" class="form-input">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Observações Gerais</label>
+                    <textarea id="planObservations" class="form-textarea" placeholder="Digite observações importantes sobre o plano de treino..."></textarea>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="app.savePlan()">
+                    💾 Salvar Plano
+                </button>
+                <button class="btn btn-outline" onclick="app.showPlanList()">
+                    📋 Ver Meus Planos
+                </button>
+            </div>
+        </div>
+
+        <!-- Plan List -->
+        <div id="planList" class="content-card">
+            <h2>📋 Meus Planos de Treino</h2>
+            <div id="planListContent">
+                <div class="plan-card">
+                    <h3>Nenhum plano encontrado</h3>
+                    <p>Crie seu primeiro plano de treino clicando em "Novo Plano" ou "Criar com IA"!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="importFile" style="display: none;" accept=".json" onchange="app.importPlan(event)">
+
+    <script>
+        // Application object to organize functions and prevent global conflicts
+        const app = {
+            // Application State
+            currentPlan: {
+                id: null,
+                nome: '',
+                aluno: {
+                    nome: '',
+                    idade: 25,
+                    altura: '1,75m',
+                    peso: '75kg'
+                },
+                dias: 1,
+                dataInicio: '',
+                dataFim: '',
+                perfil: {
+                    objetivo: 'Hipertrofia e ganho de massa muscular'
+                },
+                observacoes: {},
+                treinos: []
+            },
+
+            savedPlans: [],
+            
+            // Initialize app
+            init() {
+                this.loadSavedPlans();
+                this.setDefaultDates();
+                this.showPlanList();
+                this.setupEventListeners();
+            },
+
+            setupEventListeners() {
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.showPlanList();
+                    }
+                    if (e.ctrlKey && e.key === 's') {
+                        e.preventDefault();
+                        this.savePlan();
+                    }
+                    if (e.ctrlKey && e.key === 'n') {
+                        e.preventDefault();
+                        this.showPlanCreator();
+                    }
+                    if (e.ctrlKey && e.key === 'i') {
+                        e.preventDefault();
+                        this.showAIPlanCreator();
+                    }
+                });
+            },
+
+            setDefaultDates() {
+                const today = new Date();
+                const endDate = new Date();
+                endDate.setMonth(endDate.getMonth() + 6);
+                
+                const startInput = document.getElementById('planStartDate');
+                const endInput = document.getElementById('planEndDate');
+                
+                if (startInput) startInput.value = today.toISOString().split('T')[0];
+                if (endInput) endInput.value = endDate.toISOString().split('T')[0];
+            },
+
+            showAIPlanCreator() {
+                document.getElementById('aiPlanCreator').style.display = 'block';
+                document.getElementById('planCreator').style.display = 'none';
+                document.getElementById('planList').style.display = 'none';
+                
+                // Clear form
+                const form = document.getElementById('aiPlanCreator');
+                const inputs = form.querySelectorAll('input, textarea');
+                inputs.forEach(input => {
+                    if (input.type !== 'number') {
+                        input.value = '';
+                    }
+                });
+                
+                // Set default values
+                document.getElementById('aiStudentAge').value = 25;
+                document.getElementById('aiAvailableDays').value = '3';
+                document.getElementById('aiSessionTime').value = '60';
+            },
+
+            showPlanCreator() {
+                document.getElementById('planCreator').style.display = 'block';
+                document.getElementById('aiPlanCreator').style.display = 'none';
+                document.getElementById('planList').style.display = 'none';
+                
+                this.resetPlanForm();
+            },
+
+            showPlanList() {
+                document.getElementById('planCreator').style.display = 'none';
+                document.getElementById('aiPlanCreator').style.display = 'none';
+                document.getElementById('planList').style.display = 'block';
+                this.renderPlanList();
+            },
+
+            resetPlanForm() {
+                // Clear form inputs
+                const inputs = document.querySelectorAll('#planCreator input, #planCreator textarea, #planCreator select');
+                inputs.forEach(input => {
+                    if (input.type === 'number') {
+                        input.value = input.placeholder || '';
+                    } else {
+                        input.value = '';
+                    }
+                });
+                
+                this.setDefaultDates();
+            },
+
+            generateAIPlan() {
+                // Get AI form data
+                const aiData = {
+                    nome: document.getElementById('aiStudentName').value,
+                    idade: parseInt(document.getElementById('aiStudentAge').value) || 25,
+                    altura: document.getElementById('aiStudentHeight').value || '1,75m',
+                    peso: document.getElementById('aiStudentWeight').value || '75kg',
+                    objetivo: document.getElementById('aiPlanObjective').value,
+                    nivel: document.getElementById('aiExperienceLevel').value,
+                    dias: parseInt(document.getElementById('aiAvailableDays').value),
+                    tempo: parseInt(document.getElementById('aiSessionTime').value),
+                    equipamentos: document.getElementById('aiEquipment').value,
+                    foco: document.getElementById('aiMusclePreference').value,
+                    limitacoes: document.getElementById('aiLimitations').value,
+                    observacoes: document.getElementById('aiSpecialNotes').value
+                };
+
+                // Validation
+                if (!aiData.nome) {
+                    this.showMessage('Por favor, preencha o nome do aluno', 'error');
+                    return;
+                }
+
+                // Show generating indicator
+                const indicator = document.getElementById('generatingIndicator');
+                const progressFill = document.getElementById('progressFill');
+                indicator.classList.add('active');
+
+                // Simulate AI generation with progress
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += Math.random() * 15;
+                    if (progress > 90) progress = 90;
+                    progressFill.style.width = progress + '%';
+                }, 200);
+
+                // Generate plan after delay
+                setTimeout(() => {
+                    clearInterval(progressInterval);
+                    progressFill.style.width = '100%';
+
+                    try {
+                        // Create AI-generated plan
+                        const aiGeneratedPlan = this.createAIPlan(aiData);
+                        
+                        // Save the AI generated plan
+                        const existingIndex = this.savedPlans.findIndex(p => p.id === aiGeneratedPlan.id);
+                        if (existingIndex >= 0) {
+                            this.savedPlans[existingIndex] = { ...aiGeneratedPlan };
+                        } else {
+                            this.savedPlans.push({ ...aiGeneratedPlan });
+                        }
+
+                        // Save to localStorage
+                        this.savePlansToStorage();
+                        
+                        // Hide indicator
+                        indicator.classList.remove('active');
+                        
+                        // Show success message and redirect to plan list
+                        this.showMessage('Plano gerado com sucesso pela IA! ✨', 'success');
+                        
+                        // Redirect to plan list after a short delay
+                        setTimeout(() => {
+                            this.showPlanList();
+                        }, 1500);
+
+                    } catch (error) {
+                        console.error('Erro ao gerar plano:', error);
+                        indicator.classList.remove('active');
+                        this.showMessage('Erro ao gerar plano. Tente novamente.', 'error');
+                    }
+
+                }, 2000 + Math.random() * 2000); // 2-4 seconds
+            },
+
+            createAIPlan(aiData) {
+                const plan = {
+                    id: Date.now(),
+                    nome: `Plano IA - ${aiData.objetivo.split(' ')[0]} - ${aiData.nome}`,
+                    aluno: {
+                        nome: aiData.nome,
+                        idade: aiData.idade,
+                        altura: aiData.altura,
+                        peso: aiData.peso
+                    },
+                    dias: aiData.dias,
+                    dataInicio: new Date().toISOString().split('T')[0],
+                    dataFim: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    perfil: {
+                        objetivo: aiData.objetivo,
+                        nivel: aiData.nivel,
+                        equipamentos: aiData.equipamentos,
+                        tempo: aiData.tempo
+                    },
+                    observacoes: {
+                        frequencia: `Treino ${aiData.dias}x por semana, ${aiData.tempo} minutos por sessão`,
+                        limitacoes: aiData.limitacoes || 'Nenhuma limitação reportada',
+                        observacoesEspeciais: aiData.observacoes || 'Nenhuma observação especial'
+                    },
+                    treinos: this.generateSimpleWorkouts(aiData)
+                };
+
+                return plan;
+            },
+
+            generateSimpleWorkouts(aiData) {
+                const workouts = [];
+                const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+                
+                // Simple workout generation based on days
+                for (let i = 0; i < aiData.dias; i++) {
+                    const workout = {
+                        nome: `${letters[i]} - Treino ${i + 1}`,
+                        foco: this.getWorkoutFocus(i, aiData.dias, aiData.foco),
+                        exercicios: this.generateExercisesForWorkout(i, aiData)
+                    };
+                    workouts.push(workout);
+                }
+                
+                return workouts;
+            },
+
+            getWorkoutFocus(index, totalDays, preference) {
+                const focuses = {
+                    1: ['Corpo Inteiro'],
+                    2: ['Membros Superiores', 'Membros Inferiores'],
+                    3: ['Peito e Tríceps', 'Costas e Bíceps', 'Pernas e Ombros'],
+                    4: ['Peito e Tríceps', 'Costas e Bíceps', 'Ombros', 'Pernas'],
+                    5: ['Peito', 'Costas', 'Ombros e Braços', 'Pernas', 'Corpo Inteiro']
+                };
+                
+                return focuses[totalDays] ? focuses[totalDays][index] : `Treino ${index + 1}`;
+            },
+
+            generateExercisesForWorkout(workoutIndex, aiData) {
+                // Simple exercise generation - in a real app, this would be more sophisticated
+                const exercises = [
+                    { nome: 'Aquecimento', series: 1, repeticoes: '5-10 min', carga: 'Leve', descricao: 'Aquecimento geral' },
+                    { nome: 'Exercício Principal 1', series: 4, repeticoes: '8-12', carga: 'Moderada', descricao: 'Exercício composto' },
+                    { nome: 'Exercício Principal 2', series: 3, repeticoes: '10-15', carga: 'Moderada', descricao: 'Exercício auxiliar' },
+                    { nome: 'Exercício Acessório 1', series: 3, repeticoes: '12-15', carga: 'Leve', descricao: 'Exercício de isolamento' },
+                    { nome: 'Exercício Acessório 2', series: 2, repeticoes: '15-20', carga: 'Leve', descricao: 'Exercício de finalização' },
+                    { nome: 'Alongamento', series: 1, repeticoes: '5-10 min', carga: '', descricao: 'Alongamento geral' }
+                ];
+                
+                return exercises;
+            },
+
+            savePlan() {
+                try {
+                    // Get data from manual form
+                    const planData = {
+                        id: Date.now(),
+                        nome: document.getElementById('planName')?.value || 'Plano sem nome',
+                        aluno: {
+                            nome: document.getElementById('studentName')?.value || 'Aluno',
+                            idade: parseInt(document.getElementById('studentAge')?.value) || 25,
+                            altura: document.getElementById('studentHeight')?.value || '1,75m',
+                            peso: document.getElementById('studentWeight')?.value || '75kg'
+                        },
+                        dataInicio: document.getElementById('planStartDate')?.value || new Date().toISOString().split('T')[0],
+                        dataFim: document.getElementById('planEndDate')?.value || '',
+                        perfil: {
+                            objetivo: document.getElementById('planObjective')?.value || 'Condicionamento geral'
+                        },
+                        observacoes: {
+                            geral: document.getElementById('planObservations')?.value || ''
+                        },
+                        treinos: []
+                    };
+
+                    // Validation
+                    if (!planData.aluno.nome) {
+                        this.showMessage('Por favor, preencha o nome do aluno', 'error');
+                        return;
+                    }
+
+                    // Save plan
+                    this.savedPlans.push(planData);
+                    this.savePlansToStorage();
+                    
+                    this.showMessage('Plano salvo com sucesso! 💾', 'success');
+                    
+                    setTimeout(() => {
+                        this.showPlanList();
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('Erro ao salvar plano:', error);
+                    this.showMessage('Erro ao salvar plano. Tente novamente.', 'error');
+                }
+            },
+
+            deletePlan(planId) {
+                if (confirm('Tem certeza que deseja excluir este plano?')) {
+                    this.savedPlans = this.savedPlans.filter(plan => plan.id !== planId);
+                    this.savePlansToStorage();
+                    this.showMessage('Plano excluído com sucesso', 'success');
+                    this.renderPlanList();
+                }
+            },
+
+            exportPlan(planId) {
+                const plan = this.savedPlans.find(p => p.id === planId);
+                if (!plan) return;
+
+                const dataStr = JSON.stringify(plan, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const exportFileDefaultName = `plano_${plan.nome.replace(/\s+/g, '_').toLowerCase()}.json`;
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+                
+                this.showMessage('Plano exportado com sucesso! 📤', 'success');
+            },
+
+            importPlan(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const planData = JSON.parse(e.target.result);
+                        
+                        // Assign new ID to avoid conflicts
+                        planData.id = Date.now();
+                        planData.nome = planData.nome + ' (Importado)';
+                        
+                        this.savedPlans.push(planData);
+                        this.savePlansToStorage();
+                        
+                        this.showMessage('Plano importado com sucesso! 📥', 'success');
+                        this.renderPlanList();
+                        
+                    } catch (error) {
+                        console.error('Erro ao importar plano:', error);
+                        this.showMessage('Erro ao importar plano. Verifique o arquivo.', 'error');
+                    }
+                };
+                reader.readAsText(file);
+                
+                // Clear file input
+                event.target.value = '';
+            },
+
+            loadSavedPlans() {
+                try {
+                    const stored = localStorage.getItem('jsfitapp_plans');
+                    if (stored) {
+                        this.savedPlans = JSON.parse(stored);
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar planos:', error);
+                    this.savedPlans = [];
+                }
+            },
+
+            savePlansToStorage() {
+                try {
+                    localStorage.setItem('jsfitapp_plans', JSON.stringify(this.savedPlans));
+                } catch (error) {
+                    console.error('Erro ao salvar planos:', error);
+                }
+            },
+
+            renderPlanList() {
+                const container = document.getElementById('planListContent');
+                if (!container) return;
+
+                if (this.savedPlans.length === 0) {
+                    container.innerHTML = `
+                        <div class="plan-card">
+                            <h3>Nenhum plano encontrado</h3>
+                            <p>Crie seu primeiro plano de treino clicando em "Novo Plano" ou "Criar com IA"!</p>
+                            <div class="plan-card-actions">
+                                <button class="btn btn-primary btn-small" onclick="app.showAIPlanCreator()">
+                                    🤖 Criar com IA
+                                </button>
+                                <button class="btn btn-secondary btn-small" onclick="app.showPlanCreator()">
+                                    ➕ Criar Manualmente
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = this.savedPlans.map(plan => `
+                    <div class="plan-card">
+                        <h3>${plan.nome}</h3>
+                        <p><strong>Aluno:</strong> ${plan.aluno.nome} (${plan.aluno.idade} anos)</p>
+                        <p><strong>Objetivo:</strong> ${plan.perfil?.objetivo || 'Não especificado'}</p>
+                        <p><strong>Período:</strong> ${this.formatDate(plan.dataInicio)} até ${this.formatDate(plan.dataFim)}</p>
+                        <div class="plan-card-actions">
+                            <button class="btn btn-primary btn-small" onclick="app.viewPlan(${plan.id})">
+                                👁️ Visualizar
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="app.exportPlan(${plan.id})">
+                                📤 Exportar
+                            </button>
+                            <button class="btn btn-outline btn-small" onclick="app.deletePlan(${plan.id})" style="color: #e53e3e;">
+                                🗑️ Excluir
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            viewPlan(planId) {
+                const plan = this.savedPlans.find(p => p.id === planId);
+                if (!plan) return;
+
+                const details = `
+                    <h2>${plan.nome}</h2>
+                    <p><strong>Aluno:</strong> ${plan.aluno.nome}</p>
+                    <p><strong>Idade:</strong> ${plan.aluno.idade} anos</p>
+                    <p><strong>Altura:</strong> ${plan.aluno.altura}</p>
+                    <p><strong>Peso:</strong> ${plan.aluno.peso}</p>
+                    <p><strong>Objetivo:</strong> ${plan.perfil?.objetivo || 'Não especificado'}</p>
+                    <p><strong>Período:</strong> ${this.formatDate(plan.dataInicio)} até ${this.formatDate(plan.dataFim)}</p>
+                    ${plan.treinos?.length > 0 ? `<p><strong>Treinos:</strong> ${plan.treinos.length} dias</p>` : ''}
+                `;
+
+                alert(details); // In a real app, this would be a proper modal
+            },
+
+            formatDate(dateString) {
+                if (!dateString) return 'Não definido';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('pt-BR');
+            },
+
+            showMessage(message, type = 'success') {
+                // Remove any existing messages
+                const existingMessages = document.querySelectorAll('.success-message, .error-message');
+                existingMessages.forEach(msg => msg.remove());
+
+                // Create new message
+                const messageDiv = document.createElement('div');
+                messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+                messageDiv.innerHTML = `
+                    <span>${type === 'success' ? '✅' : '❌'}</span>
+                    <span>${message}</span>
+                `;
+
+                // Insert after header
+                const header = document.querySelector('.header');
+                if (header) {
+                    header.insertAdjacentElement('afterend', messageDiv);
+                    
+                    // Auto remove after 3 seconds
+                    setTimeout(() => {
+                        if (messageDiv.parentNode) {
+                            messageDiv.remove();
+                        }
+                    }, 3000);
+                }
+            }
+        };
+
+        // Initialize app when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            app.init();
+        });
+
+        // Fallback initialization
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', app.init.bind(app));
+        } else {
+            app.init();
+        }
+    </script>
+</body>
+</html>

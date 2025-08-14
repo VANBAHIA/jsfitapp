@@ -27,7 +27,7 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
             min-height: 100vh;
@@ -123,6 +123,21 @@
             transform: translateY(-2px);
         }
         
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c53030, #9c2626);
+        }
+        
         .content-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -179,7 +194,7 @@
         
         .form-textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 80px;
         }
         
         .plan-type-selector {
@@ -209,6 +224,68 @@
         .plan-type-btn:hover:not(.active) {
             border-color: #7945ff;
             transform: translateY(-2px);
+        }
+        
+        .workout-editor {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .workout-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .workout-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .exercise-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .exercise-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .exercise-info {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .exercise-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .exercise-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .exercise-actions {
+            display: flex;
+            gap: 8px;
         }
         
         .success-message, .error-message {
@@ -304,19 +381,151 @@
         
         .plan-card p {
             color: #666;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
         }
         
         .plan-card-actions {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
+            margin-top: 15px;
         }
         
-        .btn-small {
-            padding: 8px 12px;
-            font-size: 0.85rem;
-            border-radius: 8px;
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            min-width: 500px;
+        }
+        
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .plan-details {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .workout-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .workout-tab {
+            padding: 10px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .workout-tab.active {
+            border-color: #7945ff;
+            background: linear-gradient(135deg, #7945ff, #667eea);
+            color: white;
+        }
+        
+        .workout-content {
+            display: none;
+        }
+        
+        .workout-content.active {
+            display: block;
+        }
+        
+        .exercise-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .exercise-specs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .spec-item {
+            background: #f8fafc;
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .spec-label {
+            font-weight: 600;
+            color: #7945ff;
+            display: block;
         }
         
         @media (max-width: 768px) {
@@ -326,6 +535,25 @@
             
             .header h1 {
                 font-size: 2rem;
+            }
+            
+            .exercise-info {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .exercise-item {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .exercise-actions {
+                justify-content: center;
+            }
+            
+            .modal-content {
+                min-width: auto;
+                margin: 20px;
             }
         }
     </style>
@@ -477,7 +705,7 @@
             </div>
         </div>
 
-        <!-- Plan Creator -->
+        <!-- Manual Plan Creator -->
         <div id="planCreator" class="content-card" style="display: none;">
             <div class="form-section">
                 <h2>👤 Dados do Aluno</h2>
@@ -535,6 +763,40 @@
                 </div>
             </div>
 
+            <div class="form-section">
+                <h2>📅 Tipo de Plano</h2>
+                <div class="plan-type-selector" id="planTypeSelector">
+                    <div class="plan-type-btn active" onclick="app.selectPlanType(1, 'A', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">A</div>
+                        <div style="font-size: 0.9rem;">1 Dia</div>
+                    </div>
+                    <div class="plan-type-btn" onclick="app.selectPlanType(2, 'AB', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">AB</div>
+                        <div style="font-size: 0.9rem;">2 Dias</div>
+                    </div>
+                    <div class="plan-type-btn" onclick="app.selectPlanType(3, 'ABC', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">ABC</div>
+                        <div style="font-size: 0.9rem;">3 Dias</div>
+                    </div>
+                    <div class="plan-type-btn" onclick="app.selectPlanType(4, 'ABCD', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">ABCD</div>
+                        <div style="font-size: 0.9rem;">4 Dias</div>
+                    </div>
+                    <div class="plan-type-btn" onclick="app.selectPlanType(5, 'ABCDE', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">ABCDE</div>
+                        <div style="font-size: 0.9rem;">5 Dias</div>
+                    </div>
+                    <div class="plan-type-btn" onclick="app.selectPlanType(6, 'ABCDEF', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">ABCDEF</div>
+                        <div style="font-size: 0.9rem;">6 Dias</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="workoutEditor">
+                <!-- Workouts will be generated here -->
+            </div>
+
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button class="btn btn-primary" onclick="app.savePlan()">
                     💾 Salvar Plano
@@ -557,34 +819,216 @@
         </div>
     </div>
 
+    <!-- Modal for Plan Details -->
+    <div id="planModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="planModalTitle">Detalhes do Plano</h2>
+                <button class="close-btn" onclick="app.closePlanModal()">&times;</button>
+            </div>
+            <div id="planModalContent">
+                <!-- Plan details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Exercise Editor -->
+    <div id="exerciseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Editar Exercício</h2>
+                <button class="close-btn" onclick="app.closeExerciseModal()">&times;</button>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Nome do Exercício</label>
+                    <input type="text" id="exerciseName" class="form-input" placeholder="Supino Reto">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Séries</label>
+                    <input type="number" id="exerciseSets" class="form-input" placeholder="4" min="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Repetições</label>
+                    <input type="text" id="exerciseReps" class="form-input" placeholder="8-12">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Carga</label>
+                    <input type="text" id="exerciseWeight" class="form-input" placeholder="80kg">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Descrição/Técnica</label>
+                <textarea id="exerciseDescription" class="form-textarea" placeholder="Instruções técnicas do exercício..."></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="app.saveExercise()">💾 Salvar</button>
+                <button class="btn btn-outline" onclick="app.closeExerciseModal()">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Hidden file input -->
     <input type="file" id="importFile" style="display: none;" accept=".json" onchange="app.importPlan(event)">
 
     <script>
         // Application object to organize functions and prevent global conflicts
         const app = {
+            // Exercise database for AI generation
+            exerciseDatabase: {
+                peito: {
+                    iniciante: [
+                        { nome: 'Flexão de Braços', series: 3, repeticoes: '8-12', carga: 'Peso corporal', descricao: 'Posição de prancha, descer o peito até quase tocar o chão' },
+                        { nome: 'Supino com Halteres', series: 3, repeticoes: '10-12', carga: '12-15kg cada', descricao: 'Deitado no banco, empurrar halteres para cima' },
+                        { nome: 'Crucifixo com Halteres', series: 3, repeticoes: '12-15', carga: '8-10kg cada', descricao: 'Abrir e fechar os braços em movimento de abraço' }
+                    ],
+                    intermediario: [
+                        { nome: 'Supino Reto com Barra', series: 4, repeticoes: '8-10', carga: '40-60kg', descricao: 'Exercício fundamental para desenvolvimento do peitoral' },
+                        { nome: 'Supino Inclinado', series: 3, repeticoes: '10-12', carga: '30-45kg', descricao: 'Trabalha a parte superior do peitoral' },
+                        { nome: 'Crossover', series: 3, repeticoes: '12-15', carga: '15-25kg', descricao: 'Movimento de cruz trabalhando definição' }
+                    ],
+                    avancado: [
+                        { nome: 'Supino Reto com Barra', series: 4, repeticoes: '6-8', carga: '60-80kg', descricao: 'Foco em força e massa muscular' },
+                        { nome: 'Supino Inclinado com Halteres', series: 4, repeticoes: '8-10', carga: '22-28kg cada', descricao: 'Maior amplitude de movimento' },
+                        { nome: 'Mergulho em Paralelas', series: 3, repeticoes: '8-12', carga: 'Peso corporal + 10-20kg', descricao: 'Exercício composto para peitoral inferior' }
+                    ]
+                },
+                costas: {
+                    iniciante: [
+                        { nome: 'Puxada Frontal', series: 3, repeticoes: '10-12', carga: '30-40kg', descricao: 'Puxar barra até o peito, contrair escápulas' },
+                        { nome: 'Remada Baixa', series: 3, repeticoes: '10-12', carga: '25-35kg', descricao: 'Puxar cabo em direção ao abdômen' },
+                        { nome: 'Remada com Halter', series: 3, repeticoes: '10-12', carga: '12-16kg', descricao: 'Apoiar joelho no banco, remar halter' }
+                    ],
+                    intermediario: [
+                        { nome: 'Puxada Frontal', series: 4, repeticoes: '8-10', carga: '45-60kg', descricao: 'Desenvolvimento do latíssimo do dorso' },
+                        { nome: 'Remada Curvada', series: 4, repeticoes: '8-10', carga: '35-50kg', descricao: 'Inclinar tronco, remar barra ao abdômen' },
+                        { nome: 'Pullover', series: 3, repeticoes: '12-15', carga: '15-20kg', descricao: 'Alongamento e contração do latíssimo' }
+                    ],
+                    avancado: [
+                        { nome: 'Barra Fixa', series: 4, repeticoes: '6-10', carga: 'Peso corporal + 10-20kg', descricao: 'Exercício funcional de peso corporal' },
+                        { nome: 'Remada T-Bar', series: 4, repeticoes: '8-10', carga: '40-60kg', descricao: 'Trabalha espessura das costas' },
+                        { nome: 'Levantamento Terra', series: 4, repeticoes: '6-8', carga: '80-120kg', descricao: 'Exercício completo para posterior' }
+                    ]
+                },
+                ombros: {
+                    iniciante: [
+                        { nome: 'Desenvolvimento com Halteres', series: 3, repeticoes: '10-12', carga: '8-12kg cada', descricao: 'Elevar halteres acima da cabeça' },
+                        { nome: 'Elevação Lateral', series: 3, repeticoes: '12-15', carga: '4-6kg cada', descricao: 'Trabalha deltoide medial' },
+                        { nome: 'Elevação Frontal', series: 3, repeticoes: '12-15', carga: '4-6kg cada', descricao: 'Foco no deltoide anterior' }
+                    ],
+                    intermediario: [
+                        { nome: 'Desenvolvimento com Barra', series: 4, repeticoes: '8-10', carga: '25-35kg', descricao: 'Exercício base para ombros' },
+                        { nome: 'Elevação Lateral', series: 3, repeticoes: '12-15', carga: '6-8kg cada', descricao: 'Definição lateral dos ombros' },
+                        { nome: 'Elevação Posterior', series: 3, repeticoes: '12-15', carga: '4-6kg cada', descricao: 'Trabalha deltoide posterior' }
+                    ],
+                    avancado: [
+                        { nome: 'Desenvolvimento Arnold', series: 4, repeticoes: '8-10', carga: '14-18kg cada', descricao: 'Movimento completo de rotação' },
+                        { nome: 'Elevação Lateral 21', series: 3, repeticoes: '21 (7+7+7)', carga: '6-8kg cada', descricao: 'Método 21 para intensidade' },
+                        { nome: 'Face Pull', series: 3, repeticoes: '15-20', carga: '15-25kg', descricao: 'Trabalha deltoide posterior e trapézio' }
+                    ]
+                },
+                biceps: {
+                    iniciante: [
+                        { nome: 'Rosca Direta', series: 3, repeticoes: '10-12', carga: '15-20kg', descricao: 'Exercício básico para bíceps' },
+                        { nome: 'Rosca Alternada', series: 3, repeticoes: '10-12', carga: '8-10kg cada', descricao: 'Alternando braços para melhor controle' },
+                        { nome: 'Rosca Martelo', series: 3, repeticoes: '12-15', carga: '6-8kg cada', descricao: 'Trabalha bíceps e antebraço' }
+                    ],
+                    intermediario: [
+                        { nome: 'Rosca Direta', series: 4, repeticoes: '8-10', carga: '25-35kg', descricao: 'Foco em força e massa' },
+                        { nome: 'Rosca Scott', series: 3, repeticoes: '10-12', carga: '20-25kg', descricao: 'Isolamento do bíceps' },
+                        { nome: 'Rosca 21', series: 3, repeticoes: '21 (7+7+7)', carga: '15-20kg', descricao: 'Método intenso de treinamento' }
+                    ],
+                    avancado: [
+                        { nome: 'Rosca Direta Pegada Fechada', series: 4, repeticoes: '6-8', carga: '30-40kg', descricao: 'Variação para força máxima' },
+                        { nome: 'Rosca Spider', series: 3, repeticoes: '8-10', carga: '15-20kg', descricao: 'Isolamento total do bíceps' },
+                        { nome: 'Rosca Drag Curl', series: 3, repeticoes: '10-12', carga: '20-25kg', descricao: 'Técnica avançada de execução' }
+                    ]
+                },
+                triceps: {
+                    iniciante: [
+                        { nome: 'Tríceps Testa', series: 3, repeticoes: '10-12', carga: '15-20kg', descricao: 'Flexionar apenas antebraços' },
+                        { nome: 'Tríceps Pulley', series: 3, repeticoes: '12-15', carga: '20-25kg', descricao: 'Movimento de extensão no cabo' },
+                        { nome: 'Mergulho no Banco', series: 3, repeticoes: '8-12', carga: 'Peso corporal', descricao: 'Exercício funcional' }
+                    ],
+                    intermediario: [
+                        { nome: 'Tríceps Francês', series: 4, repeticoes: '8-10', carga: '20-30kg', descricao: 'Exercício clássico para tríceps' },
+                        { nome: 'Tríceps Corda', series: 3, repeticoes: '10-12', carga: '25-35kg', descricao: 'Maior amplitude de movimento' },
+                        { nome: 'Supino Fechado', series: 3, repeticoes: '8-10', carga: '30-40kg', descricao: 'Exercício composto' }
+                    ],
+                    avancado: [
+                        { nome: 'Tríceps Francês com Halter', series: 4, repeticoes: '6-8', carga: '18-25kg', descricao: 'Variação unilateral' },
+                        { nome: 'Mergulho em Paralelas', series: 4, repeticoes: '8-12', carga: 'Peso corporal + 10-15kg', descricao: 'Exercício funcional avançado' },
+                        { nome: 'JM Press', series: 3, repeticoes: '8-10', carga: '25-35kg', descricao: 'Técnica específica para força' }
+                    ]
+                },
+                quadriceps: {
+                    iniciante: [
+                        { nome: 'Agachamento Livre', series: 3, repeticoes: '12-15', carga: '20-30kg', descricao: 'Exercício fundamental para pernas' },
+                        { nome: 'Leg Press', series: 3, repeticoes: '12-15', carga: '80-100kg', descricao: 'Exercício seguro para iniciantes' },
+                        { nome: 'Extensão de Pernas', series: 3, repeticoes: '15-20', carga: '20-30kg', descricao: 'Isolamento do quadríceps' }
+                    ],
+                    intermediario: [
+                        { nome: 'Agachamento Livre', series: 4, repeticoes: '8-12', carga: '40-60kg', descricao: 'Aumento de carga e intensidade' },
+                        { nome: 'Leg Press 45°', series: 4, repeticoes: '10-12', carga: '120-160kg', descricao: 'Variação angular' },
+                        { nome: 'Afundo', series: 3, repeticoes: '12 cada perna', carga: '8-12kg cada', descricao: 'Exercício unilateral' }
+                    ],
+                    avancado: [
+                        { nome: 'Agachamento Livre', series: 4, repeticoes: '6-8', carga: '70-100kg', descricao: 'Foco em força máxima' },
+                        { nome: 'Agachamento Frontal', series: 4, repeticoes: '8-10', carga: '40-60kg', descricao: 'Variação técnica avançada' },
+                        { nome: 'Agachamento Búlgaro', series: 3, repeticoes: '10-12 cada', carga: '12-16kg cada', descricao: 'Exercício unilateral desafiador' }
+                    ]
+                },
+                posterior: {
+                    iniciante: [
+                        { nome: 'Stiff', series: 3, repeticoes: '10-12', carga: '20-30kg', descricao: 'Exercício para posterior de coxa' },
+                        { nome: 'Flexão de Pernas', series: 3, repeticoes: '12-15', carga: '20-30kg', descricao: 'Isolamento dos isquiotibiais' },
+                        { nome: 'Elevação Pélvica', series: 3, repeticoes: '15-20', carga: 'Peso corporal', descricao: 'Trabalha glúteos' }
+                    ],
+                    intermediario: [
+                        { nome: 'Stiff com Barra', series: 4, repeticoes: '8-10', carga: '35-50kg', descricao: 'Versão mais intensa' },
+                        { nome: 'Mesa Flexora', series: 3, repeticoes: '10-12', carga: '30-40kg', descricao: 'Isolamento na máquina' },
+                        { nome: 'Good Morning', series: 3, repeticoes: '10-12', carga: '20-30kg', descricao: 'Exercício técnico' }
+                    ],
+                    avancado: [
+                        { nome: 'Levantamento Terra', series: 4, repeticoes: '6-8', carga: '80-120kg', descricao: 'Exercício completo de força' },
+                        { nome: 'Stiff Unilateral', series: 3, repeticoes: '10-12 cada', carga: '15-20kg cada', descricao: 'Versão unilateral' },
+                        { nome: 'Hip Thrust', series: 3, repeticoes: '10-12', carga: '40-60kg', descricao: 'Foco nos glúteos' }
+                    ]
+                },
+                panturrilha: {
+                    iniciante: [
+                        { nome: 'Panturrilha Sentado', series: 3, repeticoes: '15-20', carga: '20-30kg', descricao: 'Trabalha sóleo' },
+                        { nome: 'Panturrilha em Pé', series: 3, repeticoes: '15-20', carga: '40-60kg', descricao: 'Trabalha gastrocnêmio' }
+                    ],
+                    intermediario: [
+                        { nome: 'Panturrilha Sentado', series: 4, repeticoes: '12-15', carga: '35-45kg', descricao: 'Maior intensidade' },
+                        { nome: 'Panturrilha Leg Press', series: 3, repeticoes: '15-20', carga: '80-120kg', descricao: 'Variação no leg press' }
+                    ],
+                    avancado: [
+                        { nome: 'Panturrilha Unilateral', series: 3, repeticoes: '12-15 cada', carga: '20-30kg cada', descricao: 'Trabalho unilateral' },
+                        { nome: 'Panturrilha com Pausa', series: 4, repeticoes: '10-12', carga: '50-70kg', descricao: 'Técnica de pausa' }
+                    ]
+                }
+            },
+
             // Application State
             currentPlan: {
                 id: null,
                 nome: '',
-                aluno: {
-                    nome: '',
-                    idade: 25,
-                    altura: '1,75m',
-                    peso: '75kg'
-                },
+                aluno: { nome: '', idade: 25, altura: '1,75m', peso: '75kg' },
                 dias: 1,
                 dataInicio: '',
                 dataFim: '',
-                perfil: {
-                    objetivo: 'Hipertrofia e ganho de massa muscular'
-                },
+                perfil: { objetivo: 'Hipertrofia e ganho de massa muscular' },
                 observacoes: {},
                 treinos: []
             },
 
             savedPlans: [],
-            
+            currentExerciseIndex: null,
+            currentWorkoutIndex: null,
+            selectedDays: 1,
+
             // Initialize app
             init() {
                 this.loadSavedPlans();
@@ -594,10 +1038,20 @@
             },
 
             setupEventListeners() {
+                // Close modal when clicking outside
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            modal.classList.remove('active');
+                        }
+                    });
+                });
+
                 // Keyboard shortcuts
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
-                        this.showPlanList();
+                        this.closeAllModals();
                     }
                     if (e.ctrlKey && e.key === 's') {
                         e.preventDefault();
@@ -612,6 +1066,11 @@
                         this.showAIPlanCreator();
                     }
                 });
+            },
+
+            closeAllModals() {
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => modal.classList.remove('active'));
             },
 
             setDefaultDates() {
@@ -652,6 +1111,7 @@
                 document.getElementById('planList').style.display = 'none';
                 
                 this.resetPlanForm();
+                this.selectPlanType(1, 'A', document.querySelector('.plan-type-btn'));
             },
 
             showPlanList() {
@@ -673,6 +1133,169 @@
                 });
                 
                 this.setDefaultDates();
+                this.currentPlan.treinos = [];
+                this.selectedDays = 1;
+            },
+
+            selectPlanType(days, letters, element) {
+                // Update active button
+                document.querySelectorAll('.plan-type-btn').forEach(btn => btn.classList.remove('active'));
+                element.classList.add('active');
+                
+                this.selectedDays = days;
+                this.generateWorkoutEditor(days);
+            },
+
+            generateWorkoutEditor(days) {
+                const editor = document.getElementById('workoutEditor');
+                const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+                const workoutNames = {
+                    1: ['A - Corpo Inteiro'],
+                    2: ['A - Membros Superiores', 'B - Membros Inferiores'],
+                    3: ['A - Peito e Tríceps', 'B - Costas e Bíceps', 'C - Pernas e Ombros'],
+                    4: ['A - Peito e Tríceps', 'B - Costas e Bíceps', 'C - Ombros', 'D - Pernas'],
+                    5: ['A - Peito e Tríceps', 'B - Costas e Bíceps', 'C - Ombros e Trapézio', 'D - Pernas (Quadríceps)', 'E - Posterior e Core'],
+                    6: ['A - Peito', 'B - Costas', 'C - Ombros', 'D - Braços', 'E - Pernas (Quadríceps)', 'F - Posterior e Core']
+                };
+
+                let html = '<div class="form-section"><h2>🏋️ Treinos</h2>';
+                
+                // Initialize treinos array
+                this.currentPlan.treinos = [];
+                
+                for (let i = 0; i < days; i++) {
+                    const workout = {
+                        id: letters[i],
+                        nome: workoutNames[days][i],
+                        foco: workoutNames[days][i].split(' - ')[1] || 'Treino geral',
+                        exercicios: [
+                            {
+                                id: i * 10 + 1,
+                                nome: 'Aquecimento',
+                                descricao: 'Aquecimento geral de 5-10 minutos',
+                                series: 1,
+                                repeticoes: '8-10 min',
+                                carga: 'Leve',
+                                concluido: false
+                            }
+                        ],
+                        concluido: false,
+                        execucoes: 0
+                    };
+                    
+                    this.currentPlan.treinos.push(workout);
+                    
+                    html += `
+                        <div class="workout-editor">
+                            <div class="workout-header">
+                                <h3 class="workout-title">${workout.nome}</h3>
+                                <button class="btn btn-primary btn-small" onclick="app.addExercise(${i})">
+                                    ➕ Adicionar Exercício
+                                </button>
+                            </div>
+                            <div class="exercise-list" id="exerciseList${i}">
+                                ${this.renderExercises(workout.exercicios, i)}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+                editor.innerHTML = html;
+            },
+
+            renderExercises(exercicios, workoutIndex) {
+                return exercicios.map((ex, exIndex) => `
+                    <div class="exercise-item">
+                        <div class="exercise-info">
+                            <div>
+                                <div class="exercise-name">${ex.nome}</div>
+                                <div class="exercise-description">${ex.descricao}</div>
+                            </div>
+                            <div><strong>Séries:</strong> ${ex.series}</div>
+                            <div><strong>Reps:</strong> ${ex.repeticoes}</div>
+                            <div><strong>Carga:</strong> ${ex.carga}</div>
+                        </div>
+                        <div class="exercise-actions">
+                            <button class="btn btn-outline btn-small" onclick="app.editExercise(${workoutIndex}, ${exIndex})">
+                                ✏️ Editar
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="app.removeExercise(${workoutIndex}, ${exIndex})">
+                                🗑️ Remover
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            addExercise(workoutIndex) {
+                const newExercise = {
+                    id: Date.now(),
+                    nome: 'Novo Exercício',
+                    descricao: 'Descrição do exercício',
+                    series: 3,
+                    repeticoes: '10-12',
+                    carga: '20kg',
+                    concluido: false
+                };
+                
+                this.currentPlan.treinos[workoutIndex].exercicios.push(newExercise);
+                this.updateExerciseList(workoutIndex);
+            },
+
+            editExercise(workoutIndex, exerciseIndex) {
+                this.currentWorkoutIndex = workoutIndex;
+                this.currentExerciseIndex = exerciseIndex;
+                
+                const exercise = this.currentPlan.treinos[workoutIndex].exercicios[exerciseIndex];
+                
+                // Fill modal with exercise data
+                document.getElementById('exerciseName').value = exercise.nome;
+                document.getElementById('exerciseSets').value = exercise.series;
+                document.getElementById('exerciseReps').value = exercise.repeticoes;
+                document.getElementById('exerciseWeight').value = exercise.carga;
+                document.getElementById('exerciseDescription').value = exercise.descricao;
+                
+                // Show modal
+                document.getElementById('exerciseModal').classList.add('active');
+            },
+
+            saveExercise() {
+                if (this.currentWorkoutIndex === null || this.currentExerciseIndex === null) return;
+                
+                const exercise = this.currentPlan.treinos[this.currentWorkoutIndex].exercicios[this.currentExerciseIndex];
+                
+                exercise.nome = document.getElementById('exerciseName').value;
+                exercise.series = parseInt(document.getElementById('exerciseSets').value) || 3;
+                exercise.repeticoes = document.getElementById('exerciseReps').value;
+                exercise.carga = document.getElementById('exerciseWeight').value;
+                exercise.descricao = document.getElementById('exerciseDescription').value;
+                
+                this.updateExerciseList(this.currentWorkoutIndex);
+                this.closeExerciseModal();
+            },
+
+            removeExercise(workoutIndex, exerciseIndex) {
+                if (confirm('Tem certeza que deseja remover este exercício?')) {
+                    this.currentPlan.treinos[workoutIndex].exercicios.splice(exerciseIndex, 1);
+                    this.updateExerciseList(workoutIndex);
+                }
+            },
+
+            updateExerciseList(workoutIndex) {
+                const container = document.getElementById(`exerciseList${workoutIndex}`);
+                if (container) {
+                    container.innerHTML = this.renderExercises(
+                        this.currentPlan.treinos[workoutIndex].exercicios, 
+                        workoutIndex
+                    );
+                }
+            },
+
+            closeExerciseModal() {
+                document.getElementById('exerciseModal').classList.remove('active');
+                this.currentWorkoutIndex = null;
+                this.currentExerciseIndex = null;
             },
 
             generateAIPlan() {
@@ -754,74 +1377,248 @@
             createAIPlan(aiData) {
                 const plan = {
                     id: Date.now(),
-                    nome: `Plano IA - ${aiData.objetivo.split(' ')[0]} - ${aiData.nome}`,
-                    aluno: {
-                        nome: aiData.nome,
-                        idade: aiData.idade,
-                        altura: aiData.altura,
-                        peso: aiData.peso
-                    },
+                    nome: `${this.getWorkoutLetters(aiData.dias)} - ${aiData.dias} Dias ${aiData.objetivo.split(' ')[0]} (${aiData.idade} anos)`,
                     dias: aiData.dias,
                     dataInicio: new Date().toISOString().split('T')[0],
-                    dataFim: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    dataFim: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 6 months
                     perfil: {
-                        objetivo: aiData.objetivo,
-                        nivel: aiData.nivel,
-                        equipamentos: aiData.equipamentos,
-                        tempo: aiData.tempo
+                        idade: aiData.idade,
+                        altura: aiData.altura,
+                        peso: aiData.peso,
+                        porte: this.calculateBodyType(aiData.altura, aiData.peso),
+                        objetivo: aiData.objetivo
                     },
-                    observacoes: {
-                        frequencia: `Treino ${aiData.dias}x por semana, ${aiData.tempo} minutos por sessão`,
-                        limitacoes: aiData.limitacoes || 'Nenhuma limitação reportada',
-                        observacoesEspeciais: aiData.observacoes || 'Nenhuma observação especial'
-                    },
-                    treinos: this.generateSimpleWorkouts(aiData)
+                    treinos: this.generateAIWorkouts(aiData),
+                    observacoes: this.generateObservations(aiData)
                 };
 
                 return plan;
             },
 
-            generateSimpleWorkouts(aiData) {
+            getWorkoutLetters(days) {
+                const letters = ['A', 'AB', 'ABC', 'ABCD', 'ABCDE', 'ABCDEF'];
+                return letters[days - 1] || 'A';
+            },
+
+            calculateBodyType(altura, peso) {
+                const height = parseFloat(altura.replace('m', '').replace(',', '.'));
+                const weight = parseFloat(peso.replace('kg', ''));
+                const imc = weight / (height * height);
+                
+                if (imc < 18.5) return 'pequeno';
+                if (imc < 25) return 'médio';
+                return 'grande';
+            },
+
+            generateAIWorkouts(aiData) {
                 const workouts = [];
                 const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
                 
-                // Simple workout generation based on days
-                for (let i = 0; i < aiData.dias; i++) {
-                    const workout = {
-                        nome: `${letters[i]} - Treino ${i + 1}`,
-                        foco: this.getWorkoutFocus(i, aiData.dias, aiData.foco),
-                        exercicios: this.generateExercisesForWorkout(i, aiData)
-                    };
-                    workouts.push(workout);
-                }
+                const workoutSplits = {
+                    2: [
+                        { nome: 'A - Membros Superiores', grupos: ['peito', 'costas', 'ombros', 'biceps', 'triceps'] },
+                        { nome: 'B - Membros Inferiores e Core', grupos: ['quadriceps', 'posterior', 'panturrilha'] }
+                    ],
+                    3: [
+                        { nome: 'A - Peito e Tríceps', grupos: ['peito', 'triceps'] },
+                        { nome: 'B - Costas e Bíceps', grupos: ['costas', 'biceps'] },
+                        { nome: 'C - Pernas e Ombros', grupos: ['quadriceps', 'posterior', 'ombros', 'panturrilha'] }
+                    ],
+                    4: [
+                        { nome: 'A - Peito e Tríceps', grupos: ['peito', 'triceps'] },
+                        { nome: 'B - Costas e Bíceps', grupos: ['costas', 'biceps'] },
+                        { nome: 'C - Ombros', grupos: ['ombros'] },
+                        { nome: 'D - Pernas', grupos: ['quadriceps', 'posterior', 'panturrilha'] }
+                    ],
+                    5: [
+                        { nome: 'A - Peito e Tríceps', grupos: ['peito', 'triceps'] },
+                        { nome: 'B - Costas e Bíceps', grupos: ['costas', 'biceps'] },
+                        { nome: 'C - Ombros e Trapézio', grupos: ['ombros'] },
+                        { nome: 'D - Pernas (Quadríceps e Glúteos)', grupos: ['quadriceps'] },
+                        { nome: 'E - Posterior de Coxa e Core', grupos: ['posterior', 'panturrilha'] }
+                    ],
+                    6: [
+                        { nome: 'A - Peito', grupos: ['peito'] },
+                        { nome: 'B - Costas', grupos: ['costas'] },
+                        { nome: 'C - Ombros', grupos: ['ombros'] },
+                        { nome: 'D - Braços', grupos: ['biceps', 'triceps'] },
+                        { nome: 'E - Pernas (Quadríceps)', grupos: ['quadriceps'] },
+                        { nome: 'F - Posterior e Core', grupos: ['posterior', 'panturrilha'] }
+                    ]
+                };
+
+                const split = workoutSplits[aiData.dias];
                 
+                split.forEach((workout, index) => {
+                    const exercises = this.generateExercisesForMuscleGroups(
+                        workout.grupos, 
+                        aiData.nivel, 
+                        aiData.objetivo,
+                        aiData.equipamentos,
+                        index + 1
+                    );
+
+                    workouts.push({
+                        id: letters[index],
+                        nome: workout.nome,
+                        foco: `Hipertrofia - ${workout.grupos.join(', ')}`,
+                        exercicios: exercises,
+                        concluido: false,
+                        execucoes: 0
+                    });
+                });
+
                 return workouts;
             },
 
-            getWorkoutFocus(index, totalDays, preference) {
-                const focuses = {
-                    1: ['Corpo Inteiro'],
-                    2: ['Membros Superiores', 'Membros Inferiores'],
-                    3: ['Peito e Tríceps', 'Costas e Bíceps', 'Pernas e Ombros'],
-                    4: ['Peito e Tríceps', 'Costas e Bíceps', 'Ombros', 'Pernas'],
-                    5: ['Peito', 'Costas', 'Ombros e Braços', 'Pernas', 'Corpo Inteiro']
-                };
-                
-                return focuses[totalDays] ? focuses[totalDays][index] : `Treino ${index + 1}`;
+            generateExercisesForMuscleGroups(grupos, nivel, objetivo, equipamentos, workoutNumber) {
+                const exercises = [];
+                let exerciseId = workoutNumber * 10;
+
+                // Aquecimento
+                exercises.push({
+                    id: exerciseId++,
+                    nome: this.getWarmupExercise(grupos),
+                    descricao: this.getWarmupDescription(grupos),
+                    series: 1,
+                    repeticoes: "8-10 min",
+                    carga: this.getWarmupIntensity(),
+                    concluido: false
+                });
+
+                // Exercícios por grupo muscular
+                grupos.forEach(grupo => {
+                    if (this.exerciseDatabase[grupo] && this.exerciseDatabase[grupo][nivel]) {
+                        const groupExercises = this.exerciseDatabase[grupo][nivel];
+                        
+                        // Selecionar 2-4 exercícios por grupo dependendo do número de grupos
+                        const numExercises = grupos.length <= 2 ? 4 : (grupos.length <= 3 ? 3 : 2);
+                        
+                        for (let i = 0; i < Math.min(numExercises, groupExercises.length); i++) {
+                            const baseExercise = groupExercises[i];
+                            exercises.push({
+                                id: exerciseId++,
+                                nome: baseExercise.nome,
+                                descricao: baseExercise.descricao,
+                                series: baseExercise.series,
+                                repeticoes: baseExercise.repeticoes,
+                                carga: this.adjustLoadForLevel(baseExercise.carga, nivel),
+                                concluido: false
+                            });
+                        }
+                    }
+                });
+
+                // Alongamento
+                if (exercises.length > 1) {
+                    exercises.push({
+                        id: exerciseId++,
+                        nome: "Alongamento",
+                        descricao: "Relaxamento e flexibilidade dos grupos musculares trabalhados",
+                        series: 1,
+                        repeticoes: "8-10 min",
+                        carga: "Peso corporal",
+                        concluido: false
+                    });
+                }
+
+                return exercises;
             },
 
-            generateExercisesForWorkout(workoutIndex, aiData) {
-                // Simple exercise generation - in a real app, this would be more sophisticated
-                const exercises = [
-                    { nome: 'Aquecimento', series: 1, repeticoes: '5-10 min', carga: 'Leve', descricao: 'Aquecimento geral' },
-                    { nome: 'Exercício Principal 1', series: 4, repeticoes: '8-12', carga: 'Moderada', descricao: 'Exercício composto' },
-                    { nome: 'Exercício Principal 2', series: 3, repeticoes: '10-15', carga: 'Moderada', descricao: 'Exercício auxiliar' },
-                    { nome: 'Exercício Acessório 1', series: 3, repeticoes: '12-15', carga: 'Leve', descricao: 'Exercício de isolamento' },
-                    { nome: 'Exercício Acessório 2', series: 2, repeticoes: '15-20', carga: 'Leve', descricao: 'Exercício de finalização' },
-                    { nome: 'Alongamento', series: 1, repeticoes: '5-10 min', carga: '', descricao: 'Alongamento geral' }
-                ];
+            getWarmupExercise(grupos) {
+                if (grupos.includes('quadriceps') || grupos.includes('posterior')) {
+                    return "Aquecimento - Bicicleta";
+                } else if (grupos.includes('costas')) {
+                    return "Aquecimento - Remo Ergômetro";
+                } else if (grupos.includes('ombros')) {
+                    return "Aquecimento - Elíptico";
+                } else {
+                    return "Aquecimento - Esteira";
+                }
+            },
+
+            getWarmupDescription(grupos) {
+                if (grupos.includes('quadriceps') || grupos.includes('posterior')) {
+                    return "Aquecimento específico para membros inferiores";
+                } else if (grupos.includes('costas')) {
+                    return "Aquecimento específico para movimentos de puxar";
+                } else if (grupos.includes('ombros')) {
+                    return "Aquecimento com mobilização de braços";
+                } else {
+                    return "Caminhada moderada para aquecimento geral";
+                }
+            },
+
+            getWarmupIntensity() {
+                return "Intensidade moderada";
+            },
+
+            adjustLoadForLevel(baseCarga, nivel) {
+                if (typeof baseCarga !== 'string') return baseCarga;
                 
-                return exercises;
+                const multipliers = {
+                    iniciante: 0.7,
+                    intermediario: 1.0,
+                    avancado: 1.3
+                };
+                
+                const multiplier = multipliers[nivel] || 1.0;
+                
+                // Extract numbers from carga string and adjust
+                return baseCarga.replace(/(\d+)/g, (match) => {
+                    const num = parseInt(match);
+                    const adjusted = Math.round(num * multiplier);
+                    return adjusted.toString();
+                });
+            },
+
+            generateObservations(aiData) {
+                return {
+                    frequencia: `${aiData.dias}x por semana com ${7 - aiData.dias} dia${7 - aiData.dias > 1 ? 's' : ''} de descanso por semana`,
+                    progressao: this.getProgressionByLevel(aiData.nivel),
+                    descanso: this.getRestByObjective(aiData.objetivo),
+                    hidratacao: "Beba pelo menos 2,5-3L de água por dia, especialmente durante os treinos",
+                    alimentacao: this.getNutritionByObjective(aiData.objetivo),
+                    suplementacao: "Considere whey protein, creatina e multivitamínico (consulte nutricionista)",
+                    sono: "Durma 7-9 horas por noite para recuperação muscular adequada",
+                    aquecimento: "Sempre faça aquecimento específico antes dos exercícios principais",
+                    tecnica: "Priorize a execução perfeita sobre cargas altas",
+                    periodizacao: "A cada 6-8 semanas, faça uma semana de deload com 60% da carga",
+                    consulta: "Acompanhamento profissional é essencial para ajustes e progressão segura"
+                };
+            },
+
+            getProgressionByLevel(nivel) {
+                const progressions = {
+                    iniciante: "Aumente a carga em 2,5kg quando conseguir executar todas as séries no limite superior de repetições",
+                    intermediario: "Aumente a carga em 2,5-5kg quando conseguir executar todas as séries no limite superior de repetições",
+                    avancado: "Aumente a carga em 2,5-5kg ou use técnicas avançadas quando conseguir executar todas as séries facilmente"
+                };
+                return progressions[nivel] || progressions.intermediario;
+            },
+
+            getRestByObjective(objetivo) {
+                if (objetivo.includes('Hipertrofia')) {
+                    return "2-3 minutos entre séries para exercícios compostos, 60-90 segundos para isolamentos";
+                } else if (objetivo.includes('Força')) {
+                    return "3-5 minutos entre séries para exercícios compostos, 2-3 minutos para isolamentos";
+                } else if (objetivo.includes('Perda de peso')) {
+                    return "45-90 segundos entre séries para manter intensidade e gasto calórico";
+                } else {
+                    return "60-90 segundos entre séries para exercícios gerais";
+                }
+            },
+
+            getNutritionByObjective(objetivo) {
+                if (objetivo.includes('Hipertrofia')) {
+                    return "Consuma 2,0-2,2g de proteína por kg de peso corporal diariamente para hipertrofia";
+                } else if (objetivo.includes('Perda de peso')) {
+                    return "Mantenha déficit calórico moderado com 1,8-2,0g de proteína por kg de peso";
+                } else if (objetivo.includes('Força')) {
+                    return "Consuma 1,8-2,0g de proteína por kg de peso com carboidratos adequados para energia";
+                } else {
+                    return "Siga uma dieta balanceada com 1,6-2,0g de proteína por kg de peso corporal";
+                }
             },
 
             savePlan() {
@@ -830,26 +1627,30 @@
                     const planData = {
                         id: Date.now(),
                         nome: document.getElementById('planName')?.value || 'Plano sem nome',
-                        aluno: {
-                            nome: document.getElementById('studentName')?.value || 'Aluno',
-                            idade: parseInt(document.getElementById('studentAge')?.value) || 25,
-                            altura: document.getElementById('studentHeight')?.value || '1,75m',
-                            peso: document.getElementById('studentWeight')?.value || '75kg'
-                        },
+                        dias: this.selectedDays,
                         dataInicio: document.getElementById('planStartDate')?.value || new Date().toISOString().split('T')[0],
                         dataFim: document.getElementById('planEndDate')?.value || '',
                         perfil: {
+                            idade: parseInt(document.getElementById('studentAge')?.value) || 25,
+                            altura: document.getElementById('studentHeight')?.value || '1,75m',
+                            peso: document.getElementById('studentWeight')?.value || '75kg',
+                            porte: 'médio',
                             objetivo: document.getElementById('planObjective')?.value || 'Condicionamento geral'
                         },
+                        treinos: [...this.currentPlan.treinos],
                         observacoes: {
-                            geral: document.getElementById('planObservations')?.value || ''
-                        },
-                        treinos: []
+                            geral: document.getElementById('planObservations')?.value || '',
+                            frequencia: `${this.selectedDays}x por semana`,
+                            progressao: 'Aumente a carga gradualmente quando conseguir completar todas as repetições',
+                            descanso: '60-90 segundos entre séries',
+                            hidratacao: 'Mantenha-se bem hidratado durante todo o treino',
+                            consulta: 'Acompanhamento profissional recomendado'
+                        }
                     };
 
                     // Validation
-                    if (!planData.aluno.nome) {
-                        this.showMessage('Por favor, preencha o nome do aluno', 'error');
+                    if (!planData.nome || planData.nome === 'Plano sem nome') {
+                        this.showMessage('Por favor, preencha o nome do plano', 'error');
                         return;
                     }
 
@@ -882,10 +1683,15 @@
                 const plan = this.savedPlans.find(p => p.id === planId);
                 if (!plan) return;
 
-                const dataStr = JSON.stringify(plan, null, 2);
+                // Create export structure similar to the JSON format
+                const exportData = {
+                    planos: [plan]
+                };
+
+                const dataStr = JSON.stringify(exportData, null, 2);
                 const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
                 
-                const exportFileDefaultName = `plano_${plan.nome.replace(/\s+/g, '_').toLowerCase()}.json`;
+                const exportFileDefaultName = `plano_${plan.nome.replace(/\s+/g, '_').toLowerCase().replace(/[^a-z0-9_]/g, '')}.json`;
                 
                 const linkElement = document.createElement('a');
                 linkElement.setAttribute('href', dataUri);
@@ -902,16 +1708,33 @@
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
-                        const planData = JSON.parse(e.target.result);
+                        const importedData = JSON.parse(e.target.result);
                         
-                        // Assign new ID to avoid conflicts
-                        planData.id = Date.now();
-                        planData.nome = planData.nome + ' (Importado)';
+                        // Handle different import formats
+                        let plansToImport = [];
                         
-                        this.savedPlans.push(planData);
+                        if (importedData.planos) {
+                            // New format with planos array
+                            plansToImport = importedData.planos;
+                        } else if (Array.isArray(importedData)) {
+                            // Array of plans
+                            plansToImport = importedData;
+                        } else {
+                            // Single plan object
+                            plansToImport = [importedData];
+                        }
+                        
+                        plansToImport.forEach(planData => {
+                            // Assign new ID to avoid conflicts
+                            planData.id = Date.now() + Math.random();
+                            planData.nome = planData.nome + ' (Importado)';
+                            
+                            this.savedPlans.push(planData);
+                        });
+                        
                         this.savePlansToStorage();
                         
-                        this.showMessage('Plano importado com sucesso! 📥', 'success');
+                        this.showMessage(`${plansToImport.length} plano(s) importado(s) com sucesso! 📥`, 'success');
                         this.renderPlanList();
                         
                     } catch (error) {
@@ -970,9 +1793,10 @@
                 container.innerHTML = this.savedPlans.map(plan => `
                     <div class="plan-card">
                         <h3>${plan.nome}</h3>
-                        <p><strong>Aluno:</strong> ${plan.aluno.nome} (${plan.aluno.idade} anos)</p>
-                        <p><strong>Objetivo:</strong> ${plan.perfil?.objetivo || 'Não especificado'}</p>
                         <p><strong>Período:</strong> ${this.formatDate(plan.dataInicio)} até ${this.formatDate(plan.dataFim)}</p>
+                        <p><strong>Frequência:</strong> ${plan.dias} dias por semana</p>
+                        <p><strong>Objetivo:</strong> ${plan.perfil?.objetivo || 'Não especificado'}</p>
+                        <p><strong>Treinos:</strong> ${plan.treinos?.length || 0} dias configurados</p>
                         <div class="plan-card-actions">
                             <button class="btn btn-primary btn-small" onclick="app.viewPlan(${plan.id})">
                                 👁️ Visualizar
@@ -980,7 +1804,7 @@
                             <button class="btn btn-secondary btn-small" onclick="app.exportPlan(${plan.id})">
                                 📤 Exportar
                             </button>
-                            <button class="btn btn-outline btn-small" onclick="app.deletePlan(${plan.id})" style="color: #e53e3e;">
+                            <button class="btn btn-danger btn-small" onclick="app.deletePlan(${plan.id})">
                                 🗑️ Excluir
                             </button>
                         </div>
@@ -992,18 +1816,110 @@
                 const plan = this.savedPlans.find(p => p.id === planId);
                 if (!plan) return;
 
-                const details = `
-                    <h2>${plan.nome}</h2>
-                    <p><strong>Aluno:</strong> ${plan.aluno.nome}</p>
-                    <p><strong>Idade:</strong> ${plan.aluno.idade} anos</p>
-                    <p><strong>Altura:</strong> ${plan.aluno.altura}</p>
-                    <p><strong>Peso:</strong> ${plan.aluno.peso}</p>
-                    <p><strong>Objetivo:</strong> ${plan.perfil?.objetivo || 'Não especificado'}</p>
-                    <p><strong>Período:</strong> ${this.formatDate(plan.dataInicio)} até ${this.formatDate(plan.dataFim)}</p>
-                    ${plan.treinos?.length > 0 ? `<p><strong>Treinos:</strong> ${plan.treinos.length} dias</p>` : ''}
+                // Fill modal with plan details
+                document.getElementById('planModalTitle').textContent = plan.nome;
+                
+                let content = `
+                    <div class="plan-details">
+                        <h3>📊 Informações Gerais</h3>
+                        <p><strong>Frequência:</strong> ${plan.dias} dias por semana</p>
+                        <p><strong>Período:</strong> ${this.formatDate(plan.dataInicio)} até ${this.formatDate(plan.dataFim)}</p>
+                        <p><strong>Objetivo:</strong> ${plan.perfil?.objetivo || 'Não especificado'}</p>
+                        ${plan.perfil?.idade ? `<p><strong>Idade:</strong> ${plan.perfil.idade} anos</p>` : ''}
+                        ${plan.perfil?.altura ? `<p><strong>Altura:</strong> ${plan.perfil.altura}</p>` : ''}
+                        ${plan.perfil?.peso ? `<p><strong>Peso:</strong> ${plan.perfil.peso}</p>` : ''}
+                    </div>
                 `;
 
-                alert(details); // In a real app, this would be a proper modal
+                if (plan.treinos && plan.treinos.length > 0) {
+                    content += `
+                        <div class="workout-tabs">
+                            ${plan.treinos.map((treino, index) => `
+                                <div class="workout-tab ${index === 0 ? 'active' : ''}" onclick="app.switchWorkoutTab(${index})">
+                                    ${treino.id || treino.nome}
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+
+                    plan.treinos.forEach((treino, index) => {
+                        content += `
+                            <div class="workout-content ${index === 0 ? 'active' : ''}" id="workoutContent${index}">
+                                <h3>${treino.nome}</h3>
+                                <p><strong>Foco:</strong> ${treino.foco}</p>
+                                
+                                ${treino.exercicios ? treino.exercicios.map(ex => `
+                                    <div class="exercise-card">
+                                        <div class="exercise-header">
+                                            <strong>${ex.nome}</strong>
+                                        </div>
+                                        <p>${ex.descricao}</p>
+                                        <div class="exercise-specs">
+                                            <div class="spec-item">
+                                                <span class="spec-label">Séries</span>
+                                                ${ex.series}
+                                            </div>
+                                            <div class="spec-item">
+                                                <span class="spec-label">Reps</span>
+                                                ${ex.repeticoes}
+                                            </div>
+                                            <div class="spec-item">
+                                                <span class="spec-label">Carga</span>
+                                                ${ex.carga}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('') : '<p>Nenhum exercício configurado</p>'}
+                            </div>
+                        `;
+                    });
+                }
+
+                if (plan.observacoes) {
+                    content += `
+                        <div class="plan-details">
+                            <h3>📝 Observações</h3>
+                            ${Object.entries(plan.observacoes).map(([key, value]) => 
+                                value ? `<p><strong>${this.getObservationLabel(key)}:</strong> ${value}</p>` : ''
+                            ).join('')}
+                        </div>
+                    `;
+                }
+
+                document.getElementById('planModalContent').innerHTML = content;
+                document.getElementById('planModal').classList.add('active');
+            },
+
+            switchWorkoutTab(index) {
+                // Remove active class from all tabs and contents
+                document.querySelectorAll('.workout-tab').forEach(tab => tab.classList.remove('active'));
+                document.querySelectorAll('.workout-content').forEach(content => content.classList.remove('active'));
+                
+                // Add active class to selected tab and content
+                document.querySelectorAll('.workout-tab')[index].classList.add('active');
+                document.getElementById(`workoutContent${index}`).classList.add('active');
+            },
+
+            getObservationLabel(key) {
+                const labels = {
+                    frequencia: 'Frequência',
+                    progressao: 'Progressão',
+                    descanso: 'Descanso',
+                    hidratacao: 'Hidratação',
+                    alimentacao: 'Alimentação',
+                    suplementacao: 'Suplementação',
+                    sono: 'Sono',
+                    aquecimento: 'Aquecimento',
+                    tecnica: 'Técnica',
+                    periodizacao: 'Periodização',
+                    consulta: 'Consulta',
+                    geral: 'Observações Gerais'
+                };
+                return labels[key] || key.charAt(0).toUpperCase() + key.slice(1);
+            },
+
+            closePlanModal() {
+                document.getElementById('planModal').classList.remove('active');
             },
 
             formatDate(dateString) {
