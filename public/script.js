@@ -1,5 +1,23 @@
 // Application object to organize functions and prevent global conflicts
 const app = {
+    // Configuração da API para compartilhamento
+    apiConfig: {
+        baseUrl: 'https://jsfitapp.netlify.app/api', // Usar o mesmo domínio
+        timeout: 10000,
+        retries: 3,
+        endpoints: {
+            shareWorkout: '/share-workout',
+            health: '/health'
+        }
+    },
+
+    // Estado do compartilhamento
+    sharingState: {
+        isSharing: false,
+        currentShareId: null,
+        lastSharedPlan: null
+    },
+
     // Exercise database for AI generation and descriptions
     exerciseDatabase: {
         peito: {
@@ -230,12 +248,357 @@ const app = {
     selectedDays: 1,
     isEditing: false,
 
+    // Verificar status da API
+    async checkAPIStatus() {
+        try {
+            const response = await this.makeAPIRequest(`${this.apiConfig.baseUrl}${this.apiConfig.endpoints.health}`);
+            return response.ok;
+        } catch (error) {
+            console.error('Erro ao verificar API:', error);
+            return false;
+        }
+    },
+
+    // Fazer requisições para API
+    async makeAPIRequest(url, options = {}) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), this.apiConfig.timeout);
+
+        try {
+            const response = await fetch(url, {
+                ...options,
+                signal: controller.signal,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            });
+            clearTimeout(timeoutId);
+            return response;
+        } catch (error) {
+            clearTimeout(timeoutId);
+            if (error.name === 'AbortError') {
+                throw new Error('Timeout na conexão com servidor');
+            }
+            throw error;
+        }
+    },
+
+    // Gerar ID único de 6 caracteres
+    generateShareId() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let result = '';
+        for (let i = 0; i < 6; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    },
+
+    // Compartilhar plano (nova função)
+    async sharePlan(planId) {
+        const plan = this.savedPlans.find(p => p.id === planId);
+        if (!plan) {
+            this.showMessage('Plano não encontrado', 'error');
+            return;
+        }
+
+        // Verificar se API está disponível
+        const apiAvailable = await this.checkAPIStatus();
+        
+        this.sharingState.isSharing = true;
+        this.showMessage('Preparando plano para compartilhamento...', 'info');
+
+        try {
+            // Gerar ID único
+            const shareId = this.generateShareId();
+            
+            // Preparar dados para compartilhamento
+            const shareData = {
+                shareId: shareId,
+                plan: {
+                    ...plan,
+                    // Remover dados sensíveis se necessário
+                    sharedAt: new Date().toISOString(),
+                    sharedBy: 'personal_trainer'
+                }
+            };
+
+            if (apiAvailable) {
+                // Tentar enviar para servidor
+                try {
+                    const response = await this.makeAPIRequest(
+                        `${this.apiConfig.baseUrl}${this.apiConfig.endpoints.shareWorkout}`,
+                        {
+                            method: 'POST',
+                            body: JSON.stringify(shareData)
+                        }
+                    );
+
+                    if (response.ok) {
+                        // Salvar também localmente como backup
+                        this.saveSharedPlanLocally(shareId, shareData.plan);
+                        
+                        this.sharingState.currentShareId = shareId;
+                        this.sharingState.lastSharedPlan = plan;
+                        
+                        this.showShareSuccessModal(shareId, 'server');
+                        this.showMessage('✅ Plano compartilhado com sucesso no servidor!', 'success');
+                        return;
+                    } else {
+                        throw new Error(`Erro do servidor: ${response.status}`);
+                    }
+                } catch (serverError) {
+                    console.warn('Falha no servidor, usando armazenamento local:', serverError);
+                    // Fallback para local
+                    this.saveSharedPlanLocally(shareId, shareData.plan);
+                    this.sharingState.currentShareId = shareId;
+                    this.sharingState.lastSharedPlan = plan;
+                    this.showShareSuccessModal(shareId, 'local');
+                    this.showMessage('⚠️ Plano compartilhado localmente (servidor indisponível)', 'warning');
+                }
+            } else {
+                // API indisponível, usar apenas local
+                this.saveSharedPlanLocally(shareId, shareData.plan);
+                this.sharingState.currentShareId = shareId;
+                this.sharingState.lastSharedPlan = plan;
+                this.showShareSuccessModal(shareId, 'local');
+                this.showMessage('⚠️ Plano compartilhado localmente (servidor offline)', 'warning');
+            }
+
+        } catch (error) {
+            console.error('Erro ao compartilhar plano:', error);
+            this.showMessage('❌ Erro ao compartilhar plano: ' + error.message, 'error');
+        } finally {
+            this.sharingState.isSharing = false;
+        }
+    },
+
+    // Salvar plano compartilhado localmente
+    saveSharedPlanLocally(shareId, planData) {
+        try {
+            const sharedPlans = this.getSharedPlansFromStorage();
+            sharedPlans[shareId] = planData;
+            localStorage.setItem('jsfitapp_shared_plans', JSON.stringify(sharedPlans));
+            console.log(`Plano ${shareId} salvo localmente`);
+        } catch (error) {
+            console.error('Erro ao salvar plano localmente:', error);
+            throw new Error('Falha ao salvar plano localmente');
+        }
+    },
+
+    // Obter planos compartilhados do localStorage
+    getSharedPlansFromStorage() {
+        try {
+            const stored = localStorage.getItem('jsfitapp_shared_plans');
+            return stored ? JSON.parse(stored) : {};
+        } catch (error) {
+            console.error('Erro ao carregar planos compartilhados:', error);
+            return {};
+        }
+    },
+
+    // Mostrar modal de sucesso do compartilhamento
+    showShareSuccessModal(shareId, source) {
+        // Remover modal existente se houver
+        const existingModal = document.getElementById('shareSuccessModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Criar modal
+        const modal = document.createElement('div');
+        modal.id = 'shareSuccessModal';
+        modal.className = 'modal active';
+        modal.innerHTML = `
+            <div class="modal-content share-success-modal">
+                <div class="modal-header">
+                    <h2>🎉 Plano Compartilhado com Sucesso!</h2>
+                    <button class="close-btn" onclick="app.closeShareModal()">&times;</button>
+                </div>
+                <div class="share-success-content">
+                    <div class="share-id-display">
+                        <h3>ID do Plano:</h3>
+                        <div class="share-id-code">${shareId}</div>
+                        <p class="share-id-subtitle">
+                            ${source === 'server' ? 
+                                '🌐 Armazenado no servidor' : 
+                                '💾 Armazenado localmente'
+                            }
+                        </p>
+                    </div>
+                    
+                    <div class="share-instructions">
+                        <h4>📋 Como usar:</h4>
+                        <ol>
+                            <li>Compartilhe este ID com seu aluno</li>
+                            <li>O aluno deve abrir o app do aluno</li>
+                            <li>Clicar em "Importar por ID"</li>
+                            <li>Digitar o código: <strong>${shareId}</strong></li>
+                        </ol>
+                    </div>
+
+                    <div class="share-actions">
+                        <button class="btn btn-primary" onclick="app.copyShareId('${shareId}')">
+                            📋 Copiar ID
+                        </button>
+                        <button class="btn btn-secondary" onclick="app.shareViaWhatsApp('${shareId}')">
+                            📱 Compartilhar no WhatsApp
+                        </button>
+                        <button class="btn btn-outline" onclick="app.closeShareModal()">
+                            ✅ Fechar
+                        </button>
+                    </div>
+
+                    <div class="share-qr-section">
+                        <p><small>💡 Dica: O aluno pode usar este ID a qualquer momento para importar o plano</small></p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Auto-selecionar o ID para facilitar cópia
+        setTimeout(() => {
+            const shareCodeElement = modal.querySelector('.share-id-code');
+            if (shareCodeElement && window.getSelection) {
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(shareCodeElement);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }, 100);
+    },
+
+    // Fechar modal de compartilhamento
+    closeShareModal() {
+        const modal = document.getElementById('shareSuccessModal');
+        if (modal) {
+            modal.remove();
+        }
+    },
+
+    // Copiar ID para clipboard
+    async copyShareId(shareId) {
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(shareId);
+                this.showMessage('📋 ID copiado para a área de transferência!', 'success');
+            } else {
+                // Fallback para browsers antigos
+                const textArea = document.createElement('textarea');
+                textArea.value = shareId;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                this.showMessage('📋 ID copiado!', 'success');
+            }
+        } catch (error) {
+            console.error('Erro ao copiar:', error);
+            this.showMessage('Erro ao copiar ID. Copie manualmente: ' + shareId, 'error');
+        }
+    },
+
+    // Compartilhar via WhatsApp
+    shareViaWhatsApp(shareId) {
+        const planName = this.sharingState.lastSharedPlan?.nome || 'Plano de Treino';
+        const studentName = this.sharingState.lastSharedPlan?.aluno?.nome || 'Aluno';
+        
+        const message = `🏋️ *${planName}*\n\n` +
+                       `Olá ${studentName}! Seu plano de treino está pronto!\n\n` +
+                       `📱 Para importar:\n` +
+                       `1. Abra o JS Fit App (Aluno)\n` +
+                       `2. Clique em "Importar por ID"\n` +
+                       `3. Digite o código: *${shareId}*\n\n` +
+                       `💪 Bons treinos!`;
+        
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+    },
+
+    // Listar planos compartilhados
+    getSharedPlansList() {
+        const sharedPlans = this.getSharedPlansFromStorage();
+        return Object.entries(sharedPlans).map(([shareId, planData]) => ({
+            shareId,
+            planName: planData.nome,
+            studentName: planData.aluno?.nome || 'Não informado',
+            sharedAt: planData.sharedAt || 'Data não disponível'
+        }));
+    },
+
+    // Renovar compartilhamento (gerar novo ID)
+    async renewShareId(oldShareId) {
+        const sharedPlans = this.getSharedPlansFromStorage();
+        const planData = sharedPlans[oldShareId];
+        
+        if (!planData) {
+            this.showMessage('Plano compartilhado não encontrado', 'error');
+            return;
+        }
+
+        // Gerar novo ID
+        const newShareId = this.generateShareId();
+        
+        try {
+            // Verificar se API está disponível
+            const apiAvailable = await this.checkAPIStatus();
+            
+            if (apiAvailable) {
+                // Tentar enviar para servidor com novo ID
+                const response = await this.makeAPIRequest(
+                    `${this.apiConfig.baseUrl}${this.apiConfig.endpoints.shareWorkout}`,
+                    {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            shareId: newShareId,
+                            plan: planData
+                        })
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error('Erro no servidor');
+                }
+            }
+
+            // Salvar localmente com novo ID
+            sharedPlans[newShareId] = {
+                ...planData,
+                sharedAt: new Date().toISOString()
+            };
+            
+            // Remover ID antigo
+            delete sharedPlans[oldShareId];
+            
+            localStorage.setItem('jsfitapp_shared_plans', JSON.stringify(sharedPlans));
+            
+            this.showMessage(`✅ Novo ID gerado: ${newShareId}`, 'success');
+            this.showShareSuccessModal(newShareId, apiAvailable ? 'server' : 'local');
+            
+        } catch (error) {
+            console.error('Erro ao renovar compartilhamento:', error);
+            this.showMessage('Erro ao renovar compartilhamento', 'error');
+        }
+    },
+
     // Initialize app
     init() {
         this.loadSavedPlans();
         this.setDefaultDates();
         this.showPlanList();
         this.setupEventListeners();
+        
+        // Verificar status da API de compartilhamento
+        this.checkAPIStatus().then(status => {
+            console.log('Status da API de compartilhamento:', status ? 'Online' : 'Offline');
+        }).catch(() => {
+            console.log('API de compartilhamento não disponível');
+        });
     },
 
     setupEventListeners() {
@@ -1302,30 +1665,88 @@ const app = {
             return;
         }
 
-        container.innerHTML = this.savedPlans.map(plan => `
-            <div class="plan-card">
-                <h3>${plan.nome}</h3>
-                <p><strong>Aluno:</strong> ${plan.aluno?.nome || 'Não informado'}</p>
-                <p><strong>Período:</strong> ${this.formatDate(plan.dataInicio)} até ${this.formatDate(plan.dataFim)}</p>
-                <p><strong>Frequência:</strong> ${plan.dias} dias por semana</p>
-                <p><strong>Objetivo:</strong> ${plan.perfil?.objetivo || 'Não especificado'}</p>
-                <p><strong>Treinos:</strong> ${plan.treinos?.length || 0} dias configurados</p>
-                <div class="plan-card-actions">
-                    <button class="btn btn-primary btn-small" onclick="app.viewPlan(${plan.id})">
-                        👁️ Visualizar
-                    </button>
-                    <button class="btn btn-secondary btn-small" onclick="app.editPlan(${plan.id})">
-                        ✏️ Editar
-                    </button>
-                    <button class="btn btn-outline btn-small" onclick="app.exportPlan(${plan.id})">
-                        📤 Exportar
-                    </button>
-                    <button class="btn btn-danger btn-small" onclick="app.deletePlan(${plan.id})">
-                        🗑️ Excluir
-                    </button>
+        // Obter lista de planos compartilhados
+        const sharedPlans = this.getSharedPlansFromStorage();
+
+        container.innerHTML = this.savedPlans.map(plan => {
+            // Verificar se este plano já foi compartilhado
+            const isShared = Object.values(sharedPlans).some(shared => shared.id === plan.id);
+            const shareInfo = isShared ? 
+                Object.entries(sharedPlans).find(([, shared]) => shared.id === plan.id) : 
+                null;
+
+            return `
+                <div class="plan-card ${isShared ? 'plan-shared' : ''}">
+                    <h3>${plan.nome}</h3>
+                    <p><strong>Aluno:</strong> ${plan.aluno?.nome || 'Não informado'}</p>
+                    <p><strong>Período:</strong> ${this.formatDate(plan.dataInicio)} até ${this.formatDate(plan.dataFim)}</p>
+                    <p><strong>Frequência:</strong> ${plan.dias} dias por semana</p>
+                    <p><strong>Objetivo:</strong> ${plan.perfil?.objetivo || 'Não especificado'}</p>
+                    <p><strong>Treinos:</strong> ${plan.treinos?.length || 0} dias configurados</p>
+                    
+                    ${isShared ? `
+                        <div class="share-info">
+                            <span class="share-badge">✅ Compartilhado</span>
+                            <span class="share-id">ID: ${shareInfo[0]}</span>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="plan-card-actions">
+                        <button class="btn btn-primary btn-small" onclick="app.viewPlan(${plan.id})">
+                            👁️ Visualizar
+                        </button>
+                        <button class="btn btn-secondary btn-small" onclick="app.editPlan(${plan.id})">
+                            ✏️ Editar
+                        </button>
+                        ${isShared ? `
+                            <button class="btn btn-success btn-small" onclick="app.showShareSuccessModal('${shareInfo[0]}', 'local')">
+                                🔗 Ver ID
+                            </button>
+                            <button class="btn btn-outline btn-small" onclick="app.renewShareId('${shareInfo[0]}')">
+                                🔄 Novo ID
+                            </button>
+                        ` : `
+                            <button class="btn btn-success btn-small" onclick="app.sharePlan(${plan.id})">
+                                🔗 Compartilhar
+                            </button>
+                        `}
+                        <button class="btn btn-outline btn-small" onclick="app.exportPlan(${plan.id})">
+                            📤 Exportar
+                        </button>
+                        <button class="btn btn-danger btn-small" onclick="app.deletePlan(${plan.id})">
+                            🗑️ Excluir
+                        </button>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
+
+        // Adicionar seção de planos compartilhados se houver
+        const sharedPlansList = this.getSharedPlansList();
+        if (sharedPlansList.length > 0) {
+            container.innerHTML += `
+                <div class="shared-plans-section">
+                    <h3>📤 Planos Compartilhados Recentemente</h3>
+                    ${sharedPlansList.map(shared => `
+                        <div class="shared-plan-item">
+                            <div class="shared-plan-info">
+                                <strong>${shared.planName}</strong>
+                                <span>ID: ${shared.shareId}</span>
+                                <small>Aluno: ${shared.studentName}</small>
+                            </div>
+                            <div class="shared-plan-actions">
+                                <button class="btn btn-outline btn-small" onclick="app.copyShareId('${shared.shareId}')">
+                                    📋 Copiar
+                                </button>
+                                <button class="btn btn-secondary btn-small" onclick="app.shareViaWhatsApp('${shared.shareId}')">
+                                    📱 WhatsApp
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
     },
 
     viewPlan(planId) {
@@ -1452,14 +1873,22 @@ const app = {
 
     showMessage(message, type = 'success') {
         // Remove any existing messages
-        const existingMessages = document.querySelectorAll('.success-message, .error-message');
+        const existingMessages = document.querySelectorAll('.success-message, .error-message, .warning-message, .info-message');
         existingMessages.forEach(msg => msg.remove());
 
         // Create new message
         const messageDiv = document.createElement('div');
-        messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+        messageDiv.className = `message-${type}`;
+        
+        const icon = {
+            success: '✅',
+            error: '❌',
+            warning: '⚠️',
+            info: 'ℹ️'
+        }[type] || 'ℹ️';
+        
         messageDiv.innerHTML = `
-            <span>${type === 'success' ? '✅' : '❌'}</span>
+            <span>${icon}</span>
             <span>${message}</span>
         `;
 
@@ -1468,12 +1897,12 @@ const app = {
         if (header) {
             header.insertAdjacentElement('afterend', messageDiv);
             
-            // Auto remove after 3 seconds
+            // Auto remove after 5 seconds
             setTimeout(() => {
                 if (messageDiv.parentNode) {
                     messageDiv.remove();
                 }
-            }, 3000);
+            }, 5000);
         }
     }
 };

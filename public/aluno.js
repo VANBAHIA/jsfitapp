@@ -1,4 +1,6 @@
-// Global state
+// aluno.js - Sistema do Aluno JS Fit App - Versão Otimizada
+
+// Estado global da aplicação
 let workoutPlans = [];
 let currentPlan = null;
 let currentWorkout = null;
@@ -10,10 +12,10 @@ let serverConnection = {
     retryCount: 0
 };
 
-// Configuração da API - ALTERE A URL PARA O SEU SERVIDOR
+// Configuração da API
 const API_CONFIG = {
-    baseUrl: 'https://jsfitapp.netlify.app/api', // Usar o mesmo domínio
-    timeout: 5000,
+    baseUrl: 'https://jsfitapp.netlify.app/api',
+    timeout: 8000,
     retries: 3,
     endpoints: {
         getWorkout: '/workouts',
@@ -21,7 +23,10 @@ const API_CONFIG = {
     }
 };
 
-// API de Comunicação com Servidor
+// =============================================================================
+// API DE COMUNICAÇÃO COM SERVIDOR
+// =============================================================================
+
 class WorkoutServerAPI {
     static async checkServerHealth() {
         try {
@@ -74,7 +79,6 @@ class WorkoutServerAPI {
 
         } catch (error) {
             console.error('Erro ao buscar do servidor:', error);
-            // Fallback para armazenamento local
             return await this.getFromLocalFallback(shareId);
         }
     }
@@ -121,25 +125,10 @@ class WorkoutServerAPI {
     }
 }
 
-// Status de conexão
-function updateConnectionStatus(status) {
-    const indicator = document.getElementById('connectionStatus');
-    indicator.className = `connection-status ${status}`;
-    
-    switch(status) {
-        case 'online':
-            indicator.title = 'Conectado ao servidor';
-            break;
-        case 'offline':
-            indicator.title = 'Servidor offline - usando cache local';
-            break;
-        case 'loading':
-            indicator.title = 'Verificando conexão...';
-            break;
-    }
-}
+// =============================================================================
+// SISTEMA DE IMPORTAÇÃO
+// =============================================================================
 
-// Sistema de Importação por ID - Melhorado
 function getSharedPlans() {
     try {
         const stored = localStorage.getItem('sharedWorkoutPlans');
@@ -152,13 +141,11 @@ function getSharedPlans() {
 
 async function importPlanById(shareId) {
     try {
-        // Verificar se já foi importado
         const existingPlan = workoutPlans.find(p => p.originalShareId === shareId.toUpperCase());
         if (existingPlan) {
             throw new Error('Este plano já foi importado');
         }
 
-        // Tentar buscar do servidor primeiro
         const serverResult = await WorkoutServerAPI.getWorkoutById(shareId);
         
         let planData;
@@ -167,7 +154,6 @@ async function importPlanById(shareId) {
         if (serverResult.success) {
             planData = serverResult.data;
             
-            // Se veio do servidor, salvar localmente como cache
             if (source === 'server') {
                 const sharedPlans = getSharedPlans();
                 sharedPlans[shareId.toUpperCase()] = planData;
@@ -193,7 +179,7 @@ async function importPlanById(shareId) {
                 exercicios: treino.exercicios.map(ex => ({
                     ...ex,
                     concluido: false,
-                    currentCarga: ex.carga // Armazenar carga editável
+                    currentCarga: ex.carga || ex.currentCarga
                 }))
             }))
         };
@@ -209,370 +195,32 @@ async function importPlanById(shareId) {
     }
 }
 
-// Example data
-const exampleData = {
-    "planos": [
-        {
-            "id": 2,
-            "nome": "Adaptação Iniciante - Full Body (2 meses)",
-            "dias": 3,
-            "dataInicio": "2025-08-06",
-            "dataFim": "2025-10-06",
-            "perfil": {
-                "idade": "18-50 anos",
-                "altura": "Variável",
-                "peso": "Variável",
-                "porte": "Iniciante",
-                "objetivo": "Adaptação anatômica e aprendizado de movimentos"
-            },
-            "treinos": [
-                {
-                    "id": "FULL1",
-                    "nome": "Full Body A - Adaptação",
-                    "foco": "Corpo inteiro - Movimentos básicos",
-                    "exercicios": [
-                        {
-                            "id": 1,
-                            "nome": "Aquecimento - Esteira",
-                            "descricao": "Caminhada leve para aquecimento geral",
-                            "series": 1,
-                            "repeticoes": "8 min",
-                            "carga": "Velocidade 5-6 km/h",
-                            "currentCarga": "Velocidade 5-6 km/h",
-                            "concluido": false
-                        },
-                        {
-                            "id": 2,
-                            "nome": "Agachamento Corporal",
-                            "descricao": "Movimento básico para aprender padrão de agachamento",
-                            "series": 2,
-                            "repeticoes": 15,
-                            "carga": "Corpo",
-                            "currentCarga": "Corpo",
-                            "concluido": false
-                        },
-                        {
-                            "id": 3,
-                            "nome": "Flexão no Joelho",
-                            "descricao": "Flexão adaptada para iniciantes",
-                            "series": 2,
-                            "repeticoes": 10,
-                            "carga": "Corpo",
-                            "currentCarga": "Corpo",
-                            "concluido": false
-                        },
-                        {
-                            "id": 4,
-                            "nome": "Remada com Elástico",
-                            "descricao": "Movimento de puxada para costas",
-                            "series": 2,
-                            "repeticoes": 12,
-                            "carga": "Elástico leve",
-                            "currentCarga": "Elástico leve",
-                            "concluido": false
-                        },
-                        {
-                            "id": 5,
-                            "nome": "Desenvolvimento com Bastão",
-                            "descricao": "Aprendizado do movimento de ombros",
-                            "series": 2,
-                            "repeticoes": 12,
-                            "carga": "Bastão (2kg)",
-                            "currentCarga": "Bastão (2kg)",
-                            "concluido": false
-                        },
-                        {
-                            "id": 6,
-                            "nome": "Prancha Adaptada",
-                            "descricao": "Prancha com joelhos apoiados",
-                            "series": 2,
-                            "repeticoes": "20 seg",
-                            "carga": "Corpo",
-                            "currentCarga": "Corpo",
-                            "concluido": false
-                        },
-                        {
-                            "id": 7,
-                            "nome": "Afundo Estático",
-                            "descricao": "Afundo sem deslocamento",
-                            "series": 2,
-                            "repeticoes": 8,
-                            "carga": "Corpo",
-                            "currentCarga": "Corpo",
-                            "concluido": false
-                        },
-                        {
-                            "id": 8,
-                            "nome": "Elevação de Braços",
-                            "descricao": "Movimento básico para ombros",
-                            "series": 2,
-                            "repeticoes": 12,
-                            "carga": "1kg cada",
-                            "currentCarga": "1kg cada",
-                            "concluido": false
-                        },
-                        {
-                            "id": 9,
-                            "nome": "Alongamento Geral",
-                            "descricao": "Alongamento de todos os grupos musculares",
-                            "series": 1,
-                            "repeticoes": "10 min",
-                            "carga": "Corpo",
-                            "currentCarga": "Corpo",
-                            "concluido": false
-                        }
-                    ],
-                    "concluido": false,
-                    "execucoes": 0
-                },
-                {
-                    "id": "FULL2",
-                    "nome": "Full Body B - Progressão",
-                    "foco": "Corpo inteiro - Introdução aos pesos",
-                    "exercicios": [
-                        {
-                            "id": 10,
-                            "nome": "Aquecimento - Bicicleta",
-                            "descricao": "Aquecimento cardiovascular suave",
-                            "series": 1,
-                            "repeticoes": "8 min",
-                            "carga": "Resistência mínima",
-                            "currentCarga": "Resistência mínima",
-                            "concluido": false
-                        },
-                        {
-                            "id": 11,
-                            "nome": "Leg Press Adaptado",
-                            "descricao": "Primeira experiência com máquina",
-                            "series": 2,
-                            "repeticoes": 12,
-                            "carga": "20kg",
-                            "currentCarga": "20kg",
-                            "concluido": false
-                        },
-                        {
-                            "id": 12,
-                            "nome": "Supino com Halteres Leves",
-                            "descricao": "Introdução ao supino",
-                            "series": 2,
-                            "repeticoes": 12,
-                            "carga": "5kg cada",
-                            "currentCarga": "5kg cada",
-                            "concluido": false
-                        },
-                        {
-                            "id": 13,
-                            "nome": "Puxada Alta Assistida",
-                            "descricao": "Puxada com contrapeso",
-                            "series": 2,
-                            "repeticoes": 12,
-                            "carga": "15kg",
-                            "currentCarga": "15kg",
-                            "concluido": false
-                        },
-                        {
-                            "id": 14,
-                            "nome": "Desenvolvimento Sentado",
-                            "descricao": "Ombros com apoio nas costas",
-                            "series": 2,
-                            "repeticoes": 12,
-                            "carga": "6kg cada",
-                            "currentCarga": "6kg cada",
-                            "concluido": false
-                        },
-                        {
-                            "id": 15,
-                            "nome": "Rosca Bíceps Simples",
-                            "descricao": "Movimento básico para bíceps",
-                            "series": 2,
-                            "repeticoes": 12,
-                            "carga": "4kg cada",
-                            "currentCarga": "4kg cada",
-                            "concluido": false
-                        },
-                        {
-                            "id": 16,
-                            "nome": "Extensão de Tríceps",
-                            "descricao": "Movimento simples para tríceps",
-                            "series": 2,
-                            "repeticoes": 12,
-                            "carga": "6kg",
-                            "currentCarga": "6kg",
-                            "concluido": false
-                        },
-                        {
-                            "id": 17,
-                            "nome": "Abdominal Básico",
-                            "descricao": "Abdominal tradicional",
-                            "series": 2,
-                            "repeticoes": 12,
-                            "carga": "Corpo",
-                            "currentCarga": "Corpo",
-                            "concluido": false
-                        },
-                        {
-                            "id": 18,
-                            "nome": "Panturrilha Simples",
-                            "descricao": "Elevação de panturrilha em pé",
-                            "series": 2,
-                            "repeticoes": 15,
-                            "carga": "Corpo",
-                            "currentCarga": "Corpo",
-                            "concluido": false
-                        },
-                        {
-                            "id": 19,
-                            "nome": "Alongamento Dirigido",
-                            "descricao": "Alongamento focado nos músculos trabalhados",
-                            "series": 1,
-                            "repeticoes": "12 min",
-                            "carga": "Corpo",
-                            "currentCarga": "Corpo",
-                            "concluido": false
-                        }
-                    ],
-                    "concluido": false,
-                    "execucoes": 0
-                },
-                {
-                    "id": "FULL3",
-                    "nome": "Full Body C - Consolidação",
-                    "foco": "Corpo inteiro - Preparação para divisão",
-                    "exercicios": [
-                        {
-                            "id": 20,
-                            "nome": "Aquecimento - Elíptico",
-                            "descricao": "Aquecimento completo de baixo impacto",
-                            "series": 1,
-                            "repeticoes": "10 min",
-                            "carga": "Resistência baixa",
-                            "currentCarga": "Resistência baixa",
-                            "concluido": false
-                        },
-                        {
-                            "id": 21,
-                            "nome": "Agachamento com Halteres",
-                            "descricao": "Agachamento com resistência externa",
-                            "series": 3,
-                            "repeticoes": 12,
-                            "carga": "8kg cada",
-                            "currentCarga": "8kg cada",
-                            "concluido": false
-                        },
-                        {
-                            "id": 22,
-                            "nome": "Supino Inclinado Leve",
-                            "descricao": "Variação do supino para peito superior",
-                            "series": 3,
-                            "repeticoes": 12,
-                            "carga": "8kg cada",
-                            "currentCarga": "8kg cada",
-                            "concluido": false
-                        },
-                        {
-                            "id": 23,
-                            "nome": "Remada Sentada",
-                            "descricao": "Exercício para costas em máquina",
-                            "series": 3,
-                            "repeticoes": 12,
-                            "carga": "25kg",
-                            "currentCarga": "25kg",
-                            "concluido": false
-                        },
-                        {
-                            "id": 24,
-                            "nome": "Leg Press Progressivo",
-                            "descricao": "Leg press com mais carga",
-                            "series": 3,
-                            "repeticoes": 15,
-                            "carga": "40kg",
-                            "currentCarga": "40kg",
-                            "concluido": false
-                        },
-                        {
-                            "id": 25,
-                            "nome": "Desenvolvimento Militar",
-                            "descricao": "Ombros com barra ou halteres",
-                            "series": 3,
-                            "repeticoes": 10,
-                            "carga": "15kg (barra)",
-                            "currentCarga": "15kg (barra)",
-                            "concluido": false
-                        },
-                        {
-                            "id": 26,
-                            "nome": "Rosca Direta Inicial",
-                            "descricao": "Bíceps com barra leve",
-                            "series": 3,
-                            "repeticoes": 12,
-                            "carga": "12kg",
-                            "currentCarga": "12kg",
-                            "concluido": false
-                        },
-                        {
-                            "id": 27,
-                            "nome": "Tríceps Pulley",
-                            "descricao": "Tríceps na polia com carga leve",
-                            "series": 3,
-                            "repeticoes": 12,
-                            "carga": "15kg",
-                            "currentCarga": "15kg",
-                            "concluido": false
-                        },
-                        {
-                            "id": 28,
-                            "nome": "Prancha Completa",
-                            "descricao": "Prancha tradicional",
-                            "series": 3,
-                            "repeticoes": "30 seg",
-                            "carga": "Corpo",
-                            "currentCarga": "Corpo",
-                            "concluido": false
-                        },
-                        {
-                            "id": 29,
-                            "nome": "Panturrilha com Peso",
-                            "descricao": "Panturrilha com halteres",
-                            "series": 3,
-                            "repeticoes": 15,
-                            "carga": "10kg cada",
-                            "currentCarga": "10kg cada",
-                            "concluido": false
-                        },
-                        {
-                            "id": 30,
-                            "nome": "Alongamento Final",
-                            "descricao": "Relaxamento e recuperação",
-                            "series": 1,
-                            "repeticoes": "15 min",
-                            "carga": "Corpo",
-                            "currentCarga": "Corpo",
-                            "concluido": false
-                        }
-                    ],
-                    "concluido": false,
-                    "execucoes": 0
-                }
-            ],
-            "observacoes": {
-                "frequencia": "3x por semana (segunda, quarta, sexta) com 1 dia de descanso entre sessões",
-                "progressao": "Semanas 1-2: Full Body A | Semanas 3-5: Full Body B | Semanas 6-8: Full Body C",
-                "descanso": "45-60 segundos entre séries, foco na recuperação completa",
-                "hidratacao": "Beber água antes, durante e após o treino",
-                "adaptacao": "Período crucial para aprender movimentos e criar base muscular",
-                "supervisionamento": "OBRIGATÓRIO acompanhamento profissional nas primeiras semanas",
-                "sinais_alerta": "Pare imediatamente se sentir dor aguda, tontura ou desconforto anormal",
-                "evolucao": "Após 8 semanas, avaliar progressão para treino ABC ou ABCD",
-                "tecnica": "Prioridade ABSOLUTA na execução correta dos movimentos",
-                "consulta": "Avaliação médica obrigatória antes do início do programa"
-            }
-        }
-    ]
-};
+// =============================================================================
+// FUNÇÕES UTILITÁRIAS
+// =============================================================================
 
-// Utility functions
 function formatDate(dateString) {
+    if (!dateString) return 'Não definido';
     return new Date(dateString).toLocaleDateString('pt-BR');
+}
+
+function calculateAge(birthDate) {
+    if (!birthDate) return null;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
+    }
+    
+    return age;
+}
+
+function formatCPF(cpf) {
+    if (!cpf) return '';
+    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
 }
 
 function isWorkoutActive(planId, workoutId) {
@@ -583,8 +231,10 @@ function isWorkoutActive(planId, workoutId) {
 function saveToLocalStorage() {
     try {
         localStorage.setItem('studentWorkoutPlans', JSON.stringify(workoutPlans));
+        console.log('Dados salvos com sucesso');
     } catch (error) {
         console.error('Erro ao salvar:', error);
+        showNotification('Erro ao salvar dados', 'error');
     }
 }
 
@@ -593,7 +243,7 @@ function loadFromLocalStorage() {
         const stored = localStorage.getItem('studentWorkoutPlans');
         if (stored) {
             workoutPlans = JSON.parse(stored);
-            // Migrar dados antigos que não possuem currentCarga
+            // Migrar dados antigos
             workoutPlans.forEach(plan => {
                 plan.treinos.forEach(treino => {
                     treino.exercicios.forEach(ex => {
@@ -611,7 +261,71 @@ function loadFromLocalStorage() {
     }
 }
 
-// Weight editing functions
+// =============================================================================
+// STATUS DE CONEXÃO
+// =============================================================================
+
+function updateConnectionStatus(status) {
+    const indicator = document.getElementById('connectionStatus');
+    if (!indicator) return;
+    
+    indicator.className = `connection-status ${status}`;
+    
+    switch(status) {
+        case 'online':
+            indicator.title = 'Conectado ao servidor';
+            break;
+        case 'offline':
+            indicator.title = 'Servidor offline - usando cache local';
+            break;
+        case 'loading':
+            indicator.title = 'Verificando conexão...';
+            break;
+    }
+}
+
+// =============================================================================
+// SISTEMA DE NOTIFICAÇÕES
+// =============================================================================
+
+function showNotification(message, type = 'info', duration = 4000) {
+    // Remove notificações existentes
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notif => notif.remove());
+
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    
+    const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+    };
+    
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-icon">${icons[type] || icons.info}</span>
+            <span class="notification-message">${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Animar entrada
+    setTimeout(() => notification.classList.add('show'), 100);
+    
+    // Auto remover
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, duration);
+}
+
+// =============================================================================
+// EDIÇÃO DE PESO
+// =============================================================================
+
 function startEditingWeight(exerciseId) {
     editingWeight[exerciseId] = true;
     renderWorkout();
@@ -624,98 +338,49 @@ function cancelEditingWeight(exerciseId) {
 
 function saveWeight(planId, workoutId, exerciseId) {
     const inputId = `weight-input-${exerciseId}`;
-    const newWeight = document.getElementById(inputId).value.trim();
+    const input = document.getElementById(inputId);
+    
+    if (!input) {
+        showNotification('Erro ao encontrar campo de peso', 'error');
+        return;
+    }
+    
+    const newWeight = input.value.trim();
     
     if (!newWeight) {
-        alert('Por favor, insira uma carga válida');
+        showNotification('Por favor, insira uma carga válida', 'warning');
         return;
     }
     
     const plan = workoutPlans.find(p => p.id === planId);
+    if (!plan) return;
+    
     const workout = plan.treinos.find(t => t.id === workoutId);
+    if (!workout) return;
+    
     const exercise = workout.exercicios.find(e => e.id === exerciseId);
+    if (!exercise) return;
     
     exercise.currentCarga = newWeight;
     delete editingWeight[exerciseId];
     
     saveToLocalStorage();
     renderWorkout();
+    showNotification('Carga atualizada com sucesso!', 'success');
 }
 
-// Confirmation Modal functions
-function showConfirmation(title, message, onConfirm) {
-    document.getElementById('confirmationMessage').textContent = message;
-    document.querySelector('.modal-title').textContent = title;
-    document.getElementById('confirmDeleteBtn').onclick = onConfirm;
-    document.getElementById('confirmationModal').classList.remove('hidden');
-}
+// =============================================================================
+// NAVEGAÇÃO
+// =============================================================================
 
-function hideConfirmation() {
-    document.getElementById('confirmationModal').classList.add('hidden');
-}
-
-// Delete plan function
-function deletePlan(planId) {
-    const plan = workoutPlans.find(p => p.id === planId);
-    if (!plan) return;
-    
-    // Check if there are active workouts for this plan
-    const hasActiveWorkouts = Object.keys(activeWorkoutSessions).some(key => 
-        key.startsWith(`${planId}-`)
-    );
-    
-    if (hasActiveWorkouts) {
-        showConfirmation(
-            'Plano em Uso',
-            `O plano "${plan.nome}" possui treinos em andamento. Deseja mesmo excluí-lo? Os treinos ativos serão perdidos.`,
-            () => confirmDeletePlan(planId)
-        );
-    } else {
-        showConfirmation(
-            'Confirmar Exclusão',
-            `Tem certeza de que deseja excluir o plano "${plan.nome}"? Esta ação não pode ser desfeita.`,
-            () => confirmDeletePlan(planId)
-        );
-    }
-}
-
-function confirmDeletePlan(planId) {
-    // Remove active workout sessions for this plan
-    Object.keys(activeWorkoutSessions).forEach(key => {
-        if (key.startsWith(`${planId}-`)) {
-            delete activeWorkoutSessions[key];
-        }
-    });
-    
-    // Remove plan from array
-    workoutPlans = workoutPlans.filter(p => p.id !== planId);
-    
-    // Save changes
-    saveToLocalStorage();
-    
-    // Hide confirmation modal
-    hideConfirmation();
-    
-    // If we're currently viewing the deleted plan, go back to home
-    if (currentPlan && currentPlan.id === planId) {
-        currentPlan = null;
-        showHome();
-    } else {
-        // Just refresh the current view
-        renderHome();
-    }
-    
-    // Show success message
-    setTimeout(() => {
-        alert('Plano excluído com sucesso!');
-    }, 100);
-}
-
-// Navigation functions
 function showView(viewId) {
     const views = document.querySelectorAll('.view');
     views.forEach(view => view.classList.add('hidden'));
-    document.getElementById(viewId).classList.remove('hidden');
+    
+    const targetView = document.getElementById(viewId);
+    if (targetView) {
+        targetView.classList.remove('hidden');
+    }
 }
 
 function showHome() {
@@ -727,68 +392,186 @@ function showPlan(planId = null) {
     if (planId) {
         currentPlan = workoutPlans.find(p => p.id === planId);
     }
+    if (!currentPlan) {
+        showHome();
+        return;
+    }
     showView('planView');
     renderPlan();
 }
 
 function showWorkout(workoutId) {
+    if (!currentPlan) {
+        showHome();
+        return;
+    }
     currentWorkout = currentPlan.treinos.find(t => t.id === workoutId);
+    if (!currentWorkout) {
+        showPlan();
+        return;
+    }
     showView('workoutView');
     renderWorkout();
 }
 
-// Data functions
+// =============================================================================
+// DADOS DE EXEMPLO
+// =============================================================================
+
 function loadExampleData() {
-    workoutPlans = JSON.parse(JSON.stringify(exampleData.planos));
+    const examplePlan = {
+        "id": Date.now(),
+        "nome": "Plano Exemplo - Adaptação Iniciante",
+        "aluno": {
+            "nome": "Usuário Exemplo",
+            "dataNascimento": "1990-01-01",
+            "idade": 34,
+            "altura": "1,75m",
+            "peso": "75kg",
+            "cpf": ""
+        },
+        "dias": 3,
+        "dataInicio": new Date().toISOString().split('T')[0],
+        "dataFim": new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        "perfil": {
+            "idade": 34,
+            "altura": "1,75m",
+            "peso": "75kg",
+            "porte": "médio",
+            "objetivo": "Condicionamento geral e adaptação"
+        },
+        "treinos": [
+            {
+                "id": "A",
+                "nome": "A - Corpo Inteiro",
+                "foco": "Adaptação e condicionamento geral",
+                "exercicios": [
+                    {
+                        "id": 1,
+                        "nome": "Aquecimento - Esteira",
+                        "series": 1,
+                        "repeticoes": "10 min",
+                        "carga": "Ritmo moderado",
+                        "descanso": "0",
+                        "observacoesEspeciais": "",
+                        "descricao": "Caminhada em ritmo moderado para aquecimento geral",
+                        "concluido": false,
+                        "currentCarga": "Ritmo moderado"
+                    },
+                    {
+                        "id": 2,
+                        "nome": "Agachamento Livre",
+                        "series": 3,
+                        "repeticoes": "12-15",
+                        "carga": "Peso corporal",
+                        "descanso": "90 segundos",
+                        "observacoesEspeciais": "",
+                        "descricao": "Movimento básico fundamental, mantenha as costas retas",
+                        "concluido": false,
+                        "currentCarga": "Peso corporal"
+                    },
+                    {
+                        "id": 3,
+                        "nome": "Flexão de Braços",
+                        "series": 3,
+                        "repeticoes": "8-12",
+                        "carga": "Peso corporal",
+                        "descanso": "90 segundos",
+                        "observacoesEspeciais": "",
+                        "descricao": "Pode ser feito com joelhos apoiados se necessário",
+                        "concluido": false,
+                        "currentCarga": "Peso corporal"
+                    },
+                    {
+                        "id": 4,
+                        "nome": "Prancha",
+                        "series": 3,
+                        "repeticoes": "30-60 seg",
+                        "carga": "Peso corporal",
+                        "descanso": "60 segundos",
+                        "observacoesEspeciais": "",
+                        "descricao": "Mantenha o corpo alinhado, contraindo o abdômen",
+                        "concluido": false,
+                        "currentCarga": "Peso corporal"
+                    }
+                ],
+                "concluido": false,
+                "execucoes": 0
+            },
+            {
+                "id": "B",
+                "nome": "B - Cardio e Core",
+                "foco": "Condicionamento cardiovascular e fortalecimento do core",
+                "exercicios": [
+                    {
+                        "id": 5,
+                        "nome": "Aquecimento - Bicicleta",
+                        "series": 1,
+                        "repeticoes": "8 min",
+                        "carga": "Resistência leve",
+                        "descanso": "0",
+                        "observacoesEspeciais": "",
+                        "descricao": "Pedalada em ritmo moderado para aquecimento",
+                        "concluido": false,
+                        "currentCarga": "Resistência leve"
+                    },
+                    {
+                        "id": 6,
+                        "nome": "Burpee",
+                        "series": 3,
+                        "repeticoes": "5-8",
+                        "carga": "Peso corporal",
+                        "descanso": "90 segundos",
+                        "observacoesEspeciais": "",
+                        "descricao": "Exercício completo: agachamento, prancha, flexão e salto",
+                        "concluido": false,
+                        "currentCarga": "Peso corporal"
+                    },
+                    {
+                        "id": 7,
+                        "nome": "Mountain Climber",
+                        "series": 3,
+                        "repeticoes": "30 seg",
+                        "carga": "Peso corporal",
+                        "descanso": "60 segundos",
+                        "observacoesEspeciais": "",
+                        "descricao": "Posição de prancha, alternando joelhos ao peito rapidamente",
+                        "concluido": false,
+                        "currentCarga": "Peso corporal"
+                    }
+                ],
+                "concluido": false,
+                "execucoes": 0
+            }
+        ],
+        "observacoes": {
+            "frequencia": "3x por semana com 1 dia de descanso entre sessões",
+            "progressao": "Aumente as repetições gradualmente antes de adicionar peso",
+            "descanso": "90 segundos entre séries",
+            "hidratacao": "Beba água antes, durante e após o treino",
+            "consulta": "Acompanhamento profissional recomendado"
+        },
+        "execucoesPlanCompleto": 0
+    };
+
+    workoutPlans = [examplePlan];
     saveToLocalStorage();
     renderHome();
+    showNotification('Plano de exemplo carregado com sucesso!', 'success');
 }
 
-function importJSON(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const data = JSON.parse(e.target.result);
-                if (data.planos && Array.isArray(data.planos)) {
-                    const processedPlans = data.planos.map(plan => ({
-                        ...plan,
-                        id: Date.now() + Math.random(),
-                        execucoesPlanCompleto: plan.execucoesPlanCompleto || 0,
-                        treinos: plan.treinos.map(treino => ({
-                            ...treino,
-                            exercicios: treino.exercicios.map(ex => ({
-                                ...ex,
-                                currentCarga: ex.currentCarga || ex.carga
-                            }))
-                        }))
-                    }));
-                    workoutPlans.push(...processedPlans);
-                    saveToLocalStorage();
-                    renderHome();
-                    alert(`${processedPlans.length} plano(s) importado(s) com sucesso!`);
-                } else {
-                    alert('Formato JSON inválido. Verifique a estrutura do arquivo.');
-                }
-            } catch (error) {
-                alert('Erro ao ler arquivo JSON: ' + error.message);
-            }
-        };
-        reader.readAsText(file);
-    }
-    event.target.value = '';
-}
+// =============================================================================
+// IMPORTAÇÃO POR ID
+// =============================================================================
 
-// Função melhorada de importação por ID
 async function handleImportById() {
     const input = document.getElementById('importIdInput');
     const button = document.getElementById('importIdButton');
-    const status = document.getElementById('importStatus');
+    
+    if (!input || !button) return;
     
     const shareId = input.value.trim().toUpperCase();
     
-    // Validações
     if (!shareId) {
         updateImportStatus('Digite um ID válido', 'error');
         return;
@@ -799,20 +582,17 @@ async function handleImportById() {
         return;
     }
     
-    // Mostrar loading
     button.innerHTML = '<span class="loading-spinner"></span> Buscando...';
     button.classList.add('btn-loading');
+    button.disabled = true;
     updateImportStatus('Conectando com servidor...', 'loading');
     
     try {
-        // Tentar importar do servidor
         const result = await importPlanById(shareId);
         
-        // Adicionar à lista
         workoutPlans.push(result.plan);
         saveToLocalStorage();
         
-        // Feedback de sucesso
         const sourceText = result.source === 'server' ? 'servidor' : 'cache local';
         updateImportStatus(`✅ Plano "${result.plan.nome}" importado do ${sourceText}!`, 'success');
         input.value = '';
@@ -825,7 +605,6 @@ async function handleImportById() {
         console.error('Erro na importação:', error);
         updateImportStatus(`❌ ${error.message}`, 'error');
     } finally {
-        // Restaurar botão
         button.innerHTML = `
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -835,14 +614,21 @@ async function handleImportById() {
             Importar por ID
         `;
         button.classList.remove('btn-loading');
+        button.disabled = false;
     }
 }
 
 function updateImportStatus(message, type) {
     const status = document.getElementById('importStatus');
+    if (!status) return;
+    
     status.textContent = message;
     status.className = `import-status ${type}`;
 }
+
+// =============================================================================
+// SISTEMA DE TREINOS
+// =============================================================================
 
 function startWorkout(planId, workoutId) {
     const sessionKey = `${planId}-${workoutId}`;
@@ -852,81 +638,149 @@ function startWorkout(planId, workoutId) {
         workoutId
     };
     
-    // Reset exercises
     const plan = workoutPlans.find(p => p.id === planId);
+    if (!plan) return;
+    
     const workout = plan.treinos.find(t => t.id === workoutId);
+    if (!workout) return;
+    
     workout.exercicios.forEach(ex => ex.concluido = false);
     workout.concluido = false;
     
     if (currentPlan && currentPlan.id === planId) {
         renderPlan();
     }
+    
+    showNotification('Treino iniciado! 💪', 'success');
 }
 
 function completeExercise(planId, workoutId, exerciseId) {
-    // Verificar se o treino está ativo
     const sessionKey = `${planId}-${workoutId}`;
     if (!activeWorkoutSessions[sessionKey]) {
-        alert('O treino não está ativo. Inicie o treino na tela anterior primeiro.');
+        showNotification('O treino não está ativo. Inicie o treino primeiro.', 'warning');
         return;
     }
     
     const plan = workoutPlans.find(p => p.id === planId);
+    if (!plan) return;
+    
     const workout = plan.treinos.find(t => t.id === workoutId);
+    if (!workout) return;
+    
     const exercise = workout.exercicios.find(e => e.id === exerciseId);
+    if (!exercise) return;
+    
     exercise.concluido = true;
     
     saveToLocalStorage();
     renderWorkout();
+    showNotification(`✅ ${exercise.nome} concluído!`, 'success');
 }
 
 function completeWorkout(planId, workoutId) {
     const sessionKey = `${planId}-${workoutId}`;
     const plan = workoutPlans.find(p => p.id === planId);
-    const workout = plan.treinos.find(t => t.id === workoutId);
+    if (!plan) return;
     
-    // Mark workout as completed and increment executions
+    const workout = plan.treinos.find(t => t.id === workoutId);
+    if (!workout) return;
+    
+    // Verificar se todos os exercícios foram concluídos
+    const allExercisesCompleted = workout.exercicios.every(ex => ex.concluido);
+    if (!allExercisesCompleted) {
+        showNotification('Complete todos os exercícios antes de finalizar o treino', 'warning');
+        return;
+    }
+    
     workout.concluido = true;
     workout.execucoes += 1;
     
-    // Remove active session
     delete activeWorkoutSessions[sessionKey];
     
-    // Check if all workouts in the plan are completed
+    // Verificar se todos os treinos do plano foram concluídos
     const allWorkoutsCompleted = plan.treinos.every(t => t.concluido);
     
     if (allWorkoutsCompleted) {
-        // Increment plan completion counter
         plan.execucoesPlanCompleto = (plan.execucoesPlanCompleto || 0) + 1;
         
-        // Reset all workouts for next cycle
+        // Reset todos os treinos para o próximo ciclo
         plan.treinos.forEach(t => {
             t.concluido = false;
             t.exercicios.forEach(e => e.concluido = false);
         });
         
         setTimeout(() => {
-            alert(`🎊 Parabéns! Você completou o ciclo ${plan.execucoesPlanCompleto} do plano "${plan.nome}"!\n\nTodos os treinos foram resetados para o próximo ciclo.`);
+            showNotification(`🎊 Parabéns! Você completou o ciclo ${plan.execucoesPlanCompleto} do plano "${plan.nome}"!\n\nTodos os treinos foram resetados para o próximo ciclo.`, 'success', 6000);
         }, 500);
     }
     
     saveToLocalStorage();
     
     setTimeout(() => {
-        alert('🎉 Treino concluído com sucesso!');
+        showNotification('🎉 Treino concluído com sucesso!', 'success');
         showPlan();
     }, 100);
 }
 
-// Render functions
+// =============================================================================
+// SISTEMA DE EXCLUSÃO
+// =============================================================================
+
+function deletePlan(planId) {
+    const plan = workoutPlans.find(p => p.id === planId);
+    if (!plan) return;
+    
+    const hasActiveWorkouts = Object.keys(activeWorkoutSessions).some(key => 
+        key.startsWith(`${planId}-`)
+    );
+    
+    let message = `Tem certeza de que deseja excluir o plano "${plan.nome}"?`;
+    if (hasActiveWorkouts) {
+        message += '\n\nEste plano possui treinos em andamento que serão perdidos.';
+    }
+    message += '\n\nEsta ação não pode ser desfeita.';
+    
+    if (confirm(message)) {
+        confirmDeletePlan(planId);
+    }
+}
+
+function confirmDeletePlan(planId) {
+    // Remover sessões ativas
+    Object.keys(activeWorkoutSessions).forEach(key => {
+        if (key.startsWith(`${planId}-`)) {
+            delete activeWorkoutSessions[key];
+        }
+    });
+    
+    // Remover plano
+    workoutPlans = workoutPlans.filter(p => p.id !== planId);
+    saveToLocalStorage();
+    
+    // Navegar para home se estava visualizando este plano
+    if (currentPlan && currentPlan.id === planId) {
+        currentPlan = null;
+        showHome();
+    } else {
+        renderHome();
+    }
+    
+    showNotification('Plano excluído com sucesso!', 'success');
+}
+
+// =============================================================================
+// FUNÇÕES DE RENDERIZAÇÃO
+// =============================================================================
+
 function renderHome() {
     const content = document.getElementById('homeContent');
+    if (!content) return;
     
     let html = `
-        <!-- Import by ID Card - Enhanced -->
+        <!-- Import by ID Card -->
         <div class="card import-by-id-card">
             <div class="card-content">
-                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 8px; text-align: center;">
+                <h3 class="import-title">
                     🔗 Importar Treino por ID
                 </h3>
                 <div class="server-status ${serverConnection.isOnline ? 'online' : 'offline'}">
@@ -961,20 +815,12 @@ function renderHome() {
         html += `
             <div class="card">
                 <div class="card-content empty-state">
-                    <svg class="empty-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #d1d5db; margin: 0 auto 16px;">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="7,10 12,15 17,10"/>
-                        <line x1="12" x2="12" y1="15" y2="3"/>
-                    </svg>
+                    <div class="empty-icon">🏋️</div>
                     <h3 class="empty-title">Nenhum plano importado</h3>
-                    <p class="empty-description">Use o ID fornecido pelo seu personal trainer para importar seu plano de treino, ou carregue dados de exemplo</p>
-                    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
-                        <label class="btn btn-primary">
-                            Importar Arquivo JSON
-                            <input type="file" accept=".json" onchange="importJSON(event)" class="file-input">
-                        </label>
+                    <p class="empty-description">Use o ID fornecido pelo seu personal trainer para importar seu plano de treino</p>
+                    <div class="empty-actions">
                         <button onclick="loadExampleData()" class="btn btn-secondary">
-                            Carregar Treino de Adaptação
+                            📋 Carregar Exemplo de Treino
                         </button>
                     </div>
                 </div>
@@ -982,6 +828,9 @@ function renderHome() {
         `;
     } else {
         workoutPlans.forEach(plan => {
+            const studentInfo = plan.aluno || {};
+            const age = studentInfo.dataNascimento ? calculateAge(studentInfo.dataNascimento) : studentInfo.idade;
+            
             const completedWorkouts = plan.treinos.filter(t => t.concluido).length;
             const totalWorkouts = plan.treinos.length;
             const totalExecutions = plan.treinos.reduce((sum, t) => sum + t.execucoes, 0);
@@ -989,61 +838,108 @@ function renderHome() {
             html += `
                 <div class="card">
                     <div class="card-content">
-                        <div class="plan-header">
-                            <div>
+                        ${studentInfo.nome ? `
+                        <div class="student-info-card">
+                            <div class="student-info-header">
+                                <div class="student-avatar">
+                                    ${studentInfo.nome.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <h2 class="student-name">${studentInfo.nome}</h2>
+                                    ${age ? `<div class="student-age">${age} anos</div>` : ''}
+                                </div>
+                            </div>
+                            <div class="student-details">
+                                ${studentInfo.altura ? `
+                                <div class="detail-item">
+                                    <div class="detail-label">Altura</div>
+                                    <div class="detail-value">${studentInfo.altura}</div>
+                                </div>` : ''}
+                                ${studentInfo.peso ? `
+                                <div class="detail-item">
+                                    <div class="detail-label">Peso</div>
+                                    <div class="detail-value">${studentInfo.peso}</div>
+                                </div>` : ''}
+                                ${plan.perfil?.objetivo ? `
+                                <div class="detail-item">
+                                    <div class="detail-label">Objetivo</div>
+                                    <div class="detail-value objective-text">${plan.perfil.objetivo}</div>
+                                </div>` : ''}
+                                ${studentInfo.dataNascimento ? `
+                                <div class="detail-item">
+                                    <div class="detail-label">Nascimento</div>
+                                    <div class="detail-value">${formatDate(studentInfo.dataNascimento)}</div>
+                                </div>` : ''}
+                            </div>
+                        </div>` : ''}
+                        
+                        <div class="plan-info-card">
+                            <div class="plan-header">
                                 <h3 class="plan-title">${plan.nome}</h3>
-                                <p class="plan-subtitle">${plan.dias} dias por semana</p>
+                                <div class="plan-period">
+                                    ${formatDate(plan.dataInicio)} - ${formatDate(plan.dataFim)}
+                                </div>
                                 ${plan.originalShareId ? `
-                                    <div style="margin-top: 4px;">
-                                        <span style="background: #16a34a; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600;">
-                                            ID: ${plan.originalShareId}
-                                        </span>
+                                    <div class="plan-badges">
+                                        <span class="badge badge-id">ID: ${plan.originalShareId}</span>
                                         ${plan.importedFrom ? `
-                                            <span style="background: #2563eb; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; margin-left: 4px;">
+                                            <span class="badge badge-source">
                                                 ${plan.importedFrom === 'server' ? '🌐 Servidor' : '💾 Cache'}
                                             </span>
                                         ` : ''}
                                     </div>
                                 ` : ''}
                             </div>
-                            <div class="date-info">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M8 2v4"/>
-                                    <path d="M16 2v4"/>
-                                    <rect width="18" height="18" x="3" y="4" rx="2"/>
-                                    <path d="M3 10h18"/>
-                                </svg>
-                                <div>
-                                    <div>${formatDate(plan.dataInicio)}</div>
-                                    <div>${formatDate(plan.dataFim)}</div>
+                            
+                            <div class="plan-stats">
+                                <div class="stat-card">
+                                    <div class="stat-number">${plan.execucoesPlanCompleto || 0}</div>
+                                    <div class="stat-label">Ciclos Completos</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number">${completedWorkouts}/${totalWorkouts}</div>
+                                    <div class="stat-label">Treinos no Ciclo</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number">${totalExecutions}</div>
+                                    <div class="stat-label">Total de Treinos</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number">${plan.dias}</div>
+                                    <div class="stat-label">Dias/Semana</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="home-plan-stats">
-                            <div class="home-stat-item">
-                                <div class="home-stat-value">${plan.execucoesPlanCompleto || 0}</div>
-                                <div class="home-stat-label">Ciclos Completos</div>
-                            </div>
-                            <div class="home-stat-item">
-                                <div class="home-stat-value">${completedWorkouts}/${totalWorkouts}</div>
-                                <div class="home-stat-label">Treinos no Ciclo</div>
-                            </div>
-                            <div class="home-stat-item">
-                                <div class="home-stat-value">${totalExecutions}</div>
-                                <div class="home-stat-label">Total de Treinos</div>
-                            </div>
-                        </div>
+                        
                         <div class="workout-grid">
-                            ${plan.treinos.map(treino => `
-                                <div class="workout-item" style="${treino.concluido ? 'background: #dcfce7; border-left: 3px solid #16a34a;' : ''}">
-                                    <span class="workout-name" style="${treino.concluido ? 'color: #15803d;' : ''}">${treino.nome}</span>
-                                    <span class="execution-count" style="${treino.concluido ? 'background: #16a34a; color: white;' : ''}">${treino.execucoes}x</span>
-                                </div>
-                            `).join('')}
+                            ${plan.treinos.map(treino => {
+                                const progress = treino.exercicios.length > 0 ? 
+                                    (treino.exercicios.filter(ex => ex.concluido).length / treino.exercicios.length) * 100 : 0;
+                                
+                                return `
+                                <div class="workout-item ${treino.concluido ? 'completed' : ''}">
+                                    <div class="workout-name">${treino.nome}</div>
+                                    <div class="workout-details">
+                                        <span class="execution-count ${treino.concluido ? 'completed' : ''}">${treino.execucoes}x</span>
+                                        <div class="workout-status ${treino.concluido ? 'completed' : (progress > 0 ? 'in-progress' : 'not-started')}">
+                                            ${treino.concluido ? '✅ Concluído' : 
+                                              (progress > 0 ? `${Math.round(progress)}% completo` : 'Não iniciado')}
+                                        </div>
+                                    </div>
+                                    ${progress > 0 && !treino.concluido ? `
+                                    <div class="workout-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: ${progress}%;"></div>
+                                        </div>
+                                        <span class="progress-text">${Math.round(progress)}%</span>
+                                    </div>` : ''}
+                                </div>`;
+                            }).join('')}
                         </div>
+                        
                         <div class="plan-actions">
                             <button onclick="showPlan(${plan.id})" class="btn btn-primary">
-                                Ver Plano
+                                Ver Plano Completo
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="m9 18 6-6-6-6"/>
                                 </svg>
@@ -1060,19 +956,6 @@ function renderHome() {
                 </div>
             `;
         });
-        
-        html += `
-            <div style="text-align: center; margin-top: 24px;">
-                <label class="btn btn-success">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M5 12h14"/>
-                        <path d="m12 5 0 14"/>
-                    </svg>
-                    Adicionar Novo Plano
-                    <input type="file" accept=".json" onchange="importJSON(event)" class="file-input">
-                </label>
-            </div>
-        `;
     }
     
     content.innerHTML = html;
@@ -1081,15 +964,54 @@ function renderHome() {
 function renderPlan() {
     if (!currentPlan) return;
     
-    document.getElementById('planTitle').textContent = currentPlan.nome;
-    document.getElementById('planSubtitle').textContent = `${formatDate(currentPlan.dataInicio)} - ${formatDate(currentPlan.dataFim)}`;
+    const planTitle = document.getElementById('planTitle');
+    const planSubtitle = document.getElementById('planSubtitle');
+    
+    if (planTitle) planTitle.textContent = currentPlan.nome;
+    if (planSubtitle) planSubtitle.textContent = `${formatDate(currentPlan.dataInicio)} - ${formatDate(currentPlan.dataFim)}`;
     
     const completedWorkouts = currentPlan.treinos.filter(t => t.concluido).length;
     const totalWorkouts = currentPlan.treinos.length;
-    const cycleProgress = (completedWorkouts / totalWorkouts) * 100;
+    const cycleProgress = totalWorkouts > 0 ? (completedWorkouts / totalWorkouts) * 100 : 0;
     const totalExecutions = currentPlan.treinos.reduce((sum, t) => sum + t.execucoes, 0);
     
     let html = `
+        ${currentPlan.aluno && currentPlan.aluno.nome ? `
+        <div class="student-info-card">
+            <div class="student-info-header">
+                <div class="student-avatar">
+                    ${currentPlan.aluno.nome.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                    <h2 class="student-name">${currentPlan.aluno.nome}</h2>
+                    ${currentPlan.aluno.idade || (currentPlan.aluno.dataNascimento ? calculateAge(currentPlan.aluno.dataNascimento) : null) ? 
+                        `<div class="student-age">${currentPlan.aluno.idade || calculateAge(currentPlan.aluno.dataNascimento)} anos</div>` : ''}
+                </div>
+            </div>
+            <div class="student-details">
+                ${currentPlan.aluno.altura ? `
+                <div class="detail-item">
+                    <div class="detail-label">Altura</div>
+                    <div class="detail-value">${currentPlan.aluno.altura}</div>
+                </div>` : ''}
+                ${currentPlan.aluno.peso ? `
+                <div class="detail-item">
+                    <div class="detail-label">Peso</div>
+                    <div class="detail-value">${currentPlan.aluno.peso}</div>
+                </div>` : ''}
+                ${currentPlan.perfil?.objetivo ? `
+                <div class="detail-item">
+                    <div class="detail-label">Objetivo</div>
+                    <div class="detail-value objective-text">${currentPlan.perfil.objetivo}</div>
+                </div>` : ''}
+                ${currentPlan.aluno.cpf ? `
+                <div class="detail-item">
+                    <div class="detail-label">CPF</div>
+                    <div class="detail-value">${formatCPF(currentPlan.aluno.cpf)}</div>
+                </div>` : ''}
+            </div>
+        </div>` : ''}
+        
         <div class="plan-cycle-info">
             <div class="cycle-counter">${currentPlan.execucoesPlanCompleto || 0}</div>
             <div class="cycle-label">Ciclos Completos do Plano</div>
@@ -1102,22 +1024,18 @@ function renderPlan() {
                     : `Progresso do ciclo atual: ${completedWorkouts}/${totalWorkouts} treinos (${Math.round(cycleProgress)}%)`
                 }
             </div>
-            <div style="margin-top: 12px; font-size: 14px; opacity: 0.8;">
+            <div class="total-executions">
                 Total de treinos executados: ${totalExecutions}
             </div>
-            ${currentPlan.originalShareId ? `
-                <div style="margin-top: 8px; font-size: 12px; opacity: 0.7;">
-                    Plano importado via ID: ${currentPlan.originalShareId}
-                    ${currentPlan.importedFrom ? ` (${currentPlan.importedFrom === 'server' ? 'Servidor' : 'Cache local'})` : ''}
-                </div>
-            ` : ''}
         </div>
     `;
     
+    // Treinos
     currentPlan.treinos.forEach(treino => {
         const isActive = isWorkoutActive(currentPlan.id, treino.id);
         const completedExercises = treino.exercicios.filter(ex => ex.concluido).length;
         const totalExercises = treino.exercicios.length;
+        const workoutProgress = totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0;
         const isCompleted = treino.concluido;
         
         html += `
@@ -1125,40 +1043,40 @@ function renderPlan() {
                 <div class="card-content">
                     <div class="plan-header">
                         <div>
-                            <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="workout-title-wrapper">
                                 <h3 class="plan-title">${treino.nome}</h3>
                                 ${isCompleted ? `
-                                    <div class="check-icon" style="font-size: 12px; padding: 4px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
+                                    <div class="check-icon">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="m9 12 2 2 4-4"/>
                                         </svg>
                                     </div>
                                 ` : ''}
                             </div>
-                            <p class="plan-subtitle" style="${isCompleted ? 'color: #16a34a;' : ''}">
-                                ${isCompleted 
-                                    ? `✅ Treino concluído • ${totalExercises} exercícios • Executado ${treino.execucoes}x`
-                                    : `${totalExercises} exercícios • Executado ${treino.execucoes}x`
-                                }
+                            <p class="plan-subtitle">
+                                ${treino.foco} • ${totalExercises} exercícios • Executado ${treino.execucoes}x
                             </p>
                             ${isActive ? '<div class="active-workout">Treino em andamento</div>' : ''}
-                        </div>
-                        <div style="text-align: right;">
-                            <div class="plan-subtitle" style="margin-bottom: 8px;">Progresso: ${completedExercises}/${totalExercises}</div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${(completedExercises / totalExercises) * 100}%; background-color: ${isCompleted ? '#16a34a' : '#2563eb'};"></div>
-                            </div>
+                            
+                            ${workoutProgress > 0 && !isCompleted ? `
+                            <div class="workout-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${workoutProgress}%;"></div>
+                                </div>
+                                <span class="progress-text">${Math.round(workoutProgress)}% completo</span>
+                            </div>` : ''}
                         </div>
                     </div>
+                    
                     <div class="workout-actions">
-                        <button onclick="showWorkout('${treino.id}')" class="btn btn-primary btn-secondary">
+                        <button onclick="showWorkout('${treino.id}')" class="btn btn-secondary">
                             Ver Exercícios
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="m9 18 6-6-6-6"/>
                             </svg>
                         </button>
                         ${!isActive ? `
-                            <button onclick="startWorkout(${currentPlan.id}, '${treino.id}')" class="btn ${isCompleted ? 'btn-warning' : 'btn-success'}" style="padding: 16px 24px;">
+                            <button onclick="startWorkout(${currentPlan.id}, '${treino.id}')" class="btn ${isCompleted ? 'btn-warning' : 'btn-success'}">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <polygon points="6,3 20,12 6,21"/>
                                 </svg>
@@ -1167,8 +1085,7 @@ function renderPlan() {
                         ` : `
                             <button onclick="completeWorkout(${currentPlan.id}, '${treino.id}')" 
                                     class="${completedExercises < totalExercises ? 'btn btn-disabled' : 'btn btn-warning'}" 
-                                    ${completedExercises < totalExercises ? 'disabled' : ''} 
-                                    style="padding: 16px 24px;">
+                                    ${completedExercises < totalExercises ? 'disabled' : ''}>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="m9 12 2 2 4-4"/>
                                 </svg>
@@ -1181,20 +1098,40 @@ function renderPlan() {
         `;
     });
     
-    document.getElementById('planContent').innerHTML = html;
+    // Observações do plano
+    if (currentPlan.observacoes && Object.keys(currentPlan.observacoes).length > 0) {
+        html += `
+            <div class="plan-observations">
+                <div class="observations-title">
+                    📝 Observações do Plano
+                </div>
+                ${Object.entries(currentPlan.observacoes).map(([key, value]) => {
+                    if (!value) return '';
+                    const label = getObservationLabel(key);
+                    return `<div class="observation-item"><span class="observation-label">${label}:</span> ${value}</div>`;
+                }).join('')}
+            </div>
+        `;
+    }
+    
+    const planContent = document.getElementById('planContent');
+    if (planContent) planContent.innerHTML = html;
 }
 
 function renderWorkout() {
     if (!currentWorkout || !currentPlan) return;
     
-    document.getElementById('workoutTitle').textContent = currentWorkout.nome;
-    document.getElementById('workoutSubtitle').textContent = `${currentWorkout.exercicios.length} exercícios`;
+    const workoutTitle = document.getElementById('workoutTitle');
+    const workoutSubtitle = document.getElementById('workoutSubtitle');
+    
+    if (workoutTitle) workoutTitle.textContent = currentWorkout.nome;
+    if (workoutSubtitle) workoutSubtitle.textContent = `${currentWorkout.exercicios.length} exercícios • ${currentWorkout.foco}`;
     
     const isWorkoutActiveNow = isWorkoutActive(currentPlan.id, currentWorkout.id);
     
     let html = '';
     
-    // Adicionar alerta se o treino não estiver ativo
+    // Alerta se o treino não estiver ativo
     if (!isWorkoutActiveNow) {
         html += `
             <div class="alert">
@@ -1214,9 +1151,14 @@ function renderWorkout() {
             <div class="card exercise-card ${cardClass}">
                 <div class="card-content">
                     <div class="exercise-header">
-                        <div style="flex: 1;">
+                        <div class="exercise-main">
                             <h3 class="exercise-number">${index + 1}. ${exercicio.nome}</h3>
-                            <p class="exercise-description">${exercicio.descricao}</p>
+                            <p class="exercise-description">${exercicio.descricao || 'Sem descrição'}</p>
+                            ${exercicio.observacoesEspeciais ? `
+                                <div class="exercise-notes">
+                                    ${exercicio.observacoesEspeciais}
+                                </div>
+                            ` : ''}
                         </div>
                         ${exercicio.concluido && isWorkoutActiveNow ? `
                             <div class="check-icon">
@@ -1226,19 +1168,25 @@ function renderWorkout() {
                             </div>
                         ` : ''}
                     </div>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-value">${exercicio.series}</div>
-                            <div class="stat-label">Séries</div>
+                    
+                    <div class="exercise-specs-grid">
+                        <div class="spec-badge">
+                            <div class="spec-label">Séries</div>
+                            <div class="spec-value">${exercicio.series}</div>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${exercicio.repeticoes}</div>
-                            <div class="stat-label">Repetições</div>
+                        <div class="spec-badge">
+                            <div class="spec-label">Reps</div>
+                            <div class="spec-value">${exercicio.repeticoes}</div>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${exercicio.currentCarga}</div>
-                            <div class="stat-label">Carga Atual</div>
+                        <div class="spec-badge">
+                            <div class="spec-label">Carga</div>
+                            <div class="spec-value">${exercicio.currentCarga}</div>
                         </div>
+                        ${exercicio.descanso && exercicio.descanso !== '0' ? `
+                        <div class="spec-badge">
+                            <div class="spec-label">Descanso</div>
+                            <div class="spec-value">${exercicio.descanso}</div>
+                        </div>` : ''}
                     </div>
                     
                     ${exercicio.currentCarga !== exercicio.carga ? `
@@ -1263,9 +1211,9 @@ function renderWorkout() {
                             </button>
                         </div>
                     ` : `
-                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <div class="exercise-actions">
                             <button onclick="startEditingWeight(${exercicio.id})" 
-                                    class="btn btn-secondary" style="flex: 1;">
+                                    class="btn btn-secondary">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                                     <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -1276,8 +1224,7 @@ function renderWorkout() {
                             ${isWorkoutActiveNow ? `
                                 <button onclick="completeExercise(${currentPlan.id}, '${currentWorkout.id}', ${exercicio.id})" 
                                         ${exercicio.concluido ? 'disabled' : ''} 
-                                        class="${exercicio.concluido ? 'btn btn-disabled' : 'btn btn-success'}" 
-                                        style="flex: 1;">
+                                        class="${exercicio.concluido ? 'btn btn-disabled' : 'btn btn-success'}">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="m9 12 2 2 4-4"/>
                                     </svg>
@@ -1291,37 +1238,69 @@ function renderWorkout() {
         `;
     });
     
-    // Add completion card if workout is active
+    // Card de conclusão se o treino estiver ativo
     if (isWorkoutActiveNow) {
         const allCompleted = currentWorkout.exercicios.every(ex => ex.concluido);
+        const completedCount = currentWorkout.exercicios.filter(ex => ex.concluido).length;
         
         html += `
-            <div class="card">
-                <div class="card-content" style="text-align: center;">
-                    <h3 class="plan-title" style="margin-bottom: 8px;">Treino em Andamento</h3>
-                    <p class="plan-subtitle" style="margin-bottom: 16px;">Complete todos os exercícios para finalizar o treino</p>
+            <div class="card completion-card">
+                <div class="card-content">
+                    <h3 class="completion-title">Treino em Andamento</h3>
+                    <p class="completion-subtitle">
+                        ${completedCount}/${currentWorkout.exercicios.length} exercícios concluídos
+                    </p>
+                    <div class="workout-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${(completedCount / currentWorkout.exercicios.length) * 100}%;"></div>
+                        </div>
+                        <span class="progress-text">${Math.round((completedCount / currentWorkout.exercicios.length) * 100)}%</span>
+                    </div>
                     <button onclick="completeWorkout(${currentPlan.id}, '${currentWorkout.id}')" 
                             ${!allCompleted ? 'disabled' : ''} 
-                            class="${!allCompleted ? 'btn btn-disabled' : 'btn btn-warning'}" 
-                            style="max-width: 300px;">
-                        Finalizar Treino
+                            class="${!allCompleted ? 'btn btn-disabled' : 'btn btn-warning'}">
+                        ${allCompleted ? 'Finalizar Treino' : `Faltam ${currentWorkout.exercicios.length - completedCount} exercícios`}
                     </button>
                 </div>
             </div>
         `;
     }
     
-    document.getElementById('workoutContent').innerHTML = html;
+    const workoutContent = document.getElementById('workoutContent');
+    if (workoutContent) workoutContent.innerHTML = html;
 }
 
-// iOS compatibility functions
+// =============================================================================
+// FUNÇÃO AUXILIAR PARA LABELS
+// =============================================================================
+
+function getObservationLabel(key) {
+    const labels = {
+        frequencia: 'Frequência',
+        progressao: 'Progressão',
+        descanso: 'Descanso',
+        hidratacao: 'Hidratação',
+        alimentacao: 'Alimentação',
+        suplementacao: 'Suplementação',
+        sono: 'Sono',
+        aquecimento: 'Aquecimento',
+        tecnica: 'Técnica',
+        periodizacao: 'Periodização',
+        consulta: 'Consulta',
+        geral: 'Observações Gerais'
+    };
+    return labels[key] || key.charAt(0).toUpperCase() + key.slice(1);
+}
+
+// =============================================================================
+// CONFIGURAÇÃO iOS E PWA
+// =============================================================================
+
 function setupiOSCompatibility() {
-    // Handle viewport height changes on iOS
     const setVH = () => {
         const vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
         
-        // iOS specific height fix
         if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
             const app = document.querySelector('.app');
             if (app) {
@@ -1332,11 +1311,10 @@ function setupiOSCompatibility() {
     
     setVH();
     
-    // Debounced resize handler
     let resizeTimeout;
     const handleResize = () => {
         clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(setVH, 100);
+        resizeTimeout = setTimeout(setVH, 150);
     };
     
     window.addEventListener('resize', handleResize, { passive: true });
@@ -1344,71 +1322,56 @@ function setupiOSCompatibility() {
         setTimeout(setVH, 500);
     }, { passive: true });
     
-    // iOS Safari specific fixes
     window.addEventListener('load', () => {
         setVH();
         setTimeout(setVH, 0);
     });
     
-    // Prevent iOS Safari bottom bar issues
+    // Prevenir zoom no iOS
     if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
         window.addEventListener('scroll', () => {
             if (window.pageYOffset === 0) {
                 setVH();
             }
         }, { passive: true });
+        
+        let lastTouchEnd = 0;
+        
+        document.addEventListener('touchstart', (event) => {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchend', (event) => {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        document.addEventListener('gesturestart', (event) => {
+            event.preventDefault();
+        }, false);
+
+        document.addEventListener('gesturechange', (event) => {
+            event.preventDefault();
+        }, false);
+
+        document.addEventListener('gestureend', (event) => {
+            event.preventDefault();
+        }, false);
     }
-    
-    // iOS touch event handling
-    let lastTouchEnd = 0;
-    
-    document.addEventListener('touchstart', (event) => {
-        if (event.touches.length > 1) {
-            event.preventDefault();
-        }
-    }, { passive: false });
-
-    document.addEventListener('touchend', (event) => {
-        const now = (new Date()).getTime();
-        if (now - lastTouchEnd <= 300) {
-            event.preventDefault();
-        }
-        lastTouchEnd = now;
-    }, false);
-
-    document.addEventListener('gesturestart', (event) => {
-        event.preventDefault();
-    }, false);
-
-    document.addEventListener('gesturechange', (event) => {
-        event.preventDefault();
-    }, false);
-
-    document.addEventListener('gestureend', (event) => {
-        event.preventDefault();
-    }, false);
-
-    // Prevent double-tap zoom
-    let lastTouchStart = 0;
-    document.addEventListener('touchstart', (event) => {
-        const now = Date.now();
-        if (now - lastTouchStart <= 500) {
-            event.preventDefault();
-        }
-        lastTouchStart = now;
-    }, { passive: false });
 }
 
-// Close modal when clicking outside
-document.addEventListener('click', (event) => {
-    const modal = document.getElementById('confirmationModal');
-    if (event.target === modal) {
-        hideConfirmation();
-    }
-});
+// =============================================================================
+// INICIALIZAÇÃO DA APLICAÇÃO
+// =============================================================================
 
-// Initialize app
 async function init() {
+    console.log('🚀 Inicializando JS Fit App - Versão Aluno');
+    
     setupiOSCompatibility();
     loadFromLocalStorage();
     
@@ -1418,11 +1381,31 @@ async function init() {
     // Verificar conexão periodicamente
     setInterval(async () => {
         await WorkoutServerAPI.checkServerHealth();
-    }, 30000); // A cada 30 segundos
+    }, 30000);
     
     renderHome();
+    
+    console.log('✅ Aplicação inicializada com sucesso');
 }
 
-// Start the app
+// Event listeners
 document.addEventListener('DOMContentLoaded', init);
 window.addEventListener('load', init);
+
+// Handle beforeunload para salvar dados
+window.addEventListener('beforeunload', () => {
+    saveToLocalStorage();
+});
+
+// Service Worker para PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+                console.log('SW registrado:', registration);
+            })
+            .catch(registrationError => {
+                console.log('Falha no registro do SW:', registrationError);
+            });
+    });
+}
