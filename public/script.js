@@ -11,7 +11,7 @@ const app = {
             intermediario: [
                 { nome: 'Supino Reto com Barra', series: 4, repeticoes: '8-10', carga: '40-60kg', descricao: 'Exercício fundamental para desenvolvimento do peitoral, pegada média' },
                 { nome: 'Supino Inclinado', series: 3, repeticoes: '10-12', carga: '30-45kg', descricao: 'Trabalha a parte superior do peitoral, banco a 30-45 graus' },
-                { nome: 'Crossover', series: 3, repeticoes: '12-15', carga: '15-25kg', descricao: 'Movimento de cruz trabalhando definição, contraição no final' }
+                { nome: 'Crossover', series: 3, repeticoes: '12-15', carga: '15-25kg', descricao: 'Movimento de cruz trabalhando definição, contração no final' }
             ],
             avancado: [
                 { nome: 'Supino Reto com Barra', series: 4, repeticoes: '6-8', carga: '60-80kg', descricao: 'Foco em força e massa muscular, execução controlada' },
@@ -143,7 +143,7 @@ const app = {
         'Supino Inclinado com Barra': 'Trabalha a parte superior do peitoral. Banco inclinado entre 30-45°, mesma execução do supino reto.',
         'Supino Declinado com Barra': 'Foco no peitoral inferior. Banco declinado, pés presos, execução similar ao supino reto.',
         'Supino com Halteres': 'Maior amplitude de movimento que a barra. Deitado no banco, empurre halteres para cima, controle a descida.',
-        'Supino Inclinado with Halteres': 'Versão inclinada com halteres. Permite rotação dos punhos para melhor ativação muscular.',
+        'Supino Inclinado com Halteres': 'Versão inclinada com halteres. Permite rotação dos punhos para melhor ativação muscular.',
         'Crucifixo com Halteres': 'Isolamento do peitoral. Movimento de abraço, mantenha cotovelos levemente flexionados.',
         'Crucifixo Inclinado': 'Versão inclinada do crucifixo, trabalha fibras superiores do peitoral.',
         'Crossover': 'Exercício no cabo, movimento cruzado. Excelente para definição e contração muscular.',
@@ -307,7 +307,6 @@ const app = {
         });
         
         // Set default values
-        document.getElementById('aiStudentAge').value = 25;
         document.getElementById('aiAvailableDays').value = '3';
         document.getElementById('aiSessionTime').value = '60';
     },
@@ -335,9 +334,10 @@ const app = {
         // Fill form with plan data
         document.getElementById('currentPlanId').value = planId;
         document.getElementById('studentName').value = plan.aluno?.nome || '';
-        document.getElementById('studentAge').value = plan.perfil?.idade || '';
-        document.getElementById('studentHeight').value = plan.perfil?.altura || '';
-        document.getElementById('studentWeight').value = plan.perfil?.peso || '';
+        document.getElementById('studentBirthDate').value = plan.aluno?.dataNascimento || '';
+        document.getElementById('studentCpf').value = plan.aluno?.cpf || '';
+        document.getElementById('studentHeight').value = plan.aluno?.altura || plan.perfil?.altura || '';
+        document.getElementById('studentWeight').value = plan.aluno?.peso || plan.perfil?.peso || '';
         document.getElementById('planName').value = plan.nome || '';
         document.getElementById('planObjective').value = plan.perfil?.objetivo || '';
         document.getElementById('planStartDate').value = plan.dataInicio || '';
@@ -681,11 +681,25 @@ const app = {
         this.currentExerciseIndex = null;
     },
 
+    calculateAge(birthDate) {
+        const today = new Date();
+        const birth = new Date(birthDate);
+        let age = today.getFullYear() - birth.getFullYear();
+        const monthDiff = today.getMonth() - birth.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+            age--;
+        }
+        
+        return age;
+    },
+
     generateAIPlan() {
         // Get AI form data
         const aiData = {
             nome: document.getElementById('aiStudentName').value,
-            idade: parseInt(document.getElementById('aiStudentAge').value) || 25,
+            dataNascimento: document.getElementById('aiStudentBirthDate').value,
+            cpf: document.getElementById('aiStudentCpf').value,
             altura: document.getElementById('aiStudentHeight').value || '1,75m',
             peso: document.getElementById('aiStudentWeight').value || '75kg',
             objetivo: document.getElementById('aiPlanObjective').value,
@@ -697,6 +711,9 @@ const app = {
             limitacoes: document.getElementById('aiLimitations').value,
             observacoes: document.getElementById('aiSpecialNotes').value
         };
+
+        // Calculate age from birth date
+        aiData.idade = aiData.dataNascimento ? this.calculateAge(aiData.dataNascimento) : 25;
 
         // Validation
         if (!aiData.nome) {
@@ -763,6 +780,8 @@ const app = {
             nome: `${this.getWorkoutLetters(aiData.dias)} - ${aiData.dias} Dias ${aiData.objetivo.split(' ')[0]} (${aiData.idade} anos)`,
             aluno: {
                 nome: aiData.nome,
+                dataNascimento: aiData.dataNascimento,
+                cpf: aiData.cpf,
                 idade: aiData.idade,
                 altura: aiData.altura,
                 peso: aiData.peso
@@ -1034,12 +1053,18 @@ const app = {
             const currentPlanId = document.getElementById('currentPlanId').value;
             const isEditingPlan = this.isEditing && currentPlanId;
             
+            // Calculate age from birth date
+            const birthDate = document.getElementById('studentBirthDate')?.value;
+            const calculatedAge = birthDate ? this.calculateAge(birthDate) : 25;
+            
             const planData = {
                 id: isEditingPlan ? parseInt(currentPlanId) : Date.now(),
                 nome: document.getElementById('planName')?.value || 'Plano sem nome',
                 aluno: {
                     nome: document.getElementById('studentName')?.value || '',
-                    idade: parseInt(document.getElementById('studentAge')?.value) || 25,
+                    dataNascimento: birthDate || '',
+                    cpf: document.getElementById('studentCpf')?.value || '',
+                    idade: calculatedAge,
                     altura: document.getElementById('studentHeight')?.value || '1,75m',
                     peso: document.getElementById('studentWeight')?.value || '75kg'
                 },
@@ -1047,7 +1072,7 @@ const app = {
                 dataInicio: document.getElementById('planStartDate')?.value || new Date().toISOString().split('T')[0],
                 dataFim: document.getElementById('planEndDate')?.value || '',
                 perfil: {
-                    idade: parseInt(document.getElementById('studentAge')?.value) || 25,
+                    idade: calculatedAge,
                     altura: document.getElementById('studentHeight')?.value || '1,75m',
                     peso: document.getElementById('studentWeight')?.value || '75kg',
                     porte: 'médio',
@@ -1168,6 +1193,8 @@ const app = {
                     if (!planData.aluno) {
                         planData.aluno = {
                             nome: '',
+                            dataNascimento: '',
+                            cpf: '',
                             idade: planData.perfil?.idade || 25,
                             altura: planData.perfil?.altura || '1,75m',
                             peso: planData.perfil?.peso || '75kg'
@@ -1216,6 +1243,8 @@ const app = {
                     if (!plan.aluno && plan.perfil) {
                         plan.aluno = {
                             nome: '',
+                            dataNascimento: '',
+                            cpf: '',
                             idade: plan.perfil.idade || 25,
                             altura: plan.perfil.altura || '1,75m',
                             peso: plan.perfil.peso || '75kg'
@@ -1313,9 +1342,9 @@ const app = {
                 <p><strong>Frequência:</strong> ${plan.dias} dias por semana</p>
                 <p><strong>Período:</strong> ${this.formatDate(plan.dataInicio)} até ${this.formatDate(plan.dataFim)}</p>
                 <p><strong>Objetivo:</strong> ${plan.perfil?.objetivo || 'Não especificado'}</p>
-                ${plan.perfil?.idade ? `<p><strong>Idade:</strong> ${plan.perfil.idade} anos</p>` : ''}
-                ${plan.perfil?.altura ? `<p><strong>Altura:</strong> ${plan.perfil.altura}</p>` : ''}
-                ${plan.perfil?.peso ? `<p><strong>Peso:</strong> ${plan.perfil.peso}</p>` : ''}
+                ${plan.aluno?.idade ? `<p><strong>Idade:</strong> ${plan.aluno.idade} anos</p>` : ''}
+                ${plan.aluno?.altura ? `<p><strong>Altura:</strong> ${plan.aluno.altura}</p>` : ''}
+                ${plan.aluno?.peso ? `<p><strong>Peso:</strong> ${plan.aluno.peso}</p>` : ''}
             </div>
         `;
 
@@ -1459,4 +1488,4 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', app.init.bind(app));
 } else {
     app.init();
-} 
+}
