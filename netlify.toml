@@ -7,16 +7,28 @@
 [functions]
   directory = "netlify/functions"
 
-# Redirecionamentos da API - CORRIGIDOS
+# Redirecionamentos da API - ATUALIZADOS
 [[redirects]]
   from = "/api/workouts/:id"
-  to = "/.netlify/functions/get-workout"
+  to = "/.netlify/functions/workouts"  # Nova função
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/workouts"
-  to = "/.netlify/functions/save-workout"
+  to = "/.netlify/functions/workouts"  # Nova função
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/students/*"
+  to = "/.netlify/functions/students"  # Nova função
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/sync/*"
+  to = "/.netlify/functions/sync"  # Nova função
   status = 200
   force = true
 
@@ -68,6 +80,14 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+
+# Adicionar suporte a WebSocket para real-time
+[[headers]]
+  for = "/api/ws/*"
+  [headers.values]
+    Connection = "Upgrade"
+    Upgrade = "websocket"
+    Access-Control-Allow-Origin = "*"
 
 # Cache para arquivos estáticos
 [[headers]]

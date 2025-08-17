@@ -69,6 +69,10 @@ exports.handler = async (event, context) => {
             return await createShare(event);
         }
         
+        if (method === 'POST' && pathParts.length === 1 && pathParts[0] === 'import') {
+            return await importSharedPlan(event);
+        }
+        
         if (method === 'GET' && pathParts.length === 1) {
             return await getSharedPlan(event, pathParts[0]);
         }
@@ -190,6 +194,180 @@ async function createShare(event) {
                     planName: planCheck.rows[0].name,
                     createdAt: shareResult.rows[0].created_at,
                     expiresAt
+                })
+            };
+
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
+
+    } catch (error) {
+        return {
+            statusCode: error.message.includes('Token') ? 401 : 400,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: error.message })
+        };
+    }
+}
+
+// Importar plano compartilhado para a conta do personal trainer
+async function importSharedPlan(event) {
+    try {
+        const decoded = verifyToken(event.headers.authorization);
+        const { shareId, studentId } = JSON.parse(event.body);
+
+        if (!shareId) {
+            return {
+                statusCode: 400,
+                headers: corsHeaders,
+                body: JSON.stringify({ error: 'Share ID é obrigatório' })
+            };
+        }
+
+        const client = await pool.connect();
+        
+        try {
+            await client.query('BEGIN');
+
+            // Buscar plano compartilhado
+            const shareResult = await client.query(`
+                SELECT sp.*, wp.*, pt.name as trainer_name
+                FROM shared_plans sp
+                JOIN workout_plans wp ON sp.workout_plan_id = wp.id
+                JOIN personal_trainers pt ON sp.personal_trainer_id = pt.id
+                WHERE sp.share_id = $1 AND sp.is_active = true
+            `, [shareId.toUpperCase()]);
+
+            if (shareResult.rows.length === 0) {
+                return {
+                    statusCode: 404,
+                    headers: corsHeaders,
+                    body: JSON.stringify({ error: 'Plano compartilhado não encontrado ou expirado' })
+                };
+            }
+
+            const originalPlan = shareResult.rows[0];
+
+            // Verificar expiração
+            if (originalPlan.expires_at && new Date() > new Date(originalPlan.expires_at)) {
+                return {
+                    statusCode: 410,
+                    headers: corsHeaders,
+                    body: JSON.stringify({ error: 'Compartilhamento expirado' })
+                };
+            }
+
+            // Verificar se o aluno existe (se fornecido)
+            if (studentId) {
+                const studentCheck = await client.query(
+                    'SELECT id FROM students WHERE id = $1 AND personal_trainer_id = $2',
+                    [studentId, decoded.userId]
+                );
+
+                if (studentCheck.rows.length === 0) {
+                    return {
+                        statusCode: 404,
+                        headers: corsHeaders,
+                        body: JSON.stringify({ error: 'Aluno não encontrado' })
+                    };
+                }
+            }
+
+            // Criar cópia do plano para o personal trainer atual
+            const newPlanResult = await client.query(`
+                INSERT INTO workout_plans (
+                    name, description, objective, frequency_per_week, start_date, end_date,
+                    personal_trainer_id, student_id, observations
+                )
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                RETURNING id
+            `, [
+                `${originalPlan.name} (Importado)`,
+                originalPlan.description,
+                originalPlan.objective,
+                originalPlan.frequency_per_week,
+                originalPlan.start_date,
+                originalPlan.end_date,
+                decoded.userId,
+                studentId || null,
+                originalPlan.observations
+            ]);
+
+            const newPlanId = newPlanResult.rows[0].id;
+
+            // Copiar treinos
+            const workoutsResult = await client.query(
+                'SELECT * FROM workouts WHERE workout_plan_id = $1 ORDER BY order_index',
+                [originalPlan.workout_plan_id]
+            );
+
+            for (const workout of workoutsResult.rows) {
+                const newWorkoutResult = await client.query(`
+                    INSERT INTO workouts (
+                        workout_plan_id, name, description, workout_letter, focus_area, order_index
+                    )
+                    VALUES ($1, $2, $3, $4, $5, $6)
+                    RETURNING id
+                `, [
+                    newPlanId,
+                    workout.name,
+                    workout.description,
+                    workout.workout_letter,
+                    workout.focus_area,
+                    workout.order_index
+                ]);
+
+                const newWorkoutId = newWorkoutResult.rows[0].id;
+
+                // Copiar exercícios
+                const exercisesResult = await client.query(
+                    'SELECT * FROM exercises WHERE workout_id = $1 ORDER BY order_index',
+                    [workout.id]
+                );
+
+                for (const exercise of exercisesResult.rows) {
+                    await client.query(`
+                        INSERT INTO exercises (
+                            workout_id, name, description, muscle_groups, equipment,
+                            sets, reps, weight, rest_time, special_instructions, order_index
+                        )
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+                    `, [
+                        newWorkoutId,
+                        exercise.name,
+                        exercise.description,
+                        exercise.muscle_groups,
+                        exercise.equipment,
+                        exercise.sets,
+                        exercise.reps,
+                        exercise.weight,
+                        exercise.rest_time,
+                        exercise.special_instructions,
+                        exercise.order_index
+                    ]);
+                }
+            }
+
+            // Atualizar contador de importação no compartilhamento original
+            await client.query(`
+                UPDATE shared_plans 
+                SET access_count = access_count + 1, last_accessed_at = CURRENT_TIMESTAMP
+                WHERE id = $1
+            `, [originalPlan.id]);
+
+            await client.query('COMMIT');
+
+            return {
+                statusCode: 201,
+                headers: corsHeaders,
+                body: JSON.stringify({
+                    message: 'Plano importado com sucesso',
+                    planId: newPlanId,
+                    planName: `${originalPlan.name} (Importado)`,
+                    originalTrainer: originalPlan.trainer_name
                 })
             };
 
