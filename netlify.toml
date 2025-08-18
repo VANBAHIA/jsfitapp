@@ -1,259 +1,355 @@
-[build]
-  functions = "netlify/functions"
-  publish = "public"
-  command = "npm run build"
+# =============================================================================
+# JS FIT APP - CONFIGURAÇÃO NETLIFY
+# Arquivo: netlify.toml
+# =============================================================================
 
-[build.environment]
-  NODE_VERSION = "18"
-  NPM_VERSION = "9"
-  NETLIFY_USE_YARN = "false"
+[build]
+  # Comando de build (se houver processo de build)
+  command = "echo 'No build process required'"
+  
+  # Diretório de publicação
+  publish = "public"
+  
+  # Diretório das funções
+  functions = "netlify/functions"
+
+# =============================================================================
+# CONFIGURAÇÕES DE FUNÇÕES SERVERLESS
+# =============================================================================
 
 [functions]
-  directory = "netlify/functions"
+  # Configurações globais para todas as funções
   node_bundler = "esbuild"
-  external_node_modules = ["pg", "bcryptjs", "jsonwebtoken"]
+  
+  # Timeout padrão para funções (máximo 10 segundos no plano gratuito)
+  timeout = 10
+  
+  # Tamanho máximo da resposta (6MB máximo)
+  max_response_size = 6291456
 
-# =============================================
-# REDIRECIONAMENTOS DA API
-# =============================================
+# Configurações específicas por função
+[functions.auth]
+  timeout = 10
+  memory = 1024
 
-# Auth endpoints
+[functions.health]
+  timeout = 5
+  memory = 512
+
+[functions.plans]
+  timeout = 10
+  memory = 1024
+
+[functions.share]
+  timeout = 8
+  memory = 768
+
+[functions.workouts]
+  timeout = 8
+  memory = 768
+
+[functions.students]
+  timeout = 8
+  memory = 768
+
+# =============================================================================
+# REDIRECIONAMENTOS E REWRITES
+# =============================================================================
+
 [[redirects]]
+  # API routes - redirecionamento para funções
   from = "/api/auth/*"
-  to = "/.netlify/functions/auth"
+  to = "/.netlify/functions/auth/:splat"
   status = 200
-  force = true
 
-# Plans management
-[[redirects]]
-  from = "/api/plans/*"
-  to = "/.netlify/functions/plans"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/api/plans"
-  to = "/.netlify/functions/plans"
-  status = 200
-  force = true
-
-# Sharing system
-[[redirects]]
-  from = "/api/share/*"
-  to = "/.netlify/functions/share"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/api/share"
-  to = "/.netlify/functions/share"
-  status = 200
-  force = true
-
-# Students management
-[[redirects]]
-  from = "/api/students/*"
-  to = "/.netlify/functions/students"
-  status = 200
-  force = true
-
-# Health check
 [[redirects]]
   from = "/api/health"
   to = "/.netlify/functions/health"
   status = 200
-  force = true
 
-# Legacy workouts endpoint (backward compatibility)
+[[redirects]]
+  from = "/api/plans/*"
+  to = "/.netlify/functions/plans/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/api/share/*"
+  to = "/.netlify/functions/share/:splat"
+  status = 200
+
 [[redirects]]
   from = "/api/workouts/*"
-  to = "/.netlify/functions/share"
+  to = "/.netlify/functions/workouts/:splat"
   status = 200
-  force = true
 
-# =============================================
-# REDIRECIONAMENTOS DE PÁGINAS
-# =============================================
-
-# App redirects
 [[redirects]]
-  from = "/aluno"
-  to = "/aluno.html"
+  from = "/api/students/*"
+  to = "/.netlify/functions/students/:splat"
   status = 200
 
+# Redirecionamento para páginas principais
 [[redirects]]
   from = "/personal"
   to = "/personal.html"
   status = 200
 
 [[redirects]]
-  from = "/app"
-  to = "/index.html"
+  from = "/aluno"
+  to = "/aluno.html"
   status = 200
 
-# Fallback para SPA
+[[redirects]]
+  from = "/student"
+  to = "/aluno.html"
+  status = 200
+
+# PWA - Suporte para deep linking
+[[redirects]]
+  from = "/share/:shareId"
+  to = "/aluno.html?shareId=:shareId"
+  status = 200
+
+[[redirects]]
+  from = "/plan/:planId"
+  to = "/aluno.html?planId=:planId"
+  status = 200
+
+# SPA Fallback - todas as rotas não encontradas vão para index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  force = false
 
-# =============================================
-# HEADERS DE SEGURANÇA
-# =============================================
+# =============================================================================
+# HEADERS DE SEGURANÇA E PERFORMANCE
+# =============================================================================
 
 [[headers]]
   for = "/*"
   [headers.values]
+    # Segurança
     X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "geolocation=(), camera=(), microphone=()"
-    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    
+    # CORS para desenvolvimento local
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With"
+    
+    # Cache para assets estáticos
+    Cache-Control = "public, max-age=31536000"
 
-# Headers específicos para as APIs
+# Headers específicos para API
 [[headers]]
   for = "/api/*"
   [headers.values]
+    # CORS específico para API
     Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With"
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Max-Age = "86400"
-    Cache-Control = "no-cache, no-store, must-revalidate"
-
-# Headers específicos para as Functions
-[[headers]]
-  for = "/.netlify/functions/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Max-Age = "86400"
+    Access-Control-Allow-Credentials = "true"
+    
+    # Sem cache para API
     Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+    Expires = "0"
 
-# =============================================
-# CACHE PARA ARQUIVOS ESTÁTICOS
-# =============================================
-
-[[headers]]
-  for = "/css/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-    Vary = "Accept-Encoding"
-
-[[headers]]
-  for = "/js/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-    Vary = "Accept-Encoding"
-
+# Headers para arquivos JavaScript
 [[headers]]
   for = "*.js"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
     Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "public, max-age=86400"
 
+# Headers para arquivos CSS
 [[headers]]
   for = "*.css"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
     Content-Type = "text/css; charset=utf-8"
+    Cache-Control = "public, max-age=86400"
 
-# =============================================
-# HEADERS PWA
-# =============================================
+# Headers para HTML
+[[headers]]
+  for = "*.html"
+  [headers.values]
+    Content-Type = "text/html; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
 
+# Headers para PWA
 [[headers]]
   for = "/manifest.json"
   [headers.values]
-    Content-Type = "application/manifest+json; charset=utf-8"
-    Cache-Control = "public, max-age=0, must-revalidate"
+    Content-Type = "application/manifest+json"
+    Cache-Control = "public, max-age=86400"
 
 [[headers]]
   for = "/sw.js"
   [headers.values]
-    Content-Type = "application/javascript; charset=utf-8"
-    Cache-Control = "public, max-age=0, must-revalidate"
-    Service-Worker-Allowed = "/"
+    Content-Type = "application/javascript"
+    Cache-Control = "public, max-age=0"
 
-# =============================================
-# HEADERS PARA FONTES
-# =============================================
-
-[[headers]]
-  for = "/*.woff2"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-    Content-Type = "font/woff2"
-    Access-Control-Allow-Origin = "*"
-
-# =============================================
-# EDGE FUNCTIONS (BETA)
-# =============================================
-
-# Rate limiting edge function
-[[edge_functions]]
-  function = "rate-limit"
-  path = "/api/*"
-
-# =============================================
+# =============================================================================
 # CONFIGURAÇÕES DE DESENVOLVIMENTO
-# =============================================
+# =============================================================================
 
-[dev]
-  command = "npm run dev"
-  port = 8888
-  targetPort = 8888
-  framework = "#static"
-  autoLaunch = true
-
-[dev.env]
-  NODE_ENV = "development"
-
-# =============================================
-# CONFIGURAÇÕES DE CONTEXTO
-# =============================================
-
-[context.production]
-  command = "npm run build"
+[context.development]
+  command = "echo 'Development build'"
   
-[context.production.environment]
-  NODE_ENV = "production"
+  # Variáveis específicas para desenvolvimento
+  [context.development.environment]
+    NODE_ENV = "development"
+    DEBUG = "js-fit-app:*"
 
 [context.deploy-preview]
-  command = "npm run build"
+  command = "echo 'Deploy preview build'"
   
-[context.deploy-preview.environment]
-  NODE_ENV = "staging"
+  [context.deploy-preview.environment]
+    NODE_ENV = "staging"
 
-[context.branch-deploy]
-  command = "npm run build"
+[context.production]
+  command = "echo 'Production build'"
+  
+  [context.production.environment]
+    NODE_ENV = "production"
 
-# =============================================
-# FORMS (OPCIONAL)
-# =============================================
+# =============================================================================
+# EDGE FUNCTIONS (OPCIONAL - PARA RECURSOS AVANÇADOS)
+# =============================================================================
 
-[forms]
-  settings = true
+# Se precisar de edge functions no futuro
+# [[edge_functions]]
+#   function = "geo-location"
+#   path = "/api/location"
 
-# =============================================
-# SPLIT TESTING (OPCIONAL)
-# =============================================
-
-[split]
-  # Configurações de A/B testing se necessário
-
-# =============================================
-# PLUGINS
-# =============================================
+# =============================================================================
+# PLUGINS NETLIFY
+# =============================================================================
 
 [[plugins]]
   package = "@netlify/plugin-lighthouse"
   
-  [plugins.inputs.audits]
-    performance = true
-    accessibility = true
-    best-practices = true
-    seo = true
-    pwa =
+  [plugins.inputs.thresholds]
+    performance = 0.8
+    accessibility = 0.9
+    best-practices = 0.9
+    seo = 0.9
+
+# Plugin para otimização de imagens
+[[plugins]]
+  package = "netlify-plugin-image-optim"
+
+# Plugin para minificação
+[[plugins]]
+  package = "netlify-plugin-minify-html"
+  
+  [plugins.inputs]
+    contexts = ["production"]
+
+# =============================================================================
+# CONFIGURAÇÕES DE DEPLOY
+# =============================================================================
+
+[build.processing]
+  skip_processing = false
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+[build.processing.html]
+  pretty_urls = true
+
+[build.processing.images]
+  compress = true
+
+# =============================================================================
+# VARIÁVEIS DE AMBIENTE (REFERÊNCIA)
+# =============================================================================
+
+# IMPORTANTE: Não coloque valores reais aqui!
+# Configure no painel do Netlify: Site Settings > Environment Variables
+
+# Obrigatórias:
+# DATABASE_URL = "postgresql://..."
+# JWT_SECRET = "sua-chave-secreta-aqui"
+
+# Opcionais:
+# NODE_ENV = "production"
+# FRONTEND_URL = "https://jsfitapp.netlify.app"
+# JWT_EXPIRES_IN = "7d"
+# BCRYPT_ROUNDS = "12"
+# RATE_LIMIT_MAX_ATTEMPTS = "5"
+# RATE_LIMIT_WINDOW_MS = "900000"
+# LOCKOUT_TIME = "900000"
+# MAX_UPLOAD_SIZE = "10"
+# LOG_LEVEL = "info"
+
+# =============================================================================
+# CONFIGURAÇÕES ADICIONAIS
+# =============================================================================
+
+# Configurações de build
+[build.environment]
+  # Versão do Node.js
+  NODE_VERSION = "18"
+  
+  # Configurações de timezone
+  TZ = "America/Sao_Paulo"
+
+# Configurações de deploy hooks
+# [build.lifecycle]
+#   onSuccess = "echo 'Deploy successful!'"
+#   onError = "echo 'Deploy failed!'"
+
+# =============================================================================
+# MONITORAMENTO E ANALYTICS
+# =============================================================================
+
+# Se usar Netlify Analytics
+# [template.environment]
+#   NETLIFY_ANALYTICS = "true"
+
+# =============================================================================
+# CONFIGURAÇÕES DE DOMÍNIO (QUANDO APLICÁVEL)
+# =============================================================================
+
+# Para domínio customizado
+# [[redirects]]
+#   from = "https://www.seudominio.com/*"
+#   to = "https://seudominio.com/:splat"
+#   status = 301
+#   force = true
+
+# =============================================================================
+# NOTAS DE CONFIGURAÇÃO
+# =============================================================================
+
+# 1. Este arquivo deve estar na raiz do projeto
+# 2. Qualquer mudança requer novo deploy
+# 3. Variáveis sensíveis devem ser configuradas no painel do Netlify
+# 4. Logs podem ser visualizados no painel de deploy
+# 5. Para debugging, use o console do navegador e logs do Netlify
+
+# =============================================================================
+# TROUBLESHOOTING
+# =============================================================================
+
+# Problemas comuns:
+# 1. Funções com timeout: Aumente o valor em [functions]
+# 2. CORS errors: Verifique headers [[headers]] 
+# 3. 404 em rotas: Verifique [[redirects]]
+# 4. Build falha: Verifique comando em [build]
+# 5. Variáveis não definidas: Configure no painel
+
+# Para testar localmente:
+# npm install -g netlify-cli
+# netlify dev
+
+# Para deploy manual:
+# netlify deploy --prod
