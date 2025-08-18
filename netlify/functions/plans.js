@@ -1,17 +1,17 @@
-// netlify/functions/plans.js - Gerenciamento Completo de Planos de Treino
+// netlify/functions/plans.js - Gerenciamento Completo de Planos de Treino CORRIGIDO
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
 
-// Configuração do pool de conexões PostgreSQL
+// Configuração do pool de conexões PostgreSQL CORRIGIDA
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: 'postgresql://neondb_owner:npg_rsCkP3jbcal7@ep-red-cloud-acw2aqx0-pooler.sa-east-1.aws.neon.tech/academiajsfit?sslmode=require&channel_binding=require',
     ssl: {
         rejectUnauthorized: false
     },
     max: 10,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    connectionTimeoutMillis: 5000,
 });
 
 // Headers CORS padrão
@@ -195,6 +195,10 @@ exports.handler = async (event, context) => {
             return await handleGetPlanStats(event, pathParts[0]);
         }
 
+        if (method === 'POST' && pathParts.length === 2 && pathParts[1] === 'share') {
+            return await handleSharePlan(event, pathParts[0]);
+        }
+
         return errorResponse(404, 'Endpoint não encontrado');
 
     } catch (error) {
@@ -236,7 +240,7 @@ async function handleGetPlans(event) {
 
             if (search) {
                 paramCount++;
-                whereClause += ` AND (wp.name ILIKE ${paramCount} OR s.name ILIKE ${paramCount})`;
+                whereClause += ` AND (wp.name ILIKE $${paramCount} OR s.name ILIKE $${paramCount})`;
                 params.push(`%${search}%`);
             }
 
@@ -250,7 +254,7 @@ async function handleGetPlans(event) {
                     s.id as student_id, s.name as student_name, s.email as student_email,
                     COUNT(w.id) as total_workouts,
                     COUNT(w.id) FILTER (WHERE w.is_completed = true) as completed_workouts,
-                    SUM(w.execution_count) as total_executions,
+                    COALESCE(SUM(w.execution_count), 0) as total_executions,
                     (SELECT COUNT(*) FROM shared_plans sp WHERE sp.workout_plan_id = wp.id AND sp.is_active = true) as active_shares
                 FROM workout_plans wp
                 LEFT JOIN students s ON wp.student_id = s.id
@@ -258,7 +262,7 @@ async function handleGetPlans(event) {
                 ${whereClause}
                 GROUP BY wp.id, s.id
                 ORDER BY wp.updated_at DESC
-                LIMIT ${paramCount + 1} OFFSET ${paramCount + 2}
+                LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}
             `;
 
             params.push(limit, offset);
@@ -319,122 +323,6 @@ async function handleGetPlans(event) {
 
     } catch (error) {
         console.error('[PLANS] Erro ao listar planos:', error);
-        return errorResponse(401, error.message);
-    }
-}
-
-// Obter plano específico com todos os detalhes
-async function handleGetPlan(event, planId) {
-    try {
-        const decoded = verifyToken(event.headers.authorization);
-
-        if (!validator.isUUID(planId)) {
-            return errorResponse(400, 'ID do plano inválido');
-        }
-
-        const client = await pool.connect();
-        
-        try {
-            // Buscar plano
-            const planResult = await client.query(`
-                SELECT 
-                    wp.*, s.name as student_name, s.email as student_email,
-                    s.birth_date, s.age, s.height, s.weight, s.cpf
-                FROM workout_plans wp
-                LEFT JOIN students s ON wp.student_id = s.id
-                WHERE wp.id = $1 AND wp.personal_trainer_id = $2
-            `, [planId, decoded.userId]);
-
-            if (planResult.rows.length === 0) {
-                return errorResponse(404, 'Plano não encontrado');
-            }
-
-            const plan = planResult.rows[0];
-
-            // Buscar treinos
-            const workoutsResult = await client.query(`
-                SELECT * FROM workouts 
-                WHERE workout_plan_id = $1 
-                ORDER BY order_index
-            `, [planId]);
-
-            // Buscar exercícios para cada treino
-            const workouts = [];
-            for (const workout of workoutsResult.rows) {
-                const exercisesResult = await client.query(`
-                    SELECT * FROM exercises 
-                    WHERE workout_id = $1 
-                    ORDER BY order_index
-                `, [workout.id]);
-
-                workouts.push({
-                    id: workout.id,
-                    name: workout.name,
-                    workoutLetter: workout.workout_letter,
-                    focusArea: workout.focus_area,
-                    description: workout.description,
-                    estimatedDuration: workout.estimated_duration_minutes,
-                    difficultyLevel: workout.difficulty_level,
-                    orderIndex: workout.order_index,
-                    isCompleted: workout.is_completed,
-                    executionCount: workout.execution_count,
-                    notes: workout.notes,
-                    exercises: exercisesResult.rows.map(ex => ({
-                        id: ex.id,
-                        name: ex.name,
-                        description: ex.description,
-                        muscleGroups: ex.muscle_groups,
-                        equipment: ex.equipment,
-                        sets: ex.sets,
-                        reps: ex.reps,
-                        weight: ex.weight,
-                        restTime: ex.rest_time,
-                        orderIndex: ex.order_index,
-                        specialInstructions: ex.special_instructions,
-                        videoUrl: ex.video_url,
-                        imageUrl: ex.image_url,
-                        isCompleted: ex.is_completed,
-                        currentWeight: ex.current_weight,
-                        rpeScale: ex.rpe_scale
-                    }))
-                });
-            }
-
-            return successResponse(200, 'Plano obtido com sucesso', {
-                id: plan.id,
-                name: plan.name,
-                description: plan.description,
-                objective: plan.objective,
-                frequencyPerWeek: plan.frequency_per_week,
-                startDate: plan.start_date,
-                endDate: plan.end_date,
-                status: plan.status,
-                difficultyLevel: plan.difficulty_level,
-                equipmentType: plan.equipment_type,
-                estimatedDuration: plan.estimated_duration_minutes,
-                observations: plan.observations,
-                aiGenerated: plan.ai_generated,
-                completedCycles: plan.completed_cycles,
-                createdAt: plan.created_at,
-                updatedAt: plan.updated_at,
-                student: plan.student_name ? {
-                    name: plan.student_name,
-                    email: plan.student_email,
-                    birthDate: plan.birth_date,
-                    age: plan.age,
-                    height: plan.height,
-                    weight: plan.weight,
-                    cpf: plan.cpf
-                } : null,
-                workouts
-            });
-
-        } finally {
-            client.release();
-        }
-
-    } catch (error) {
-        console.error('[PLANS] Erro ao obter plano:', error);
         return errorResponse(401, error.message);
     }
 }
@@ -570,6 +458,294 @@ async function handleCreatePlan(event) {
     } catch (error) {
         console.error('[PLANS] Erro ao criar plano:', error);
         return errorResponse(error.message.includes('Token') ? 401 : 400, 'Erro ao criar plano');
+    }
+}
+
+// Compartilhar plano
+async function handleSharePlan(event, planId) {
+    try {
+        const decoded = verifyToken(event.headers.authorization);
+
+        if (!validator.isUUID(planId)) {
+            return errorResponse(400, 'ID do plano inválido');
+        }
+
+        const client = await pool.connect();
+        
+        try {
+            // Verificar se o plano pertence ao personal trainer
+            const planCheck = await client.query(
+                'SELECT id, name FROM workout_plans WHERE id = $1 AND personal_trainer_id = $2',
+                [planId, decoded.userId]
+            );
+
+            if (planCheck.rows.length === 0) {
+                return errorResponse(404, 'Plano não encontrado');
+            }
+
+            const plan = planCheck.rows[0];
+
+            // Gerar ID único para compartilhamento
+            let shareId;
+            let attempts = 0;
+            
+            do {
+                shareId = generateShareId();
+                const existing = await client.query(
+                    'SELECT id FROM shared_plans WHERE share_id = $1',
+                    [shareId]
+                );
+                attempts++;
+            } while (existing.rows.length > 0 && attempts < 10);
+
+            if (attempts === 10) {
+                return errorResponse(500, 'Não foi possível gerar ID único');
+            }
+
+            // Buscar dados completos do plano
+            const fullPlan = await getFullPlanData(client, planId);
+
+            // Criar compartilhamento
+            const shareResult = await client.query(`
+                INSERT INTO shared_plans (
+                    share_id, workout_plan_id, plan_data, expires_at
+                )
+                VALUES ($1, $2, $3, $4)
+                RETURNING id, share_id, created_at
+            `, [
+                shareId,
+                planId,
+                JSON.stringify(fullPlan),
+                new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) // 90 dias
+            ]);
+
+            const sharedPlan = shareResult.rows[0];
+
+            return successResponse(201, 'Plano compartilhado com sucesso', {
+                shareId: sharedPlan.share_id,
+                planName: plan.name,
+                expiresAt: sharedPlan.expires_at,
+                createdAt: sharedPlan.created_at
+            });
+
+        } finally {
+            client.release();
+        }
+
+    } catch (error) {
+        console.error('[PLANS] Erro ao compartilhar plano:', error);
+        return errorResponse(401, error.message);
+    }
+}
+
+// Função auxiliar para gerar Share ID
+function generateShareId() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
+// Função auxiliar para obter dados completos do plano
+async function getFullPlanData(client, planId) {
+    // Buscar plano básico
+    const planResult = await client.query(`
+        SELECT 
+            wp.*, s.name as student_name, s.email as student_email,
+            s.birth_date, s.age, s.height, s.weight, s.cpf
+        FROM workout_plans wp
+        LEFT JOIN students s ON wp.student_id = s.id
+        WHERE wp.id = $1
+    `, [planId]);
+
+    if (planResult.rows.length === 0) {
+        throw new Error('Plano não encontrado');
+    }
+
+    const plan = planResult.rows[0];
+
+    // Buscar treinos
+    const workoutsResult = await client.query(`
+        SELECT * FROM workouts 
+        WHERE workout_plan_id = $1 
+        ORDER BY order_index
+    `, [planId]);
+
+    // Buscar exercícios para cada treino
+    const workouts = [];
+    for (const workout of workoutsResult.rows) {
+        const exercisesResult = await client.query(`
+            SELECT * FROM exercises 
+            WHERE workout_id = $1 
+            ORDER BY order_index
+        `, [workout.id]);
+
+        workouts.push({
+            id: workout.workout_letter,
+            nome: workout.name,
+            foco: workout.focus_area,
+            descricao: workout.description,
+            exercicios: exercisesResult.rows.map(ex => ({
+                id: ex.id,
+                nome: ex.name,
+                descricao: ex.description,
+                series: ex.sets,
+                repeticoes: ex.reps,
+                carga: ex.weight,
+                descanso: ex.rest_time,
+                observacoesEspeciais: ex.special_instructions,
+                concluido: false
+            })),
+            concluido: false,
+            execucoes: workout.execution_count || 0
+        });
+    }
+
+    // Montar estrutura final do plano
+    return {
+        id: plan.id,
+        nome: plan.name,
+        descricao: plan.description,
+        objetivo: plan.objective,
+        dias: plan.frequency_per_week,
+        dataInicio: plan.start_date,
+        dataFim: plan.end_date,
+        aluno: plan.student_name ? {
+            nome: plan.student_name,
+            email: plan.student_email,
+            dataNascimento: plan.birth_date,
+            idade: plan.age,
+            altura: plan.height,
+            peso: plan.weight,
+            cpf: plan.cpf
+        } : null,
+        perfil: {
+            objetivo: plan.objective,
+            idade: plan.age,
+            altura: plan.height,
+            peso: plan.weight
+        },
+        treinos: workouts,
+        observacoes: plan.observations ? JSON.parse(plan.observations) : {},
+        execucoesPlanCompleto: plan.completed_cycles || 0
+    };
+}
+
+// Obter plano específico com todos os detalhes
+async function handleGetPlan(event, planId) {
+    try {
+        const decoded = verifyToken(event.headers.authorization);
+
+        if (!validator.isUUID(planId)) {
+            return errorResponse(400, 'ID do plano inválido');
+        }
+
+        const client = await pool.connect();
+        
+        try {
+            // Buscar plano
+            const planResult = await client.query(`
+                SELECT 
+                    wp.*, s.name as student_name, s.email as student_email,
+                    s.birth_date, s.age, s.height, s.weight, s.cpf
+                FROM workout_plans wp
+                LEFT JOIN students s ON wp.student_id = s.id
+                WHERE wp.id = $1 AND wp.personal_trainer_id = $2
+            `, [planId, decoded.userId]);
+
+            if (planResult.rows.length === 0) {
+                return errorResponse(404, 'Plano não encontrado');
+            }
+
+            const plan = planResult.rows[0];
+
+            // Buscar treinos
+            const workoutsResult = await client.query(`
+                SELECT * FROM workouts 
+                WHERE workout_plan_id = $1 
+                ORDER BY order_index
+            `, [planId]);
+
+            // Buscar exercícios para cada treino
+            const workouts = [];
+            for (const workout of workoutsResult.rows) {
+                const exercisesResult = await client.query(`
+                    SELECT * FROM exercises 
+                    WHERE workout_id = $1 
+                    ORDER BY order_index
+                `, [workout.id]);
+
+                workouts.push({
+                    id: workout.id,
+                    name: workout.name,
+                    workoutLetter: workout.workout_letter,
+                    focusArea: workout.focus_area,
+                    description: workout.description,
+                    estimatedDuration: workout.estimated_duration_minutes,
+                    difficultyLevel: workout.difficulty_level,
+                    orderIndex: workout.order_index,
+                    isCompleted: workout.is_completed,
+                    executionCount: workout.execution_count,
+                    notes: workout.notes,
+                    exercises: exercisesResult.rows.map(ex => ({
+                        id: ex.id,
+                        name: ex.name,
+                        description: ex.description,
+                        muscleGroups: ex.muscle_groups,
+                        equipment: ex.equipment,
+                        sets: ex.sets,
+                        reps: ex.reps,
+                        weight: ex.weight,
+                        restTime: ex.rest_time,
+                        orderIndex: ex.order_index,
+                        specialInstructions: ex.special_instructions,
+                        videoUrl: ex.video_url,
+                        imageUrl: ex.image_url,
+                        isCompleted: ex.is_completed,
+                        currentWeight: ex.current_weight,
+                        rpeScale: ex.rpe_scale
+                    }))
+                });
+            }
+
+            return successResponse(200, 'Plano obtido com sucesso', {
+                id: plan.id,
+                name: plan.name,
+                description: plan.description,
+                objective: plan.objective,
+                frequencyPerWeek: plan.frequency_per_week,
+                startDate: plan.start_date,
+                endDate: plan.end_date,
+                status: plan.status,
+                difficultyLevel: plan.difficulty_level,
+                equipmentType: plan.equipment_type,
+                estimatedDuration: plan.estimated_duration_minutes,
+                observations: plan.observations,
+                aiGenerated: plan.ai_generated,
+                completedCycles: plan.completed_cycles,
+                createdAt: plan.created_at,
+                updatedAt: plan.updated_at,
+                student: plan.student_name ? {
+                    name: plan.student_name,
+                    email: plan.student_email,
+                    birthDate: plan.birth_date,
+                    age: plan.age,
+                    height: plan.height,
+                    weight: plan.weight,
+                    cpf: plan.cpf
+                } : null,
+                workouts
+            });
+
+        } finally {
+            client.release();
+        }
+
+    } catch (error) {
+        console.error('[PLANS] Erro ao obter plano:', error);
+        return errorResponse(401, error.message);
     }
 }
 
@@ -805,13 +981,39 @@ async function handleGetPlanStats(event, planId) {
         const client = await pool.connect();
         
         try {
+            // Verificar se o plano pertence ao usuário
+            const planCheck = await client.query(
+                'SELECT id FROM workout_plans WHERE id = $1 AND personal_trainer_id = $2',
+                [planId, decoded.userId]
+            );
+
+            if (planCheck.rows.length === 0) {
+                return errorResponse(404, 'Plano não encontrado');
+            }
+
+            // Obter estatísticas
             const statsResult = await client.query(`
-                SELECT get_plan_statistics($1) as stats
+                SELECT 
+                    (SELECT COUNT(*) FROM workouts WHERE workout_plan_id = $1) as total_workouts,
+                    (SELECT COUNT(*) FROM workouts WHERE workout_plan_id = $1 AND is_completed = true) as completed_workouts,
+                    (SELECT COUNT(*) FROM exercises e JOIN workouts w ON e.workout_id = w.id WHERE w.workout_plan_id = $1) as total_exercises,
+                    (SELECT COUNT(*) FROM exercises e JOIN workouts w ON e.workout_id = w.id WHERE w.workout_plan_id = $1 AND e.is_completed = true) as completed_exercises,
+                    (SELECT COALESCE(SUM(execution_count), 0) FROM workouts WHERE workout_plan_id = $1) as total_executions,
+                    (SELECT completed_cycles FROM workout_plans WHERE id = $1) as completed_cycles
             `, [planId]);
 
-            const stats = statsResult.rows[0].stats;
+            const stats = statsResult.rows[0];
 
-            return successResponse(200, 'Estatísticas obtidas com sucesso', stats);
+            return successResponse(200, 'Estatísticas obtidas com sucesso', {
+                totalWorkouts: parseInt(stats.total_workouts) || 0,
+                completedWorkouts: parseInt(stats.completed_workouts) || 0,
+                totalExercises: parseInt(stats.total_exercises) || 0,
+                completedExercises: parseInt(stats.completed_exercises) || 0,
+                totalExecutions: parseInt(stats.total_executions) || 0,
+                completedCycles: parseInt(stats.completed_cycles) || 0,
+                completionPercentage: stats.total_exercises > 0 ? 
+                    Math.round((stats.completed_exercises / stats.total_exercises) * 100) : 0
+            });
 
         } finally {
             client.release();
@@ -821,3 +1023,4 @@ async function handleGetPlanStats(event, planId) {
         console.error('[PLANS] Erro ao obter estatísticas:', error);
         return errorResponse(401, error.message);
     }
+}

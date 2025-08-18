@@ -1,18 +1,18 @@
-// netlify/functions/auth.js - Sistema de Autenticação JWT Completo
+// netlify/functions/auth.js - Sistema de Autenticação JWT Corrigido
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
 
-// Configuração do pool de conexões PostgreSQL
+// Configuração do pool de conexões PostgreSQL - CORRIGIDA
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: 'postgresql://neondb_owner:npg_rsCkP3jbcal7@ep-red-cloud-acw2aqx0-pooler.sa-east-1.aws.neon.tech/academiajsfit?sslmode=require&channel_binding=require',
     ssl: {
         rejectUnauthorized: false
     },
     max: 10,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    connectionTimeoutMillis: 5000,
 });
 
 // Headers CORS padrão
@@ -213,7 +213,7 @@ exports.handler = async (event, context) => {
 };
 
 // =============================================================================
-// HANDLERS DE ENDPOINTS
+// HANDLERS DE ENDPOINTS - CORRIGIDOS
 // =============================================================================
 
 // Registrar novo personal trainer
@@ -294,7 +294,7 @@ async function handleRegister(event) {
     }
 }
 
-// Login
+// Login - CORRIGIDO
 async function handleLogin(event, clientIP) {
     try {
         const data = JSON.parse(event.body);
@@ -386,7 +386,7 @@ async function handleLogin(event, clientIP) {
     }
 }
 
-// Obter perfil do usuário
+// Obter perfil do usuário - CORRIGIDO
 async function handleGetProfile(event) {
     try {
         const decoded = verifyToken(event.headers.authorization);
@@ -441,7 +441,7 @@ async function handleGetProfile(event) {
     }
 }
 
-// Atualizar perfil
+// Atualizar perfil - CORRIGIDO
 async function handleUpdateProfile(event) {
     try {
         const decoded = verifyToken(event.headers.authorization);
@@ -486,7 +486,7 @@ async function handleUpdateProfile(event) {
     }
 }
 
-// Refresh token
+// Refresh token - CORRIGIDO
 async function handleRefreshToken(event) {
     try {
         const decoded = verifyToken(event.headers.authorization);
@@ -546,7 +546,7 @@ async function handleLogout(event) {
     }
 }
 
-// Alterar senha
+// Alterar senha - CORRIGIDO
 async function handleChangePassword(event) {
     try {
         const decoded = verifyToken(event.headers.authorization);

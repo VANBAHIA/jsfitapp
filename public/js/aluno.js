@@ -1,16 +1,14 @@
-// modernized-student-app.js - JS Fit Student App - Refactored Version
-
-/**
- * Modern Student Workout App
- * Refactored for better performance, maintainability, and user experience
- */
+// aluno.js - JS Fit Student App - Compatible with Backend System
+// Sistema modernizado compatível com PostgreSQL e Netlify Functions
 
 class JSFitStudentApp {
     constructor() {
         // API Configuration
         this.config = {
-            apiBase: 'https://jsfitapp.netlify.app/api',
-            timeout: 8000,
+            apiBase: window.location.hostname === 'localhost' ? 
+                'http://localhost:8888/api' : 
+                'https://jsfitapp.netlify.app/api',
+            timeout: 10000,
             retries: 3,
             syncInterval: 30000
         };
@@ -23,12 +21,11 @@ class JSFitStudentApp {
             activeWorkoutSessions: new Map(),
             editingWeights: new Set(),
             connectionStatus: 'unknown',
-            isOnline: navigator.onLine
+            isOnline: navigator.onLine,
+            user: null,
+            token: null
         };
 
-        // Event handlers
-        this.eventHandlers = new Map();
-        
         // Initialize app
         this.init();
     }
@@ -38,7 +35,7 @@ class JSFitStudentApp {
     // =============================================================================
 
     async init() {
-        console.log('🚀 Initializing JS Fit Student App');
+        console.log('🚀 Initializing JS Fit Student App - Backend Compatible');
         
         try {
             this.setupEventListeners();
@@ -74,7 +71,6 @@ class JSFitStudentApp {
             this.saveToStorage();
         });
 
-        // Handle visibility changes for battery optimization
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 this.saveToStorage();
@@ -92,7 +88,7 @@ class JSFitStudentApp {
         };
 
         setViewportHeight();
-        window.addEventListener('resize', debounce(setViewportHeight, 150));
+        window.addEventListener('resize', this.debounce(setViewportHeight, 150));
         window.addEventListener('orientationchange', () => {
             setTimeout(setViewportHeight, 500);
         });
@@ -119,6 +115,7 @@ class JSFitStudentApp {
                 signal: controller.signal,
                 headers: {
                     'Content-Type': 'application/json',
+                    ...(this.state.token && { 'Authorization': `Bearer ${this.state.token}` }),
                     ...options.headers
                 }
             });
@@ -126,7 +123,8 @@ class JSFitStudentApp {
             clearTimeout(timeoutId);
             
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
             }
 
             return await response.json();
@@ -144,9 +142,14 @@ class JSFitStudentApp {
     async checkServerConnection() {
         try {
             this.updateConnectionStatus('loading');
-            await this.makeRequest('/health');
-            this.updateConnectionStatus('online');
-            return true;
+            const response = await this.makeRequest('/health');
+            
+            if (response.success !== false) {
+                this.updateConnectionStatus('online');
+                return true;
+            } else {
+                throw new Error('Health check failed');
+            }
         } catch (error) {
             console.warn('Server connection failed:', error);
             this.updateConnectionStatus('offline');
@@ -172,10 +175,10 @@ class JSFitStudentApp {
             // Try server first
             const serverData = await this.fetchFromServer(normalizedId);
             
-            // Save to cache
-            this.savePlanToCache(normalizedId, serverData);
+            // Process and save the plan
+            const processedPlan = this.processPlanData(serverData, normalizedId, 'server');
             
-            return this.processPlanData(serverData, normalizedId, 'server');
+            return processedPlan;
         } catch (serverError) {
             console.warn('Server fetch failed, trying cache:', serverError);
             
@@ -185,37 +188,92 @@ class JSFitStudentApp {
                 throw new Error('Plano não encontrado nem no servidor nem no cache');
             }
             
-            return this.processPlanData(cacheData, normalizedId, 'cache');
+            const processedPlan = this.processPlanData(cacheData, normalizedId, 'cache');
+            return processedPlan;
         }
     }
 
     async fetchFromServer(shareId) {
-        const data = await this.makeRequest(`/share/${shareId}`);
-        return data;
+        try {
+            const response = await this.makeRequest(`/share/${shareId}`);
+            
+            if (response.success && response.plan) {
+                return response.plan;
+            } else {
+                throw new Error(response.error || 'Plano não encontrado no servidor');
+            }
+        } catch (error) {
+            throw new Error(`Erro ao buscar do servidor: ${error.message}`);
+        }
     }
 
     processPlanData(planData, shareId, source) {
+        // Convert backend format to frontend format
         const processedPlan = {
-            ...planData,
             id: this.generateId(),
+            nome: planData.nome || planData.name || 'Plano Importado',
             originalShareId: shareId,
             importedAt: new Date().toISOString(),
             importedFrom: source,
             execucoesPlanCompleto: 0,
-            treinos: planData.treinos.map(treino => ({
-                ...treino,
-                concluido: false,
-                execucoes: 0,
-                exercicios: treino.exercicios.map(ex => ({
-                    ...ex,
-                    id: ex.id || this.generateId(),
-                    concluido: false,
-                    currentCarga: ex.carga || ex.currentCarga || ''
-                }))
-            }))
+            
+            // Student data
+            aluno: {
+                nome: planData.aluno?.nome || planData.student?.name || '',
+                dataNascimento: planData.aluno?.dataNascimento || planData.student?.birth_date || '',
+                idade: planData.aluno?.idade || planData.student?.age || null,
+                altura: planData.aluno?.altura || planData.student?.height || '',
+                peso: planData.aluno?.peso || planData.student?.weight || '',
+                cpf: planData.aluno?.cpf || planData.student?.cpf || ''
+            },
+            
+            // Plan metadata
+            dias: planData.dias || planData.frequency_per_week || 3,
+            dataInicio: planData.dataInicio || planData.start_date || new Date().toISOString().split('T')[0],
+            dataFim: planData.dataFim || planData.end_date || '',
+            
+            // Profile and objectives
+            perfil: {
+                objetivo: planData.perfil?.objetivo || planData.objective || 'Condicionamento geral',
+                altura: planData.aluno?.altura || planData.student?.height || '',
+                peso: planData.aluno?.peso || planData.student?.weight || '',
+                idade: planData.aluno?.idade || planData.student?.age || null
+            },
+            
+            // Convert workouts
+            treinos: this.convertWorkoutsToFrontendFormat(planData.treinos || planData.workouts || []),
+            
+            // Observations
+            observacoes: planData.observacoes || planData.observations || {}
         };
 
         return { plan: processedPlan, source };
+    }
+
+    convertWorkoutsToFrontendFormat(workouts) {
+        return workouts.map((workout, index) => ({
+            id: workout.id || String.fromCharCode(65 + index),
+            nome: workout.nome || workout.name || `Treino ${String.fromCharCode(65 + index)}`,
+            foco: workout.foco || workout.focus_area || 'Treino geral',
+            concluido: false,
+            execucoes: 0,
+            exercicios: this.convertExercisesToFrontendFormat(workout.exercicios || workout.exercises || [])
+        }));
+    }
+
+    convertExercisesToFrontendFormat(exercises) {
+        return exercises.map((exercise, index) => ({
+            id: exercise.id || this.generateId(),
+            nome: exercise.nome || exercise.name || 'Exercício',
+            descricao: exercise.descricao || exercise.description || '',
+            series: exercise.series || exercise.sets || 3,
+            repeticoes: exercise.repeticoes || exercise.reps || '10-12',
+            carga: exercise.carga || exercise.weight || 'A definir',
+            currentCarga: exercise.currentCarga || exercise.current_weight || exercise.carga || exercise.weight || 'A definir',
+            descanso: exercise.descanso || exercise.rest_time || '90 segundos',
+            observacoesEspeciais: exercise.observacoesEspeciais || exercise.special_instructions || '',
+            concluido: false
+        }));
     }
 
     // =============================================================================
@@ -225,7 +283,6 @@ class JSFitStudentApp {
     startWorkout(planId, workoutId) {
         const sessionKey = `${planId}-${workoutId}`;
         
-        // Check if already active
         if (this.state.activeWorkoutSessions.has(sessionKey)) {
             this.showNotification('Este treino já está em andamento', 'warning');
             return;
@@ -239,7 +296,6 @@ class JSFitStudentApp {
             return;
         }
 
-        // Start session
         this.state.activeWorkoutSessions.set(sessionKey, {
             startTime: new Date(),
             planId,
@@ -406,7 +462,8 @@ class JSFitStudentApp {
             const data = {
                 workoutPlans: this.state.workoutPlans,
                 activeWorkoutSessions: Array.from(this.state.activeWorkoutSessions.entries()),
-                lastSaved: new Date().toISOString()
+                lastSaved: new Date().toISOString(),
+                version: '3.0.0'
             };
             
             localStorage.setItem('jsfitapp_student_data', JSON.stringify(data));
@@ -443,6 +500,20 @@ class JSFitStudentApp {
         if (oldData) {
             try {
                 const plans = JSON.parse(oldData);
+                plans.forEach(plan => {
+                    // Convert old format to new format
+                    if (!plan.aluno && plan.perfil) {
+                        plan.aluno = {
+                            nome: '',
+                            dataNascimento: '',
+                            idade: plan.perfil.idade || null,
+                            altura: plan.perfil.altura || '',
+                            peso: plan.perfil.peso || '',
+                            cpf: ''
+                        };
+                    }
+                });
+                
                 this.state.workoutPlans = [...this.state.workoutPlans, ...plans];
                 localStorage.removeItem('studentWorkoutPlans');
                 this.saveToStorage();
@@ -495,7 +566,6 @@ class JSFitStudentApp {
         const plan = this.findPlan(planId);
         if (!plan) return;
 
-        // Check for active workouts
         const activeWorkouts = Array.from(this.state.activeWorkoutSessions.keys())
             .filter(key => key.startsWith(`${planId}-`));
 
@@ -674,7 +744,7 @@ class JSFitStudentApp {
         const isOnline = this.state.connectionStatus === 'online';
         
         return `
-            <div class="card import-card">
+            <div class="card import-by-id-card">
                 <div class="card-content">
                     <h3 class="import-title">
                         🔗 Importar Treino por ID
@@ -963,7 +1033,7 @@ class JSFitStudentApp {
                             <p class="workout-subtitle">
                                 ${treino.foco} • ${totalExercises} exercícios • Executado ${treino.execucoes}x
                             </p>
-                            ${isActive ? '<div class="active-workout-badge">Treino em andamento</div>' : ''}
+                            ${isActive ? '<div class="active-workout">Treino em andamento</div>' : ''}
                             
                             ${workoutProgress > 0 && !isCompleted ? this.renderProgressBar(workoutProgress) : ''}
                         </div>
@@ -1116,7 +1186,7 @@ class JSFitStudentApp {
                     </div>
                     
                     ${exercicio.currentCarga !== exercicio.carga ? `
-                        <div class="current-weight-info">
+                        <div class="current-weight">
                             Carga original: ${exercicio.carga}
                         </div>
                     ` : ''}
@@ -1136,10 +1206,10 @@ class JSFitStudentApp {
                        placeholder="Digite a nova carga"
                        autocomplete="off">
                 <div class="weight-edit-actions">
-                    <button onclick="app.handleSaveWeight(${exercicio.id})" class="btn btn-success btn-weight">
+                    <button onclick="app.handleSaveWeight(${exercicio.id})" class="btn btn-success btn-small">
                         Salvar
                     </button>
-                    <button onclick="app.cancelEditingWeight(${exercicio.id})" class="btn btn-secondary btn-weight">
+                    <button onclick="app.cancelEditingWeight(${exercicio.id})" class="btn btn-secondary btn-small">
                         Cancelar
                     </button>
                 </div>
@@ -1254,6 +1324,18 @@ class JSFitStudentApp {
             geral: 'Observações Gerais'
         };
         return labels[key] || key.charAt(0).toUpperCase() + key.slice(1);
+    }
+
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
     }
 
     // =============================================================================
@@ -1466,22 +1548,6 @@ class JSFitStudentApp {
         this.renderHome();
         this.showNotification('Plano de exemplo carregado!', 'success');
     }
-}
-
-// =============================================================================
-// UTILITY FUNCTIONS
-// =============================================================================
-
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
 }
 
 // =============================================================================

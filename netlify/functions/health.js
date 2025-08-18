@@ -1,7 +1,7 @@
-// netlify/functions/health.js
+// netlify/functions/health.js - Health Check Corrigido
 const { Pool } = require('pg');
 
-// Pool de conexões com o novo banco
+// Pool de conexões com o banco correto
 const pool = new Pool({
     connectionString: 'postgresql://neondb_owner:npg_rsCkP3jbcal7@ep-red-cloud-acw2aqx0-pooler.sa-east-1.aws.neon.tech/academiajsfit?sslmode=require&channel_binding=require',
     max: 5,
@@ -23,6 +23,8 @@ let lastCheckTime = 0;
 const CACHE_DURATION = 30000; // 30 segundos
 
 exports.handler = async (event, context) => {
+    context.callbackWaitsForEmptyEventLoop = false;
+
     // Handle preflight requests
     if (event.httpMethod === 'OPTIONS') {
         return {
@@ -74,10 +76,15 @@ exports.handler = async (event, context) => {
             status: 'online',
             timestamp: new Date().toISOString(),
             version: '2.1.0',
-            environment: 'production',
+            environment: process.env.NODE_ENV || 'production',
             uptime: process.uptime(),
             database: dbHealth,
-            storage: stats
+            statistics: stats,
+            server: {
+                memory: process.memoryUsage(),
+                platform: process.platform,
+                nodeVersion: process.version
+            }
         };
 
         // Determinar status geral
@@ -132,12 +139,19 @@ async function checkDatabase() {
             await client.query('SELECT 1');
             await client.query('ROLLBACK');
 
+            // Verificar se as extensões estão instaladas
+            const extensionsResult = await client.query(`
+                SELECT extname FROM pg_extension 
+                WHERE extname IN ('uuid-ossp')
+            `);
+
             return {
                 status: 'healthy',
                 responseTime: `${responseTime}ms`,
                 timestamp: result.rows[0].current_time,
                 version: result.rows[0].version.split(' ')[0] + ' ' + result.rows[0].version.split(' ')[1],
                 connection: 'active',
+                extensions: extensionsResult.rows.map(row => row.extname),
                 pool: {
                     total: pool.totalCount,
                     idle: pool.idleCount,
@@ -172,46 +186,105 @@ async function getSystemStats() {
                 SELECT table_name 
                 FROM information_schema.tables 
                 WHERE table_schema = 'public' 
-                AND table_name IN ('workout_plans', 'workouts', 'exercises', 'shared_plans')
+                AND table_name IN ('workout_plans', 'workouts', 'exercises', 'shared_plans', 'personal_trainers', 'students')
             `);
 
-            if (tablesExist.rows.length === 0) {
+            const existingTables = tablesExist.rows.map(row => row.table_name);
+
+            if (existingTables.length === 0) {
                 return {
-                    totalWorkouts: 0,
-                    activeShares: 0,
-                    totalPlans: 0,
-                    note: 'Database tables not yet created'
+                    tablesStatus: 'not_created',
+                    message: 'Database tables not yet created',
+                    availableTables: existingTables
                 };
             }
 
             // Se as tabelas existem, obter estatísticas
-            const statsQuery = `
-                SELECT 
-                    (SELECT COUNT(*) FROM workout_plans WHERE status = 'active') as active_plans,
-                    (SELECT COUNT(*) FROM workout_plans) as total_plans,
-                    (SELECT COUNT(*) FROM workouts) as total_workouts,
-                    (SELECT COUNT(*) FROM exercises) as total_exercises,
-                    (SELECT COUNT(*) FROM shared_plans WHERE is_active = true) as active_shares
-            `;
+            const stats = {};
 
-            const result = await client.query(statsQuery);
-            const stats = result.rows[0];
+            // Estatísticas básicas
+            if (existingTables.includes('personal_trainers')) {
+                const trainersResult = await client.query('SELECT COUNT(*) as count FROM personal_trainers WHERE is_active = true');
+                stats.activePersonalTrainers = parseInt(trainersResult.rows[0].count);
+            }
 
-            return {
-                plans: {
-                    total: parseInt(stats.total_plans) || 0,
-                    active: parseInt(stats.active_plans) || 0
-                },
-                workouts: {
-                    total: parseInt(stats.total_workouts) || 0
-                },
-                exercises: {
-                    total: parseInt(stats.total_exercises) || 0
-                },
-                sharing: {
-                    activeShares: parseInt(stats.active_shares) || 0
-                }
+            if (existingTables.includes('students')) {
+                const studentsResult = await client.query('SELECT COUNT(*) as count FROM students');
+                stats.totalStudents = parseInt(studentsResult.rows[0].count);
+            }
+
+            if (existingTables.includes('workout_plans')) {
+                const plansResult = await client.query(`
+                    SELECT 
+                        COUNT(*) as total_plans,
+                        COUNT(*) FILTER (WHERE status = 'active') as active_plans,
+                        COUNT(*) FILTER (WHERE ai_generated = true) as ai_generated_plans
+                    FROM workout_plans
+                `);
+                const planStats = plansResult.rows[0];
+                stats.workoutPlans = {
+                    total: parseInt(planStats.total_plans),
+                    active: parseInt(planStats.active_plans),
+                    aiGenerated: parseInt(planStats.ai_generated_plans)
+                };
+            }
+
+            if (existingTables.includes('workouts')) {
+                const workoutsResult = await client.query(`
+                    SELECT 
+                        COUNT(*) as total_workouts,
+                        COUNT(*) FILTER (WHERE is_completed = true) as completed_workouts,
+                        COALESCE(SUM(execution_count), 0) as total_executions
+                    FROM workouts
+                `);
+                const workoutStats = workoutsResult.rows[0];
+                stats.workouts = {
+                    total: parseInt(workoutStats.total_workouts),
+                    completed: parseInt(workoutStats.completed_workouts),
+                    totalExecutions: parseInt(workoutStats.total_executions)
+                };
+            }
+
+            if (existingTables.includes('exercises')) {
+                const exercisesResult = await client.query(`
+                    SELECT 
+                        COUNT(*) as total_exercises,
+                        COUNT(*) FILTER (WHERE is_completed = true) as completed_exercises
+                    FROM exercises
+                `);
+                const exerciseStats = exercisesResult.rows[0];
+                stats.exercises = {
+                    total: parseInt(exerciseStats.total_exercises),
+                    completed: parseInt(exerciseStats.completed_exercises)
+                };
+            }
+
+            if (existingTables.includes('shared_plans')) {
+                const sharedResult = await client.query(`
+                    SELECT 
+                        COUNT(*) as total_shared,
+                        COUNT(*) FILTER (WHERE is_active = true) as active_shares,
+                        COALESCE(SUM(access_count), 0) as total_accesses
+                    FROM shared_plans
+                `);
+                const shareStats = sharedResult.rows[0];
+                stats.sharedPlans = {
+                    total: parseInt(shareStats.total_shared),
+                    active: parseInt(shareStats.active_shares),
+                    totalAccesses: parseInt(shareStats.total_accesses)
+                };
+            }
+
+            // Informações sobre o banco
+            const dbSizeResult = await client.query(`
+                SELECT pg_size_pretty(pg_database_size(current_database())) as database_size
+            `);
+            stats.database = {
+                size: dbSizeResult.rows[0].database_size,
+                availableTables: existingTables
             };
+
+            return stats;
 
         } finally {
             client.release();
@@ -220,10 +293,18 @@ async function getSystemStats() {
     } catch (error) {
         console.error('[HEALTH] Erro ao obter estatísticas:', error);
         return {
-            totalWorkouts: 0,
-            activeShares: 0,
             error: 'Could not fetch statistics',
-            message: error.message
+            message: error.message,
+            tablesStatus: 'error'
         };
     }
 }
+
+// Função para limpar cache quando necessário
+function clearCache() {
+    lastHealthCheck = null;
+    lastCheckTime = 0;
+}
+
+// Exportar função para limpeza de cache se necessário
+module.exports.clearCache = clearCache;
