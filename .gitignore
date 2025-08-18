@@ -1,5 +1,5 @@
 # =============================================================================
-# JS FIT APP - GITIGNORE
+# JS FIT APP - GITIGNORE OTIMIZADO
 # =============================================================================
 
 # =============================================================================
@@ -22,6 +22,34 @@ secrets.json
 # Credenciais de banco de dados
 database.json
 db-config.json
+
+# =============================================================================
+# ARQUIVOS ESPECÍFICOS DO JS FIT APP
+# =============================================================================
+
+# Scripts de desenvolvimento local (removidos do controle de versão)
+scripts/migrate-local-data.js
+scripts/setup-database.js
+
+# Arquivos de configuração sensível do Netlify
+netlify/functions/env_example.sh
+
+# Configurações locais de desenvolvimento
+local-config.js
+dev-config.json
+*.local.json
+dev-config.*
+local-server.config
+
+# Dados de treinos locais (desenvolvimento)
+data/workouts/*.json
+data/plans/*.json
+public/data/workouts/*.json
+
+# Backups de dados locais
+data-backup-*
+plans-backup-*
+workouts-backup-*
 
 # =============================================================================
 # NODE.JS E NPM
@@ -72,6 +100,9 @@ netlify-debug.log
 # Cache de funções
 .netlify/functions-serve/
 
+# Configurações locais do Netlify
+.netlify.toml.backup
+
 # =============================================================================
 # LOGS E DEBUGGING
 # =============================================================================
@@ -88,6 +119,10 @@ pids
 
 # Diretório para dados de debug
 .vscode-test
+
+# Logs específicos do JS Fit App
+jsfitapp-*.log
+app-debug-*.log
 
 # =============================================================================
 # SISTEMA OPERACIONAL
@@ -195,6 +230,10 @@ tmp/
 # Cache do navegador para desenvolvimento
 .browser-cache/
 
+# Cache específico do JS Fit App
+.jsfitapp-cache/
+app-cache/
+
 # =============================================================================
 # ARQUIVOS DE BUILD E DISTRIBUIÇÃO
 # =============================================================================
@@ -226,6 +265,11 @@ coverage/
 test-results/
 .test-output/
 
+# Testes específicos do JS Fit App
+test-data/
+mock-data/
+fixtures/
+
 # =============================================================================
 # DOCUMENTAÇÃO E RELATÓRIOS
 # =============================================================================
@@ -237,6 +281,11 @@ api-docs/
 # Relatórios
 reports/
 lighthouse-report.html
+
+# Documentação removida do controle de versão
+implementation_guide.txt
+dev-notes.md
+internal-docs/
 
 # =============================================================================
 # BANCO DE DADOS LOCAL
@@ -255,6 +304,10 @@ migrations/temp/
 *.sqlite3
 *.db
 
+# Scripts SQL temporários
+temp-*.sql
+debug-*.sql
+
 # =============================================================================
 # UPLOADS E MÍDIA (DESENVOLVIMENTO)
 # =============================================================================
@@ -267,6 +320,9 @@ user-uploads/
 # Imagens temporárias
 temp-images/
 cache-images/
+
+# Assets gerados durante desenvolvimento
+generated-assets/
 
 # =============================================================================
 # CERTIFICADOS E CHAVES
@@ -283,7 +339,10 @@ cache-images/
 # Chaves SSH
 id_rsa
 id_rsa.pub
-*.pem
+
+# Chaves específicas do projeto
+jwt-*.key
+api-*.key
 
 # =============================================================================
 # ARQUIVOS ESPECÍFICOS DO PROJETO
@@ -315,6 +374,10 @@ monitoring/
 performance/
 *.perf
 
+# Métricas de desenvolvimento
+metrics/
+analytics-debug/
+
 # =============================================================================
 # DEPENDÊNCIAS E VENDORS
 # =============================================================================
@@ -334,6 +397,23 @@ lib/external/
 # Configurações do servidor local
 local-server.config
 
+# Configurações específicas do JS Fit App
+.jsfitapp-config
+personal-trainer-settings.json
+student-app-settings.json
+
+# =============================================================================
+# PWA E SERVICE WORKER (DESENVOLVIMENTO)
+# =============================================================================
+
+# Cache do Service Worker em desenvolvimento
+sw-cache/
+pwa-debug/
+
+# Arquivos temporários do PWA
+pwa-temp/
+manifest-temp.json
+
 # =============================================================================
 # EXCLUSÕES ESPECÍFICAS (MANTER ARQUIVOS IMPORTANTES)
 # =============================================================================
@@ -343,9 +423,17 @@ local-server.config
 !docs/README.md
 !scripts/README.md
 
-# Manter exemplos de configuração
+# Manter exemplos de configuração essenciais
 !.env.example
 !config.example.json
+!netlify.toml
+
+# Manter scripts essenciais de banco (apenas o schema principal)
+!scripts/database_schema.sql
+
+# Manter manifesto PWA e service worker
+!public/manifest.json
+!public/sw.js
 
 # =============================================================================
 # PADRÕES FINAIS
@@ -368,3 +456,30 @@ local-server.config
 *.zip.tmp
 *.tar.tmp
 *.gz.tmp
+
+# Arquivos específicos removidos do controle de versão
+implementation_guide.txt
+workout_table_sql.sql
+
+# =============================================================================
+# COMENTÁRIOS IMPORTANTES
+# =============================================================================
+
+# Este .gitignore foi otimizado para o JS Fit App
+# Inclui padrões específicos para:
+# - Aplicação PWA
+# - Sistema de treinos
+# - Backend Netlify Functions
+# - Banco de dados PostgreSQL
+# - Autenticação JWT
+# - Sistema de compartilhamento
+
+# Para desenvolvedores:
+# - Mantenha suas configurações locais em arquivos *.local
+# - Use dev-config.* para configurações de desenvolvimento
+# - Scripts sensíveis devem ir em scripts/private/
+
+# Para deploy:
+# - Apenas arquivos essenciais são incluídos
+# - Dados sensíveis são automaticamente excluídos
+# - Build e cache são ignorados
