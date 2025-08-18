@@ -17,10 +17,12 @@
     "lint": "echo 'No linting configured yet'",
     "start": "netlify dev",
     "db:init": "chmod +x scripts/database_initialization.sh && ./scripts/database_initialization.sh",
-    "db:migrate": "psql $DATABASE_URL -f database/schema.sql",
+    "db:migrate": "netlify dev:exec drizzle-kit migrate",
     "db:test": "psql $DATABASE_URL -c 'SELECT version();'",
     "health": "curl https://jsfitapp.netlify.app/api/health",
-    "logs": "netlify logs"
+    "logs": "netlify logs",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "netlify dev:exec drizzle-kit studio"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
