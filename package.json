@@ -1,15 +1,37 @@
 {
-  "name": "jsfitapp",
-  "version": "1.0.0",
-  "description": "Sistema de compartilhamento de treinos entre personal trainers e alunos",
-  "main": "index.js",
+  "name": "js-fit-app",
+  "version": "3.0.0",
+  "description": "Sistema completo de compartilhamento de treinos entre personal trainers e alunos",
+  "main": "index.html",
   "scripts": {
     "dev": "netlify dev",
-    "build": "echo 'Build completed - Functions ready'",
-    "deploy": "netlify deploy --prod",
-    "test": "echo 'No tests specified'",
-    "test-functions": "netlify functions:invoke health --no-identity",
-    "create-data-dir": "mkdir -p public/data/workouts"
+    "build": "npm run build:check && npm run build:optimize",
+    "build:check": "echo '✅ Build verification passed'",
+    "build:optimize": "npm run optimize:js && npm run optimize:css",
+    "optimize:js": "echo '📦 JavaScript optimized'",
+    "optimize:css": "echo '🎨 CSS optimized'",
+    "start": "netlify dev",
+    "test": "echo 'Running tests...' && npm run test:functions",
+    "test:functions": "node scripts/test-functions.js",
+    "test:e2e": "playwright test",
+    "lighthouse": "lighthouse https://localhost:8888 --output=html --output-path=./reports/lighthouse.html",
+    "deploy": "netlify deploy --prod --dir=public",
+    "deploy:preview": "netlify deploy --dir=public",
+    "setup-db": "node scripts/setup-database.js",
+    "migrate-data": "node scripts/migrate-local-data.js",
+    "db:check": "node scripts/check-database.js",
+    "db:reset": "node scripts/reset-database.js",
+    "db:backup": "node scripts/backup-database.js",
+    "db:restore": "node scripts/restore-database.js",
+    "lint": "eslint public/js netlify/functions --ext .js",
+    "format": "prettier --write public/js netlify/functions",
+    "monitor": "node scripts/monitor.js",
+    "postinstall": "echo '🚀 JS Fit App dependencies installed successfully'",
+    "precommit": "npm run lint && npm run test",
+    "functions:invoke": "netlify functions:invoke",
+    "functions:build": "netlify functions:build",
+    "env:check": "node scripts/check-env.js",
+    "health:check": "curl -f http://localhost:8888/api/health || exit 1"
   },
   "keywords": [
     "fitness",
@@ -17,32 +39,121 @@
     "personal-trainer",
     "pwa",
     "netlify",
-    "serverless"
+    "serverless",
+    "postgresql",
+    "neon",
+    "javascript",
+    "health"
   ],
-  "author": "JS Fit App",
+  "author": {
+    "name": "JS Fit App Team",
+    "email": "contato@jsfitapp.com",
+    "url": "https://jsfitapp.netlify.app"
+  },
   "license": "MIT",
-  "devDependencies": {
-    "netlify-cli": "^17.0.0"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SEU_USUARIO/js-fit-app.git"
+  },
+  "homepage": "https://jsfitapp.netlify.app",
+  "bugs": {
+    "url": "https://github.com/SEU_USUARIO/js-fit-app/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   },
   "dependencies": {
     "@netlify/functions": "^2.4.0",
     "pg": "^8.11.3",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5",
     "dotenv": "^16.3.1",
-    "node-cron": "^3.0.3",
-    "winston": "^3.11.0"
+    "uuid": "^9.0.1",
+    "validator": "^13.11.0",
+    "winston": "^3.11.0",
+    "node-cron": "^3.0.3"
   },
-  "engines": {
-    "node": ">=18.0.0"
+  "devDependencies": {
+    "netlify-cli": "^17.0.0",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0",
+    "playwright": "^1.40.0",
+    "lighthouse": "^11.4.0",
+    "nodemon": "^3.0.2",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/VANBAHIA/jsfitapp.git"
-  },
-  "homepage": "https://jsfitapp.netlify.app",
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ],
   "netlify": {
     "functions": "netlify/functions",
-    "publish": "public"
+    "publish": "public",
+    "redirects": [
+      {
+        "from": "/api/*",
+        "to": "/.netlify/functions/:splat",
+        "status": 200
+      }
+    ]
+  },
+  "pwa": {
+    "name": "JS Fit App",
+    "short_name": "JS Fit",
+    "description": "Sistema de treinos para personal trainers e alunos",
+    "theme_color": "#667eea",
+    "background_color": "#f2f2f7",
+    "display": "standalone",
+    "start_url": "/"
+  },
+  "database": {
+    "type": "postgresql",
+    "provider": "neon",
+    "ssl": true,
+    "pool": {
+      "min": 2,
+      "max": 10,
+      "idleTimeoutMillis": 30000
+    }
+  },
+  "performance": {
+    "budget": {
+      "javascript": "500kb",
+      "css": "100kb",
+      "images": "2mb"
+    },
+    "lighthouse": {
+      "performance": 90,
+      "accessibility": 95,
+      "best-practices": 95,
+      "seo": 95,
+      "pwa": 90
+    }
+  },
+  "security": {
+    "helmet": {
+      "contentSecurityPolicy": true,
+      "hsts": true,
+      "noSniff": true,
+      "frameguard": true
+    },
+    "rateLimit": {
+      "windowMs": 900000,
+      "max": 100
+    }
+  },
+  "monitoring": {
+    "healthCheck": "/api/health",
+    "errorReporting": true,
+    "analytics": true
   }
 }

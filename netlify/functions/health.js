@@ -1,20 +1,17 @@
 // netlify/functions/health.js
 const { Pool } = require('pg');
 
-// Pool de conexões
+// Pool de conexões com o novo banco
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    },
+    connectionString: 'postgresql://neondb_owner:npg_rsCkP3jbcal7@ep-red-cloud-acw2aqx0-pooler.sa-east-1.aws.neon.tech/academiajsfit?sslmode=require&channel_binding=require',
     max: 5,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    connectionTimeoutMillis: 5000,
 });
 
 // Headers CORS
 const corsHeaders = {
-    'Access-Control-Allow-Origin': process.env.FRONTEND_URL || '*',
+    'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Credentials': 'true'
@@ -72,23 +69,19 @@ exports.handler = async (event, context) => {
         // Obter estatísticas do sistema
         const stats = await getSystemStats();
 
-        // Verificar status dos serviços
-        const services = await checkServices();
-
         // Construir resposta
         const healthData = {
             status: 'online',
             timestamp: new Date().toISOString(),
             version: '2.1.0',
-            environment: process.env.NODE_ENV || 'development',
+            environment: 'production',
             uptime: process.uptime(),
             database: dbHealth,
-            services,
             storage: stats
         };
 
         // Determinar status geral
-        const overallStatus = determineOverallStatus(dbHealth, services);
+        const overallStatus = dbHealth.status === 'healthy' ? 'online' : 'degraded';
         healthData.status = overallStatus;
 
         // Atualizar cache
@@ -174,59 +167,49 @@ async function getSystemStats() {
         const client = await pool.connect();
         
         try {
+            // Primeiro verificar se as tabelas existem
+            const tablesExist = await client.query(`
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name IN ('workout_plans', 'workouts', 'exercises', 'shared_plans')
+            `);
+
+            if (tablesExist.rows.length === 0) {
+                return {
+                    totalWorkouts: 0,
+                    activeShares: 0,
+                    totalPlans: 0,
+                    note: 'Database tables not yet created'
+                };
+            }
+
+            // Se as tabelas existem, obter estatísticas
             const statsQuery = `
                 SELECT 
-                    (SELECT COUNT(*) FROM personal_trainers WHERE is_active = true) as active_trainers,
-                    (SELECT COUNT(*) FROM students) as total_students,
                     (SELECT COUNT(*) FROM workout_plans WHERE status = 'active') as active_plans,
                     (SELECT COUNT(*) FROM workout_plans) as total_plans,
                     (SELECT COUNT(*) FROM workouts) as total_workouts,
                     (SELECT COUNT(*) FROM exercises) as total_exercises,
-                    (SELECT COUNT(*) FROM shared_plans WHERE is_active = true) as active_shares,
-                    (SELECT COUNT(*) FROM workout_sessions WHERE started_at > CURRENT_DATE - INTERVAL '7 days') as recent_sessions,
-                    (SELECT COUNT(*) FROM exercise_templates) as exercise_templates
+                    (SELECT COUNT(*) FROM shared_plans WHERE is_active = true) as active_shares
             `;
 
             const result = await client.query(statsQuery);
             const stats = result.rows[0];
 
-            // Obter estatísticas de uso recente
-            const usageQuery = `
-                SELECT 
-                    COUNT(DISTINCT personal_trainer_id) as daily_active_trainers,
-                    COUNT(*) as daily_logins
-                FROM personal_trainers 
-                WHERE last_login_at > CURRENT_DATE
-            `;
-
-            const usageResult = await client.query(usageQuery);
-            const usage = usageResult.rows[0];
-
             return {
-                trainers: {
-                    active: parseInt(stats.active_trainers),
-                    dailyActive: parseInt(usage.daily_active_trainers)
-                },
-                students: {
-                    total: parseInt(stats.total_students)
-                },
                 plans: {
-                    total: parseInt(stats.total_plans),
-                    active: parseInt(stats.active_plans)
+                    total: parseInt(stats.total_plans) || 0,
+                    active: parseInt(stats.active_plans) || 0
                 },
                 workouts: {
-                    total: parseInt(stats.total_workouts)
+                    total: parseInt(stats.total_workouts) || 0
                 },
                 exercises: {
-                    total: parseInt(stats.total_exercises),
-                    templates: parseInt(stats.exercise_templates)
+                    total: parseInt(stats.total_exercises) || 0
                 },
                 sharing: {
-                    activeShares: parseInt(stats.active_shares)
-                },
-                activity: {
-                    recentSessions: parseInt(stats.recent_sessions),
-                    dailyLogins: parseInt(usage.daily_logins)
+                    activeShares: parseInt(stats.active_shares) || 0
                 }
             };
 
@@ -237,146 +220,10 @@ async function getSystemStats() {
     } catch (error) {
         console.error('[HEALTH] Erro ao obter estatísticas:', error);
         return {
-            error: 'Não foi possível obter estatísticas',
+            totalWorkouts: 0,
+            activeShares: 0,
+            error: 'Could not fetch statistics',
             message: error.message
         };
     }
 }
-
-// Verificar status dos serviços
-async function checkServices() {
-    const services = {};
-
-    // Verificar tabelas essenciais
-    try {
-        const client = await pool.connect();
-        
-        try {
-            // Verificar se as tabelas principais existem
-            const tablesQuery = `
-                SELECT table_name 
-                FROM information_schema.tables 
-                WHERE table_schema = 'public' 
-                AND table_name IN (
-                    'personal_trainers', 'students', 'workout_plans', 
-                    'workouts', 'exercises', 'shared_plans'
-                )
-            `;
-
-            const tablesResult = await client.query(tablesQuery);
-            const existingTables = tablesResult.rows.map(row => row.table_name);
-
-            const requiredTables = [
-                'personal_trainers', 'students', 'workout_plans',
-                'workouts', 'exercises', 'shared_plans'
-            ];
-
-            const missingTables = requiredTables.filter(table => !existingTables.includes(table));
-
-            services.database_schema = {
-                status: missingTables.length === 0 ? 'healthy' : 'degraded',
-                tables: {
-                    required: requiredTables.length,
-                    existing: existingTables.length,
-                    missing: missingTables
-                }
-            };
-
-            // Verificar funções do banco
-            const functionsQuery = `
-                SELECT routine_name 
-                FROM information_schema.routines 
-                WHERE routine_schema = 'public' 
-                AND routine_name IN ('generate_share_id', 'get_plan_statistics')
-            `;
-
-            const functionsResult = await client.query(functionsQuery);
-            const existingFunctions = functionsResult.rows.map(row => row.routine_name);
-
-            services.database_functions = {
-                status: existingFunctions.length > 0 ? 'healthy' : 'degraded',
-                functions: existingFunctions
-            };
-
-        } finally {
-            client.release();
-        }
-
-    } catch (error) {
-        services.database_schema = {
-            status: 'unhealthy',
-            error: error.message
-        };
-    }
-
-    // Verificar serviços externos (se aplicável)
-    services.external_apis = {
-        status: 'not_configured'
-    };
-
-    // Verificar capacidade de escrita
-    try {
-        const client = await pool.connect();
-        
-        try {
-            await client.query('BEGIN');
-            await client.query('SELECT 1 as test_write');
-            await client.query('ROLLBACK');
-            
-            services.database_write = {
-                status: 'healthy',
-                lastChecked: new Date().toISOString()
-            };
-
-        } finally {
-            client.release();
-        }
-
-    } catch (error) {
-        services.database_write = {
-            status: 'unhealthy',
-            error: error.message
-        };
-    }
-
-    return services;
-}
-
-// Determinar status geral do sistema
-function determineOverallStatus(dbHealth, services) {
-    // Se o banco estiver com problemas, sistema está offline
-    if (dbHealth.status === 'unhealthy') {
-        return 'offline';
-    }
-
-    // Verificar serviços críticos
-    const criticalServices = ['database_schema', 'database_write'];
-    const unhealthyServices = criticalServices.filter(service => 
-        services[service] && services[service].status === 'unhealthy'
-    );
-
-    if (unhealthyServices.length > 0) {
-        return 'degraded';
-    }
-
-    // Verificar se há serviços degradados
-    const degradedServices = Object.values(services).filter(service => 
-        service.status === 'degraded'
-    );
-
-    if (degradedServices.length > 0) {
-        return 'degraded';
-    }
-
-    return 'online';
-}
-
-// Limpeza periódica do cache
-setInterval(() => {
-    const now = Date.now();
-    if (lastHealthCheck && (now - lastCheckTime) > CACHE_DURATION * 2) {
-        lastHealthCheck = null;
-        lastCheckTime = 0;
-        console.log('[HEALTH] Cache limpo');
-    }
-}, CACHE_DURATION);

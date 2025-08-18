@@ -1,21 +1,17 @@
 // netlify/functions/share.js
 const { Pool } = require('pg');
-const jwt = require('jsonwebtoken');
 
 // Pool de conexões
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    },
+    connectionString: 'postgresql://neondb_owner:npg_rsCkP3jbcal7@ep-red-cloud-acw2aqx0-pooler.sa-east-1.aws.neon.tech/academiajsfit?sslmode=require&channel_binding=require',
     max: 10,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    connectionTimeoutMillis: 5000,
 });
 
 // Headers CORS
 const corsHeaders = {
-    'Access-Control-Allow-Origin': process.env.FRONTEND_URL || '*',
+    'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Credentials': 'true'
@@ -31,21 +27,6 @@ function generateShareId() {
     return result;
 }
 
-// Middleware para autenticação (opcional para algumas rotas)
-function verifyToken(authHeader) {
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        throw new Error('Token de autorização requerido');
-    }
-
-    const token = authHeader.substring(7);
-    
-    try {
-        return jwt.verify(token, process.env.JWT_SECRET);
-    } catch (error) {
-        throw new Error('Token inválido');
-    }
-}
-
 // Handler principal
 exports.handler = async (event, context) => {
     // Handle preflight requests
@@ -58,7 +39,7 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        const path = event.path.replace('/api/share', '');
+        const path = event.path.replace('/.netlify/functions/share', '');
         const method = event.httpMethod;
         const pathParts = path.split('/').filter(p => p.length > 0);
 
@@ -69,24 +50,8 @@ exports.handler = async (event, context) => {
             return await createShare(event);
         }
         
-        if (method === 'POST' && pathParts.length === 1 && pathParts[0] === 'import') {
-            return await importSharedPlan(event);
-        }
-        
         if (method === 'GET' && pathParts.length === 1) {
-            return await getSharedPlan(event, pathParts[0]);
-        }
-        
-        if (method === 'PUT' && pathParts.length === 1) {
-            return await updateShare(event, pathParts[0]);
-        }
-        
-        if (method === 'DELETE' && pathParts.length === 1) {
-            return await deactivateShare(event, pathParts[0]);
-        }
-        
-        if (method === 'GET' && pathParts.length === 0) {
-            return await getMyShares(event);
+            return await getSharedPlan(pathParts[0]);
         }
 
         return {
@@ -109,278 +74,60 @@ exports.handler = async (event, context) => {
     }
 };
 
-// Criar compartilhamento
+// Criar compartilhamento (recebe plano completo)
 async function createShare(event) {
     try {
-        const decoded = verifyToken(event.headers.authorization);
-        const { planId, expiresInDays } = JSON.parse(event.body);
+        const { shareId, plan } = JSON.parse(event.body);
 
-        if (!planId) {
+        if (!shareId || !plan) {
             return {
                 statusCode: 400,
                 headers: corsHeaders,
-                body: JSON.stringify({ error: 'ID do plano é obrigatório' })
+                body: JSON.stringify({ error: 'shareId e plan são obrigatórios' })
             };
         }
 
         const client = await pool.connect();
         
         try {
-            await client.query('BEGIN');
-
-            // Verificar se o plano pertence ao personal trainer
-            const planCheck = await client.query(
-                'SELECT id, name FROM workout_plans WHERE id = $1 AND personal_trainer_id = $2',
-                [planId, decoded.userId]
+            // Verificar se o share_id já existe
+            const existingShare = await client.query(
+                'SELECT id FROM shared_plans WHERE share_id = $1',
+                [shareId]
             );
 
-            if (planCheck.rows.length === 0) {
-                return {
-                    statusCode: 404,
-                    headers: corsHeaders,
-                    body: JSON.stringify({ error: 'Plano não encontrado' })
-                };
-            }
-
-            // Gerar share ID único
-            let shareId;
-            let attempts = 0;
-            const maxAttempts = 10;
-
-            do {
-                shareId = generateShareId();
-                const existingShare = await client.query(
-                    'SELECT id FROM shared_plans WHERE share_id = $1',
-                    [shareId]
+            if (existingShare.rows.length > 0) {
+                // Atualizar o plano existente
+                await client.query(
+                    'UPDATE shared_plans SET plan_data = $1, updated_at = CURRENT_TIMESTAMP WHERE share_id = $2',
+                    [JSON.stringify(plan), shareId]
                 );
-                
-                if (existingShare.rows.length === 0) break;
-                
-                attempts++;
-            } while (attempts < maxAttempts);
-
-            if (attempts >= maxAttempts) {
-                throw new Error('Não foi possível gerar ID único');
+            } else {
+                // Criar novo compartilhamento
+                await client.query(`
+                    INSERT INTO shared_plans (share_id, plan_data, is_active, created_at, updated_at)
+                    VALUES ($1, $2, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                `, [shareId, JSON.stringify(plan)]);
             }
-
-            // Calcular data de expiração
-            let expiresAt = null;
-            if (expiresInDays && expiresInDays > 0) {
-                expiresAt = new Date();
-                expiresAt.setDate(expiresAt.getDate() + expiresInDays);
-            }
-
-            // Desativar compartilhamentos anteriores do mesmo plano
-            await client.query(
-                'UPDATE shared_plans SET is_active = false WHERE workout_plan_id = $1',
-                [planId]
-            );
-
-            // Criar novo compartilhamento
-            const shareResult = await client.query(`
-                INSERT INTO shared_plans (share_id, workout_plan_id, personal_trainer_id, expires_at)
-                VALUES ($1, $2, $3, $4)
-                RETURNING id, share_id, created_at
-            `, [shareId, planId, decoded.userId, expiresAt]);
-
-            await client.query('COMMIT');
 
             return {
-                statusCode: 201,
+                statusCode: 200,
                 headers: corsHeaders,
                 body: JSON.stringify({
+                    success: true,
                     message: 'Plano compartilhado com sucesso',
-                    shareId: shareResult.rows[0].share_id,
-                    planName: planCheck.rows[0].name,
-                    createdAt: shareResult.rows[0].created_at,
-                    expiresAt
+                    shareId
                 })
             };
 
-        } catch (error) {
-            await client.query('ROLLBACK');
-            throw error;
         } finally {
             client.release();
         }
 
     } catch (error) {
+        console.error('[CREATE_SHARE] Erro:', error);
         return {
-            statusCode: error.message.includes('Token') ? 401 : 400,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: error.message })
-        };
-    }
-}
-
-// Importar plano compartilhado para a conta do personal trainer
-async function importSharedPlan(event) {
-    try {
-        const decoded = verifyToken(event.headers.authorization);
-        const { shareId, studentId } = JSON.parse(event.body);
-
-        if (!shareId) {
-            return {
-                statusCode: 400,
-                headers: corsHeaders,
-                body: JSON.stringify({ error: 'Share ID é obrigatório' })
-            };
-        }
-
-        const client = await pool.connect();
-        
-        try {
-            await client.query('BEGIN');
-
-            // Buscar plano compartilhado
-            const shareResult = await client.query(`
-                SELECT sp.*, wp.*, pt.name as trainer_name
-                FROM shared_plans sp
-                JOIN workout_plans wp ON sp.workout_plan_id = wp.id
-                JOIN personal_trainers pt ON sp.personal_trainer_id = pt.id
-                WHERE sp.share_id = $1 AND sp.is_active = true
-            `, [shareId.toUpperCase()]);
-
-            if (shareResult.rows.length === 0) {
-                return {
-                    statusCode: 404,
-                    headers: corsHeaders,
-                    body: JSON.stringify({ error: 'Plano compartilhado não encontrado ou expirado' })
-                };
-            }
-
-            const originalPlan = shareResult.rows[0];
-
-            // Verificar expiração
-            if (originalPlan.expires_at && new Date() > new Date(originalPlan.expires_at)) {
-                return {
-                    statusCode: 410,
-                    headers: corsHeaders,
-                    body: JSON.stringify({ error: 'Compartilhamento expirado' })
-                };
-            }
-
-            // Verificar se o aluno existe (se fornecido)
-            if (studentId) {
-                const studentCheck = await client.query(
-                    'SELECT id FROM students WHERE id = $1 AND personal_trainer_id = $2',
-                    [studentId, decoded.userId]
-                );
-
-                if (studentCheck.rows.length === 0) {
-                    return {
-                        statusCode: 404,
-                        headers: corsHeaders,
-                        body: JSON.stringify({ error: 'Aluno não encontrado' })
-                    };
-                }
-            }
-
-            // Criar cópia do plano para o personal trainer atual
-            const newPlanResult = await client.query(`
-                INSERT INTO workout_plans (
-                    name, description, objective, frequency_per_week, start_date, end_date,
-                    personal_trainer_id, student_id, observations
-                )
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-                RETURNING id
-            `, [
-                `${originalPlan.name} (Importado)`,
-                originalPlan.description,
-                originalPlan.objective,
-                originalPlan.frequency_per_week,
-                originalPlan.start_date,
-                originalPlan.end_date,
-                decoded.userId,
-                studentId || null,
-                originalPlan.observations
-            ]);
-
-            const newPlanId = newPlanResult.rows[0].id;
-
-            // Copiar treinos
-            const workoutsResult = await client.query(
-                'SELECT * FROM workouts WHERE workout_plan_id = $1 ORDER BY order_index',
-                [originalPlan.workout_plan_id]
-            );
-
-            for (const workout of workoutsResult.rows) {
-                const newWorkoutResult = await client.query(`
-                    INSERT INTO workouts (
-                        workout_plan_id, name, description, workout_letter, focus_area, order_index
-                    )
-                    VALUES ($1, $2, $3, $4, $5, $6)
-                    RETURNING id
-                `, [
-                    newPlanId,
-                    workout.name,
-                    workout.description,
-                    workout.workout_letter,
-                    workout.focus_area,
-                    workout.order_index
-                ]);
-
-                const newWorkoutId = newWorkoutResult.rows[0].id;
-
-                // Copiar exercícios
-                const exercisesResult = await client.query(
-                    'SELECT * FROM exercises WHERE workout_id = $1 ORDER BY order_index',
-                    [workout.id]
-                );
-
-                for (const exercise of exercisesResult.rows) {
-                    await client.query(`
-                        INSERT INTO exercises (
-                            workout_id, name, description, muscle_groups, equipment,
-                            sets, reps, weight, rest_time, special_instructions, order_index
-                        )
-                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-                    `, [
-                        newWorkoutId,
-                        exercise.name,
-                        exercise.description,
-                        exercise.muscle_groups,
-                        exercise.equipment,
-                        exercise.sets,
-                        exercise.reps,
-                        exercise.weight,
-                        exercise.rest_time,
-                        exercise.special_instructions,
-                        exercise.order_index
-                    ]);
-                }
-            }
-
-            // Atualizar contador de importação no compartilhamento original
-            await client.query(`
-                UPDATE shared_plans 
-                SET access_count = access_count + 1, last_accessed_at = CURRENT_TIMESTAMP
-                WHERE id = $1
-            `, [originalPlan.id]);
-
-            await client.query('COMMIT');
-
-            return {
-                statusCode: 201,
-                headers: corsHeaders,
-                body: JSON.stringify({
-                    message: 'Plano importado com sucesso',
-                    planId: newPlanId,
-                    planName: `${originalPlan.name} (Importado)`,
-                    originalTrainer: originalPlan.trainer_name
-                })
-            };
-
-        } catch (error) {
-            await client.query('ROLLBACK');
-            throw error;
-        } finally {
-            client.release();
-        }
-
-    } catch (error) {
-        return {
-            statusCode: error.message.includes('Token') ? 401 : 400,
+            statusCode: 500,
             headers: corsHeaders,
             body: JSON.stringify({ error: error.message })
         };
@@ -388,149 +135,56 @@ async function importSharedPlan(event) {
 }
 
 // Obter plano compartilhado (usado pelo aluno)
-async function getSharedPlan(event, shareId) {
+async function getSharedPlan(shareId) {
+    if (!shareId || shareId.length !== 6) {
+        return {
+            statusCode: 400,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Share ID deve ter 6 caracteres' })
+        };
+    }
+
     const client = await pool.connect();
     
     try {
-        // Buscar compartilhamento
+        // Primeiro tentar buscar da tabela shared_plans
         const shareResult = await client.query(`
-            SELECT sp.*, wp.*, pt.name as trainer_name, pt.email as trainer_email
-            FROM shared_plans sp
-            JOIN workout_plans wp ON sp.workout_plan_id = wp.id
-            JOIN personal_trainers pt ON sp.personal_trainer_id = pt.id
-            WHERE sp.share_id = $1 AND sp.is_active = true
+            SELECT plan_data, created_at, access_count
+            FROM shared_plans 
+            WHERE share_id = $1 AND is_active = true
         `, [shareId.toUpperCase()]);
 
-        if (shareResult.rows.length === 0) {
-            return {
-                statusCode: 404,
-                headers: corsHeaders,
-                body: JSON.stringify({ error: 'Plano compartilhado não encontrado ou expirado' })
-            };
-        }
-
-        const share = shareResult.rows[0];
-
-        // Verificar expiração
-        if (share.expires_at && new Date() > new Date(share.expires_at)) {
-            // Desativar compartilhamento expirado
-            await client.query(
-                'UPDATE shared_plans SET is_active = false WHERE id = $1',
-                [share.id]
-            );
-
-            return {
-                statusCode: 410,
-                headers: corsHeaders,
-                body: JSON.stringify({ error: 'Compartilhamento expirado' })
-            };
-        }
-
-        // Atualizar contador de acesso
-        await client.query(`
-            UPDATE shared_plans 
-            SET access_count = access_count + 1, last_accessed_at = CURRENT_TIMESTAMP
-            WHERE id = $1
-        `, [share.id]);
-
-        // Buscar treinos
-        const workoutsResult = await client.query(`
-            SELECT * FROM workouts 
-            WHERE workout_plan_id = $1 
-            ORDER BY order_index
-        `, [share.workout_plan_id]);
-
-        // Buscar exercícios para cada treino
-        const workouts = [];
-        for (const workout of workoutsResult.rows) {
-            const exercisesResult = await client.query(`
-                SELECT 
-                    id, name, description, muscle_groups, equipment, sets, reps,
-                    weight, rest_time, order_index, special_instructions
-                FROM exercises 
-                WHERE workout_id = $1 
-                ORDER BY order_index
-            `, [workout.id]);
-
-            workouts.push({
-                id: workout.workout_letter,
-                nome: workout.name,
-                foco: workout.focus_area,
-                descricao: workout.description,
-                exercicios: exercisesResult.rows.map(ex => ({
-                    id: ex.id,
-                    nome: ex.name,
-                    descricao: ex.description,
-                    series: ex.sets,
-                    repeticoes: ex.reps,
-                    carga: ex.weight,
-                    descanso: ex.rest_time,
-                    observacoesEspeciais: ex.special_instructions || '',
-                    concluido: false,
-                    currentCarga: ex.weight
-                })),
-                concluido: false,
-                execucoes: 0
-            });
-        }
-
-        // Buscar dados do aluno se existir
-        let alunoData = null;
-        if (share.student_id) {
-            const studentResult = await client.query(
-                'SELECT * FROM students WHERE id = $1',
-                [share.student_id]
-            );
+        if (shareResult.rows.length > 0) {
+            const share = shareResult.rows[0];
             
-            if (studentResult.rows.length > 0) {
-                const student = studentResult.rows[0];
-                alunoData = {
-                    nome: student.name,
-                    dataNascimento: student.birth_date,
-                    idade: student.age,
-                    altura: student.height,
-                    peso: student.weight,
-                    cpf: student.cpf
-                };
-            }
+            // Atualizar contador de acesso
+            await client.query(`
+                UPDATE shared_plans 
+                SET access_count = access_count + 1, last_accessed_at = CURRENT_TIMESTAMP
+                WHERE share_id = $1
+            `, [shareId.toUpperCase()]);
+
+            const planData = JSON.parse(share.plan_data);
+
+            return {
+                statusCode: 200,
+                headers: corsHeaders,
+                body: JSON.stringify({
+                    plan: planData,
+                    sharedAt: share.created_at,
+                    accessCount: share.access_count + 1
+                })
+            };
         }
 
-        // Formato compatível com o frontend atual
-        const planData = {
-            plan: {
-                id: share.workout_plan_id,
-                nome: share.name,
-                aluno: alunoData || {
-                    nome: '',
-                    dataNascimento: '',
-                    idade: null,
-                    altura: '',
-                    peso: '',
-                    cpf: ''
-                },
-                dias: share.frequency_per_week,
-                dataInicio: share.start_date,
-                dataFim: share.end_date,
-                perfil: {
-                    idade: alunoData?.idade,
-                    altura: alunoData?.altura,
-                    peso: alunoData?.peso,
-                    porte: 'médio',
-                    objetivo: share.objective
-                },
-                treinos: workouts,
-                observacoes: share.observations || {},
-                execucoesPlanCompleto: 0
-            },
-            sharedAt: share.created_at,
-            sharedBy: share.trainer_name,
-            accessCount: share.access_count
-        };
-
+        // Se não encontrou na tabela, retornar erro
         return {
-            statusCode: 200,
+            statusCode: 404,
             headers: corsHeaders,
-            body: JSON.stringify(planData)
+            body: JSON.stringify({ 
+                error: 'Plano compartilhado não encontrado',
+                shareId: shareId.toUpperCase()
+            })
         };
 
     } finally {
@@ -538,190 +192,50 @@ async function getSharedPlan(event, shareId) {
     }
 }
 
-// Listar compartilhamentos do personal trainer
-async function getMyShares(event) {
+// Inicializar tabela se não existir
+async function initializeDatabase() {
+    const client = await pool.connect();
+    
     try {
-        const decoded = verifyToken(event.headers.authorization);
-
-        const client = await pool.connect();
-        
-        try {
-            const result = await client.query(`
-                SELECT 
-                    sp.id, sp.share_id, sp.is_active, sp.access_count, sp.last_accessed_at,
-                    sp.expires_at, sp.created_at,
-                    wp.name as plan_name, wp.objective,
-                    s.name as student_name
-                FROM shared_plans sp
-                JOIN workout_plans wp ON sp.workout_plan_id = wp.id
-                LEFT JOIN students s ON wp.student_id = s.id
-                WHERE sp.personal_trainer_id = $1
-                ORDER BY sp.created_at DESC
-            `, [decoded.userId]);
-
-            return {
-                statusCode: 200,
-                headers: corsHeaders,
-                body: JSON.stringify({
-                    shares: result.rows.map(row => ({
-                        id: row.id,
-                        shareId: row.share_id,
-                        planName: row.plan_name,
-                        objective: row.objective,
-                        studentName: row.student_name,
-                        isActive: row.is_active,
-                        accessCount: row.access_count,
-                        lastAccessedAt: row.last_accessed_at,
-                        expiresAt: row.expires_at,
-                        createdAt: row.created_at,
-                        isExpired: row.expires_at ? new Date() > new Date(row.expires_at) : false
-                    }))
-                })
-            };
-
-        } finally {
-            client.release();
-        }
-
-    } catch (error) {
-        return {
-            statusCode: 401,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: error.message })
-        };
-    }
-}
-
-// Atualizar compartilhamento (renovar share ID)
-async function updateShare(event, shareId) {
-    try {
-        const decoded = verifyToken(event.headers.authorization);
-
-        const client = await pool.connect();
-        
-        try {
-            await client.query('BEGIN');
-
-            // Verificar se o compartilhamento pertence ao personal trainer
-            const shareCheck = await client.query(`
-                SELECT sp.id, sp.workout_plan_id, wp.name as plan_name
-                FROM shared_plans sp
-                JOIN workout_plans wp ON sp.workout_plan_id = wp.id
-                WHERE sp.share_id = $1 AND sp.personal_trainer_id = $2
-            `, [shareId, decoded.userId]);
-
-            if (shareCheck.rows.length === 0) {
-                return {
-                    statusCode: 404,
-                    headers: corsHeaders,
-                    body: JSON.stringify({ error: 'Compartilhamento não encontrado' })
-                };
-            }
-
-            // Gerar novo share ID
-            let newShareId;
-            let attempts = 0;
-            const maxAttempts = 10;
-
-            do {
-                newShareId = generateShareId();
-                const existingShare = await client.query(
-                    'SELECT id FROM shared_plans WHERE share_id = $1',
-                    [newShareId]
-                );
-                
-                if (existingShare.rows.length === 0) break;
-                
-                attempts++;
-            } while (attempts < maxAttempts);
-
-            if (attempts >= maxAttempts) {
-                throw new Error('Não foi possível gerar ID único');
-            }
-
-            // Desativar compartilhamento antigo
-            await client.query(
-                'UPDATE shared_plans SET is_active = false WHERE share_id = $1',
-                [shareId]
+        // Verificar se a tabela shared_plans existe
+        const tableExists = await client.query(`
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = 'shared_plans'
             );
+        `);
 
-            // Criar novo compartilhamento
-            const newShareResult = await client.query(`
-                INSERT INTO shared_plans (share_id, workout_plan_id, personal_trainer_id)
-                VALUES ($1, $2, $3)
-                RETURNING id, share_id, created_at
-            `, [newShareId, shareCheck.rows[0].workout_plan_id, decoded.userId]);
+        if (!tableExists.rows[0].exists) {
+            // Criar tabela shared_plans
+            await client.query(`
+                CREATE TABLE shared_plans (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    share_id VARCHAR(10) UNIQUE NOT NULL,
+                    plan_data JSONB NOT NULL,
+                    is_active BOOLEAN DEFAULT true,
+                    access_count INTEGER DEFAULT 0,
+                    last_accessed_at TIMESTAMP WITH TIME ZONE,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    
+                    CONSTRAINT share_id_format CHECK (share_id ~ '^[A-Z0-9]{6}$')
+                );
+            `);
 
-            await client.query('COMMIT');
+            // Criar índice para busca rápida
+            await client.query(`
+                CREATE INDEX idx_shared_plans_share_id ON shared_plans(share_id);
+                CREATE INDEX idx_shared_plans_active ON shared_plans(is_active);
+            `);
 
-            return {
-                statusCode: 200,
-                headers: corsHeaders,
-                body: JSON.stringify({
-                    message: 'Compartilhamento renovado com sucesso',
-                    oldShareId: shareId,
-                    newShareId: newShareResult.rows[0].share_id,
-                    planName: shareCheck.rows[0].plan_name,
-                    createdAt: newShareResult.rows[0].created_at
-                })
-            };
-
-        } catch (error) {
-            await client.query('ROLLBACK');
-            throw error;
-        } finally {
-            client.release();
+            console.log('[SHARE] Tabela shared_plans criada');
         }
 
-    } catch (error) {
-        return {
-            statusCode: error.message.includes('Token') ? 401 : 400,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: error.message })
-        };
+    } finally {
+        client.release();
     }
 }
 
-// Desativar compartilhamento
-async function deactivateShare(event, shareId) {
-    try {
-        const decoded = verifyToken(event.headers.authorization);
-
-        const client = await pool.connect();
-        
-        try {
-            const result = await client.query(`
-                UPDATE shared_plans 
-                SET is_active = false 
-                WHERE share_id = $1 AND personal_trainer_id = $2
-                RETURNING id
-            `, [shareId, decoded.userId]);
-
-            if (result.rows.length === 0) {
-                return {
-                    statusCode: 404,
-                    headers: corsHeaders,
-                    body: JSON.stringify({ error: 'Compartilhamento não encontrado' })
-                };
-            }
-
-            return {
-                statusCode: 200,
-                headers: corsHeaders,
-                body: JSON.stringify({
-                    message: 'Compartilhamento desativado com sucesso'
-                })
-            };
-
-        } finally {
-            client.release();
-        }
-
-    } catch (error) {
-        return {
-            statusCode: 401,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: error.message })
-        };
-    }
-}
+// Executar inicialização na primeira chamada
+initializeDatabase().catch(console.error);

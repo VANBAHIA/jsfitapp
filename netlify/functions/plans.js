@@ -1,8 +1,9 @@
-// netlify/functions/plans.js
+// netlify/functions/plans.js - Gerenciamento Completo de Planos de Treino
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
+const validator = require('validator');
 
-// Pool de conexões
+// Configuração do pool de conexões PostgreSQL
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
@@ -13,15 +14,20 @@ const pool = new Pool({
     connectionTimeoutMillis: 2000,
 });
 
-// Headers CORS
+// Headers CORS padrão
 const corsHeaders = {
     'Access-Control-Allow-Origin': process.env.FRONTEND_URL || '*',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Credentials': 'true'
+    'Access-Control-Allow-Credentials': 'true',
+    'Content-Type': 'application/json'
 };
 
-// Middleware para autenticação
+// =============================================================================
+// UTILITÁRIOS E MIDDLEWARE
+// =============================================================================
+
+// Middleware para verificar JWT
 function verifyToken(authHeader) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         throw new Error('Token de autorização requerido');
@@ -36,8 +42,114 @@ function verifyToken(authHeader) {
     }
 }
 
-// Handler principal
+// Sanitização de dados
+function sanitizeInput(data) {
+    const sanitized = {};
+    for (const [key, value] of Object.entries(data)) {
+        if (typeof value === 'string') {
+            sanitized[key] = validator.escape(value.trim());
+        } else if (Array.isArray(value)) {
+            sanitized[key] = value.map(item => 
+                typeof item === 'string' ? validator.escape(item.trim()) : item
+            );
+        } else {
+            sanitized[key] = value;
+        }
+    }
+    return sanitized;
+}
+
+// Resposta de erro padronizada
+function errorResponse(statusCode, message, details = null) {
+    const response = {
+        success: false,
+        error: message,
+        timestamp: new Date().toISOString()
+    };
+    
+    if (details && process.env.NODE_ENV === 'development') {
+        response.details = details;
+    }
+    
+    return {
+        statusCode,
+        headers: corsHeaders,
+        body: JSON.stringify(response)
+    };
+}
+
+// Resposta de sucesso padronizada
+function successResponse(statusCode, message, data = null) {
+    const response = {
+        success: true,
+        message,
+        timestamp: new Date().toISOString()
+    };
+    
+    if (data) {
+        response.data = data;
+    }
+    
+    return {
+        statusCode,
+        headers: corsHeaders,
+        body: JSON.stringify(response)
+    };
+}
+
+// Validação de dados do plano
+function validatePlanData(data) {
+    const errors = [];
+    
+    if (!data.name || data.name.length < 3 || data.name.length > 255) {
+        errors.push('Nome deve ter entre 3 e 255 caracteres');
+    }
+    
+    if (data.frequency_per_week && (data.frequency_per_week < 1 || data.frequency_per_week > 7)) {
+        errors.push('Frequência deve ser entre 1 e 7 dias por semana');
+    }
+    
+    if (data.difficulty_level && !['beginner', 'intermediate', 'advanced'].includes(data.difficulty_level)) {
+        errors.push('Nível de dificuldade inválido');
+    }
+    
+    return errors;
+}
+
+// Extrair grupos musculares dos exercícios
+function extractMuscleGroups(exerciseName, description = '') {
+    const text = `${exerciseName} ${description}`.toLowerCase();
+    const groups = [];
+
+    const muscleMap = {
+        'peito': ['peito', 'peitoral', 'supino', 'crucifixo'],
+        'costas': ['costas', 'dorso', 'puxada', 'remada', 'pullover'],
+        'ombros': ['ombro', 'deltoide', 'desenvolvimento', 'elevação'],
+        'bíceps': ['bíceps', 'rosca'],
+        'tríceps': ['tríceps', 'francês', 'testa', 'pulley'],
+        'quadríceps': ['quadríceps', 'agachamento', 'leg press', 'extensão'],
+        'posterior': ['posterior', 'flexor', 'stiff', 'mesa flexora'],
+        'glúteos': ['glúteo', 'glúteos', 'hip thrust'],
+        'panturrilha': ['panturrilha', 'gastrocnêmio'],
+        'core': ['abdominal', 'prancha', 'core', 'abdômen']
+    };
+
+    for (const [group, keywords] of Object.entries(muscleMap)) {
+        if (keywords.some(keyword => text.includes(keyword))) {
+            groups.push(group);
+        }
+    }
+
+    return groups.length > 0 ? groups : ['geral'];
+}
+
+// =============================================================================
+// HANDLER PRINCIPAL
+// =============================================================================
+
 exports.handler = async (event, context) => {
+    context.callbackWaitsForEmptyEventLoop = false;
+    
     // Handle preflight requests
     if (event.httpMethod === 'OPTIONS') {
         return {
@@ -48,65 +160,62 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        const path = event.path.replace('/api/plans', '');
+        const path = event.path.replace('/.netlify/functions/plans', '').replace('/api/plans', '');
         const method = event.httpMethod;
         const pathParts = path.split('/').filter(p => p.length > 0);
 
         console.log(`[PLANS] ${method} ${path}`);
 
-        // Rotas
+        // Roteamento
         if (method === 'GET' && pathParts.length === 0) {
-            return await getPlans(event);
+            return await handleGetPlans(event);
         }
         
         if (method === 'POST' && pathParts.length === 0) {
-            return await createPlan(event);
+            return await handleCreatePlan(event);
         }
         
         if (method === 'GET' && pathParts.length === 1) {
-            return await getPlan(event, pathParts[0]);
+            return await handleGetPlan(event, pathParts[0]);
         }
         
         if (method === 'PUT' && pathParts.length === 1) {
-            return await updatePlan(event, pathParts[0]);
+            return await handleUpdatePlan(event, pathParts[0]);
         }
         
         if (method === 'DELETE' && pathParts.length === 1) {
-            return await deletePlan(event, pathParts[0]);
+            return await handleDeletePlan(event, pathParts[0]);
         }
         
         if (method === 'POST' && pathParts.length === 2 && pathParts[1] === 'duplicate') {
-            return await duplicatePlan(event, pathParts[0]);
+            return await handleDuplicatePlan(event, pathParts[0]);
         }
 
-        return {
-            statusCode: 404,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: 'Endpoint não encontrado' })
-        };
+        if (method === 'GET' && pathParts.length === 2 && pathParts[1] === 'stats') {
+            return await handleGetPlanStats(event, pathParts[0]);
+        }
+
+        return errorResponse(404, 'Endpoint não encontrado');
 
     } catch (error) {
         console.error('[PLANS] Erro:', error);
         
-        return {
-            statusCode: 500,
-            headers: corsHeaders,
-            body: JSON.stringify({ 
-                error: 'Erro interno do servidor',
-                message: error.message 
-            })
-        };
+        return errorResponse(500, 'Erro interno do servidor', error.message);
     }
 };
 
+// =============================================================================
+// HANDLERS DOS ENDPOINTS
+// =============================================================================
+
 // Listar planos do personal trainer
-async function getPlans(event) {
+async function handleGetPlans(event) {
     try {
         const decoded = verifyToken(event.headers.authorization);
         const queryParams = event.queryStringParameters || {};
         
         const page = parseInt(queryParams.page) || 1;
-        const limit = parseInt(queryParams.limit) || 20;
+        const limit = Math.min(parseInt(queryParams.limit) || 20, 100);
         const status = queryParams.status;
         const search = queryParams.search;
         const offset = (page - 1) * limit;
@@ -127,7 +236,7 @@ async function getPlans(event) {
 
             if (search) {
                 paramCount++;
-                whereClause += ` AND (wp.name ILIKE $${paramCount} OR s.name ILIKE $${paramCount})`;
+                whereClause += ` AND (wp.name ILIKE ${paramCount} OR s.name ILIKE ${paramCount})`;
                 params.push(`%${search}%`);
             }
 
@@ -149,7 +258,7 @@ async function getPlans(event) {
                 ${whereClause}
                 GROUP BY wp.id, s.id
                 ORDER BY wp.updated_at DESC
-                LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}
+                LIMIT ${paramCount + 1} OFFSET ${paramCount + 2}
             `;
 
             params.push(limit, offset);
@@ -167,64 +276,61 @@ async function getPlans(event) {
             const countResult = await client.query(countQuery, params.slice(0, -2));
             const total = parseInt(countResult.rows[0].total);
 
-            return {
-                statusCode: 200,
-                headers: corsHeaders,
-                body: JSON.stringify({
-                    plans: result.rows.map(row => ({
-                        id: row.id,
-                        name: row.name,
-                        description: row.description,
-                        objective: row.objective,
-                        frequencyPerWeek: row.frequency_per_week,
-                        startDate: row.start_date,
-                        endDate: row.end_date,
-                        status: row.status,
-                        difficultyLevel: row.difficulty_level,
-                        equipmentType: row.equipment_type,
-                        estimatedDuration: row.estimated_duration_minutes,
-                        aiGenerated: row.ai_generated,
-                        completedCycles: row.completed_cycles,
-                        createdAt: row.created_at,
-                        updatedAt: row.updated_at,
-                        student: row.student_id ? {
-                            id: row.student_id,
-                            name: row.student_name,
-                            email: row.student_email
-                        } : null,
-                        stats: {
-                            totalWorkouts: parseInt(row.total_workouts) || 0,
-                            completedWorkouts: parseInt(row.completed_workouts) || 0,
-                            totalExecutions: parseInt(row.total_executions) || 0,
-                            activeShares: parseInt(row.active_shares) || 0
-                        }
-                    })),
-                    pagination: {
-                        page,
-                        limit,
-                        total,
-                        pages: Math.ceil(total / limit)
+            return successResponse(200, 'Planos obtidos com sucesso', {
+                plans: result.rows.map(row => ({
+                    id: row.id,
+                    name: row.name,
+                    description: row.description,
+                    objective: row.objective,
+                    frequencyPerWeek: row.frequency_per_week,
+                    startDate: row.start_date,
+                    endDate: row.end_date,
+                    status: row.status,
+                    difficultyLevel: row.difficulty_level,
+                    equipmentType: row.equipment_type,
+                    estimatedDuration: row.estimated_duration_minutes,
+                    aiGenerated: row.ai_generated,
+                    completedCycles: row.completed_cycles,
+                    createdAt: row.created_at,
+                    updatedAt: row.updated_at,
+                    student: row.student_id ? {
+                        id: row.student_id,
+                        name: row.student_name,
+                        email: row.student_email
+                    } : null,
+                    stats: {
+                        totalWorkouts: parseInt(row.total_workouts) || 0,
+                        completedWorkouts: parseInt(row.completed_workouts) || 0,
+                        totalExecutions: parseInt(row.total_executions) || 0,
+                        activeShares: parseInt(row.active_shares) || 0
                     }
-                })
-            };
+                })),
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    pages: Math.ceil(total / limit)
+                }
+            });
 
         } finally {
             client.release();
         }
 
     } catch (error) {
-        return {
-            statusCode: 401,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: error.message })
-        };
+        console.error('[PLANS] Erro ao listar planos:', error);
+        return errorResponse(401, error.message);
     }
 }
 
 // Obter plano específico com todos os detalhes
-async function getPlan(event, planId) {
+async function handleGetPlan(event, planId) {
     try {
         const decoded = verifyToken(event.headers.authorization);
+
+        if (!validator.isUUID(planId)) {
+            return errorResponse(400, 'ID do plano inválido');
+        }
 
         const client = await pool.connect();
         
@@ -240,11 +346,7 @@ async function getPlan(event, planId) {
             `, [planId, decoded.userId]);
 
             if (planResult.rows.length === 0) {
-                return {
-                    statusCode: 404,
-                    headers: corsHeaders,
-                    body: JSON.stringify({ error: 'Plano não encontrado' })
-                };
+                return errorResponse(404, 'Plano não encontrado');
             }
 
             const plan = planResult.rows[0];
@@ -298,72 +400,63 @@ async function getPlan(event, planId) {
                 });
             }
 
-            return {
-                statusCode: 200,
-                headers: corsHeaders,
-                body: JSON.stringify({
-                    id: plan.id,
-                    name: plan.name,
-                    description: plan.description,
-                    objective: plan.objective,
-                    frequencyPerWeek: plan.frequency_per_week,
-                    startDate: plan.start_date,
-                    endDate: plan.end_date,
-                    status: plan.status,
-                    difficultyLevel: plan.difficulty_level,
-                    equipmentType: plan.equipment_type,
-                    estimatedDuration: plan.estimated_duration_minutes,
-                    observations: plan.observations,
-                    aiGenerated: plan.ai_generated,
-                    completedCycles: plan.completed_cycles,
-                    createdAt: plan.created_at,
-                    updatedAt: plan.updated_at,
-                    student: plan.student_name ? {
-                        name: plan.student_name,
-                        email: plan.student_email,
-                        birthDate: plan.birth_date,
-                        age: plan.age,
-                        height: plan.height,
-                        weight: plan.weight,
-                        cpf: plan.cpf
-                    } : null,
-                    workouts
-                })
-            };
+            return successResponse(200, 'Plano obtido com sucesso', {
+                id: plan.id,
+                name: plan.name,
+                description: plan.description,
+                objective: plan.objective,
+                frequencyPerWeek: plan.frequency_per_week,
+                startDate: plan.start_date,
+                endDate: plan.end_date,
+                status: plan.status,
+                difficultyLevel: plan.difficulty_level,
+                equipmentType: plan.equipment_type,
+                estimatedDuration: plan.estimated_duration_minutes,
+                observations: plan.observations,
+                aiGenerated: plan.ai_generated,
+                completedCycles: plan.completed_cycles,
+                createdAt: plan.created_at,
+                updatedAt: plan.updated_at,
+                student: plan.student_name ? {
+                    name: plan.student_name,
+                    email: plan.student_email,
+                    birthDate: plan.birth_date,
+                    age: plan.age,
+                    height: plan.height,
+                    weight: plan.weight,
+                    cpf: plan.cpf
+                } : null,
+                workouts
+            });
 
         } finally {
             client.release();
         }
 
     } catch (error) {
-        return {
-            statusCode: 401,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: error.message })
-        };
+        console.error('[PLANS] Erro ao obter plano:', error);
+        return errorResponse(401, error.message);
     }
 }
 
 // Criar novo plano
-async function createPlan(event) {
+async function handleCreatePlan(event) {
     try {
         const decoded = verifyToken(event.headers.authorization);
         const data = JSON.parse(event.body);
+
+        const sanitizedData = sanitizeInput(data);
+        const validationErrors = validatePlanData(sanitizedData);
+        
+        if (validationErrors.length > 0) {
+            return errorResponse(400, 'Dados inválidos', validationErrors);
+        }
 
         const {
             name, description, objective, frequencyPerWeek, startDate, endDate,
             difficultyLevel, equipmentType, estimatedDuration, observations,
             aiGenerated, student, workouts
-        } = data;
-
-        // Validações
-        if (!name || !objective || !frequencyPerWeek) {
-            return {
-                statusCode: 400,
-                headers: corsHeaders,
-                body: JSON.stringify({ error: 'Nome, objetivo e frequência são obrigatórios' })
-            };
-        }
+        } = sanitizedData;
 
         const client = await pool.connect();
         
@@ -383,7 +476,8 @@ async function createPlan(event) {
                         birth_date = EXCLUDED.birth_date,
                         age = EXCLUDED.age,
                         height = EXCLUDED.height,
-                        weight = EXCLUDED.weight
+                        weight = EXCLUDED.weight,
+                        updated_at = CURRENT_TIMESTAMP
                     RETURNING id
                 `, [
                     student.name,
@@ -409,9 +503,9 @@ async function createPlan(event) {
                 RETURNING id
             `, [
                 decoded.userId, studentId, name, description, objective,
-                frequencyPerWeek, startDate, endDate, difficultyLevel || 'intermediate',
+                frequencyPerWeek || 3, startDate, endDate, difficultyLevel || 'intermediate',
                 equipmentType || 'gym', estimatedDuration || 60,
-                JSON.stringify(observations || {}), aiGenerated || false
+                observations ? JSON.stringify(observations) : null, aiGenerated || false
             ]);
 
             const planId = planResult.rows[0].id;
@@ -440,6 +534,7 @@ async function createPlan(event) {
                     if (workout.exercises && Array.isArray(workout.exercises)) {
                         for (let j = 0; j < workout.exercises.length; j++) {
                             const exercise = workout.exercises[j];
+                            const muscleGroups = extractMuscleGroups(exercise.name, exercise.description);
                             
                             await client.query(`
                                 INSERT INTO exercises (
@@ -449,7 +544,7 @@ async function createPlan(event) {
                                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
                             `, [
                                 workoutId, exercise.name, exercise.description,
-                                exercise.muscleGroups || ['geral'], exercise.equipment,
+                                muscleGroups, exercise.equipment,
                                 exercise.sets || 3, exercise.reps || '10-12',
                                 exercise.weight || 'A definir', exercise.restTime || '90 segundos',
                                 j, exercise.specialInstructions
@@ -461,14 +556,9 @@ async function createPlan(event) {
 
             await client.query('COMMIT');
 
-            return {
-                statusCode: 201,
-                headers: corsHeaders,
-                body: JSON.stringify({
-                    message: 'Plano criado com sucesso',
-                    planId
-                })
-            };
+            return successResponse(201, 'Plano criado com sucesso', {
+                planId
+            });
 
         } catch (error) {
             await client.query('ROLLBACK');
@@ -478,19 +568,22 @@ async function createPlan(event) {
         }
 
     } catch (error) {
-        return {
-            statusCode: error.message.includes('Token') ? 401 : 400,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: error.message })
-        };
+        console.error('[PLANS] Erro ao criar plano:', error);
+        return errorResponse(error.message.includes('Token') ? 401 : 400, 'Erro ao criar plano');
     }
 }
 
 // Atualizar plano
-async function updatePlan(event, planId) {
+async function handleUpdatePlan(event, planId) {
     try {
         const decoded = verifyToken(event.headers.authorization);
         const data = JSON.parse(event.body);
+
+        if (!validator.isUUID(planId)) {
+            return errorResponse(400, 'ID do plano inválido');
+        }
+
+        const sanitizedData = sanitizeInput(data);
 
         const client = await pool.connect();
         
@@ -504,11 +597,7 @@ async function updatePlan(event, planId) {
             );
 
             if (planCheck.rows.length === 0) {
-                return {
-                    statusCode: 404,
-                    headers: corsHeaders,
-                    body: JSON.stringify({ error: 'Plano não encontrado' })
-                };
+                return errorResponse(404, 'Plano não encontrado');
             }
 
             // Atualizar plano
@@ -516,32 +605,33 @@ async function updatePlan(event, planId) {
             const updateValues = [];
             let paramCount = 0;
 
-            Object.entries(data).forEach(([key, value]) => {
-                if (value !== undefined && key !== 'workouts' && key !== 'student') {
+            const allowedFields = [
+                'name', 'description', 'objective', 'frequency_per_week',
+                'start_date', 'end_date', 'status', 'difficulty_level',
+                'equipment_type', 'estimated_duration_minutes', 'observations'
+            ];
+
+            for (const [key, value] of Object.entries(sanitizedData)) {
+                const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+                if (allowedFields.includes(snakeKey) && value !== undefined) {
                     paramCount++;
-                    updateFields.push(`${key.replace(/([A-Z])/g, '_$1').toLowerCase()} = $${paramCount}`);
+                    updateFields.push(`${snakeKey} = ${paramCount}`);
                     updateValues.push(key === 'observations' ? JSON.stringify(value) : value);
                 }
-            });
+            }
 
             if (updateFields.length > 0) {
                 updateValues.push(planId);
                 await client.query(`
                     UPDATE workout_plans 
                     SET ${updateFields.join(', ')}, updated_at = CURRENT_TIMESTAMP
-                    WHERE id = $${paramCount + 1}
+                    WHERE id = ${paramCount + 1}
                 `, updateValues);
             }
 
             await client.query('COMMIT');
 
-            return {
-                statusCode: 200,
-                headers: corsHeaders,
-                body: JSON.stringify({
-                    message: 'Plano atualizado com sucesso'
-                })
-            };
+            return successResponse(200, 'Plano atualizado com sucesso');
 
         } catch (error) {
             await client.query('ROLLBACK');
@@ -551,18 +641,19 @@ async function updatePlan(event, planId) {
         }
 
     } catch (error) {
-        return {
-            statusCode: error.message.includes('Token') ? 401 : 400,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: error.message })
-        };
+        console.error('[PLANS] Erro ao atualizar plano:', error);
+        return errorResponse(error.message.includes('Token') ? 401 : 400, 'Erro ao atualizar plano');
     }
 }
 
 // Excluir plano
-async function deletePlan(event, planId) {
+async function handleDeletePlan(event, planId) {
     try {
         const decoded = verifyToken(event.headers.authorization);
+
+        if (!validator.isUUID(planId)) {
+            return errorResponse(400, 'ID do plano inválido');
+        }
 
         const client = await pool.connect();
         
@@ -573,38 +664,29 @@ async function deletePlan(event, planId) {
             );
 
             if (result.rows.length === 0) {
-                return {
-                    statusCode: 404,
-                    headers: corsHeaders,
-                    body: JSON.stringify({ error: 'Plano não encontrado' })
-                };
+                return errorResponse(404, 'Plano não encontrado');
             }
 
-            return {
-                statusCode: 200,
-                headers: corsHeaders,
-                body: JSON.stringify({
-                    message: 'Plano excluído com sucesso'
-                })
-            };
+            return successResponse(200, 'Plano excluído com sucesso');
 
         } finally {
             client.release();
         }
 
     } catch (error) {
-        return {
-            statusCode: 401,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: error.message })
-        };
+        console.error('[PLANS] Erro ao excluir plano:', error);
+        return errorResponse(401, error.message);
     }
 }
 
 // Duplicar plano
-async function duplicatePlan(event, planId) {
+async function handleDuplicatePlan(event, planId) {
     try {
         const decoded = verifyToken(event.headers.authorization);
+
+        if (!validator.isUUID(planId)) {
+            return errorResponse(400, 'ID do plano inválido');
+        }
 
         const client = await pool.connect();
         
@@ -618,11 +700,7 @@ async function duplicatePlan(event, planId) {
             );
 
             if (originalPlan.rows.length === 0) {
-                return {
-                    statusCode: 404,
-                    headers: corsHeaders,
-                    body: JSON.stringify({ error: 'Plano não encontrado' })
-                };
+                return errorResponse(404, 'Plano não encontrado');
             }
 
             const plan = originalPlan.rows[0];
@@ -698,14 +776,9 @@ async function duplicatePlan(event, planId) {
 
             await client.query('COMMIT');
 
-            return {
-                statusCode: 201,
-                headers: corsHeaders,
-                body: JSON.stringify({
-                    message: 'Plano duplicado com sucesso',
-                    planId: newPlanId
-                })
-            };
+            return successResponse(201, 'Plano duplicado com sucesso', {
+                planId: newPlanId
+            });
 
         } catch (error) {
             await client.query('ROLLBACK');
@@ -715,10 +788,36 @@ async function duplicatePlan(event, planId) {
         }
 
     } catch (error) {
-        return {
-            statusCode: 401,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: error.message })
-        };
+        console.error('[PLANS] Erro ao duplicar plano:', error);
+        return errorResponse(401, error.message);
     }
 }
+
+// Obter estatísticas do plano
+async function handleGetPlanStats(event, planId) {
+    try {
+        const decoded = verifyToken(event.headers.authorization);
+
+        if (!validator.isUUID(planId)) {
+            return errorResponse(400, 'ID do plano inválido');
+        }
+
+        const client = await pool.connect();
+        
+        try {
+            const statsResult = await client.query(`
+                SELECT get_plan_statistics($1) as stats
+            `, [planId]);
+
+            const stats = statsResult.rows[0].stats;
+
+            return successResponse(200, 'Estatísticas obtidas com sucesso', stats);
+
+        } finally {
+            client.release();
+        }
+
+    } catch (error) {
+        console.error('[PLANS] Erro ao obter estatísticas:', error);
+        return errorResponse(401, error.message);
+    }

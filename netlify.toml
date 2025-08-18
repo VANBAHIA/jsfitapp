@@ -1,44 +1,81 @@
-# netlify.toml
 [build]
   functions = "netlify/functions"
   publish = "public"
+  command = "npm run build"
 
-# Configuração das Functions
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_VERSION = "9"
+  NETLIFY_USE_YARN = "false"
+
 [functions]
   directory = "netlify/functions"
+  node_bundler = "esbuild"
+  external_node_modules = ["pg", "bcryptjs", "jsonwebtoken"]
 
-# Redirecionamentos da API - ATUALIZADOS
+# =============================================
+# REDIRECIONAMENTOS DA API
+# =============================================
+
+# Auth endpoints
 [[redirects]]
-  from = "/api/workouts/:id"
-  to = "/.netlify/functions/workouts"  # Nova função
+  from = "/api/auth/*"
+  to = "/.netlify/functions/auth"
+  status = 200
+  force = true
+
+# Plans management
+[[redirects]]
+  from = "/api/plans/*"
+  to = "/.netlify/functions/plans"
   status = 200
   force = true
 
 [[redirects]]
-  from = "/api/workouts"
-  to = "/.netlify/functions/workouts"  # Nova função
+  from = "/api/plans"
+  to = "/.netlify/functions/plans"
   status = 200
   force = true
 
+# Sharing system
+[[redirects]]
+  from = "/api/share/*"
+  to = "/.netlify/functions/share"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/share"
+  to = "/.netlify/functions/share"
+  status = 200
+  force = true
+
+# Students management
 [[redirects]]
   from = "/api/students/*"
-  to = "/.netlify/functions/students"  # Nova função
+  to = "/.netlify/functions/students"
   status = 200
   force = true
 
-[[redirects]]
-  from = "/api/sync/*"
-  to = "/.netlify/functions/sync"  # Nova função
-  status = 200
-  force = true
-
+# Health check
 [[redirects]]
   from = "/api/health"
   to = "/.netlify/functions/health"
   status = 200
   force = true
 
-# Redirecionamentos das aplicações
+# Legacy workouts endpoint (backward compatibility)
+[[redirects]]
+  from = "/api/workouts/*"
+  to = "/.netlify/functions/share"
+  status = 200
+  force = true
+
+# =============================================
+# REDIRECIONAMENTOS DE PÁGINAS
+# =============================================
+
+# App redirects
 [[redirects]]
   from = "/aluno"
   to = "/aluno.html"
@@ -49,14 +86,22 @@
   to = "/personal.html"
   status = 200
 
-# Fallback para arquivos de dados (permitir acesso direto aos JSONs)
 [[redirects]]
-  from = "/data/workouts/*"
-  to = "/data/workouts/:splat"
+  from = "/app"
+  to = "/index.html"
+  status = 200
+
+# Fallback para SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
   status = 200
   force = false
 
-# Headers de segurança
+# =============================================
+# HEADERS DE SEGURANÇA
+# =============================================
+
 [[headers]]
   for = "/*"
   [headers.values]
@@ -64,59 +109,151 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), camera=(), microphone=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
 
 # Headers específicos para as APIs
 [[headers]]
   for = "/api/*"
   [headers.values]
     Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Headers = "Content-Type, Authorization"
-    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Max-Age = "86400"
+    Cache-Control = "no-cache, no-store, must-revalidate"
 
 # Headers específicos para as Functions
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]
     Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Headers = "Content-Type, Authorization"
-    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Max-Age = "86400"
+    Cache-Control = "no-cache, no-store, must-revalidate"
 
-# Adicionar suporte a WebSocket para real-time
-[[headers]]
-  for = "/api/ws/*"
-  [headers.values]
-    Connection = "Upgrade"
-    Upgrade = "websocket"
-    Access-Control-Allow-Origin = "*"
+# =============================================
+# CACHE PARA ARQUIVOS ESTÁTICOS
+# =============================================
 
-# Cache para arquivos estáticos
 [[headers]]
   for = "/css/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000"
+    Cache-Control = "public, max-age=31536000, immutable"
+    Vary = "Accept-Encoding"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Vary = "Accept-Encoding"
 
 [[headers]]
   for = "*.js"
   [headers.values]
-    Cache-Control = "public, max-age=31536000"
+    Cache-Control = "public, max-age=31536000, immutable"
+    Content-Type = "application/javascript; charset=utf-8"
 
-# Headers PWA
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Content-Type = "text/css; charset=utf-8"
+
+# =============================================
+# HEADERS PWA
+# =============================================
+
 [[headers]]
   for = "/manifest.json"
   [headers.values]
-    Content-Type = "application/manifest+json"
-    Cache-Control = "public, max-age=0"
+    Content-Type = "application/manifest+json; charset=utf-8"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
   for = "/sw.js"
   [headers.values]
-    Content-Type = "application/javascript"
-    Cache-Control = "public, max-age=0"
+    Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Service-Worker-Allowed = "/"
 
-# Headers para arquivos de dados JSON
+# =============================================
+# HEADERS PARA FONTES
+# =============================================
+
 [[headers]]
-  for = "/data/workouts/*.json"
+  for = "/*.woff2"
   [headers.values]
-    Content-Type = "application/json"
-    Cache-Control = "public, max-age=300"
+    Cache-Control = "public, max-age=31536000, immutable"
+    Content-Type = "font/woff2"
     Access-Control-Allow-Origin = "*"
+
+# =============================================
+# EDGE FUNCTIONS (BETA)
+# =============================================
+
+# Rate limiting edge function
+[[edge_functions]]
+  function = "rate-limit"
+  path = "/api/*"
+
+# =============================================
+# CONFIGURAÇÕES DE DESENVOLVIMENTO
+# =============================================
+
+[dev]
+  command = "npm run dev"
+  port = 8888
+  targetPort = 8888
+  framework = "#static"
+  autoLaunch = true
+
+[dev.env]
+  NODE_ENV = "development"
+
+# =============================================
+# CONFIGURAÇÕES DE CONTEXTO
+# =============================================
+
+[context.production]
+  command = "npm run build"
+  
+[context.production.environment]
+  NODE_ENV = "production"
+
+[context.deploy-preview]
+  command = "npm run build"
+  
+[context.deploy-preview.environment]
+  NODE_ENV = "staging"
+
+[context.branch-deploy]
+  command = "npm run build"
+
+# =============================================
+# FORMS (OPCIONAL)
+# =============================================
+
+[forms]
+  settings = true
+
+# =============================================
+# SPLIT TESTING (OPCIONAL)
+# =============================================
+
+[split]
+  # Configurações de A/B testing se necessário
+
+# =============================================
+# PLUGINS
+# =============================================
+
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
+  
+  [plugins.inputs.audits]
+    performance = true
+    accessibility = true
+    best-practices = true
+    seo = true
+    pwa =
