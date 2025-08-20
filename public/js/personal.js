@@ -1,8 +1,17 @@
-// Application object to organize functions and prevent global conflicts
+// =============================================
+// JS FIT APP - PERSONAL TRAINER SYSTEM
+// Sistema Completo de Criação de Planos de Treino
+// Compatível com formato JSON padronizado
+// =============================================
+
 const app = {
+    // =============================================
+    // CONFIGURAÇÕES E CONSTANTES
+    // =============================================
+    
     // Configuração da API para compartilhamento
     apiConfig: {
-        baseUrl: 'https://jsfitapp.netlify.app/api', // Usar o mesmo domínio
+        baseUrl: 'https://jsfitapp.netlify.app/api',
         timeout: 10000,
         retries: 3,
         endpoints: {
@@ -18,7 +27,42 @@ const app = {
         lastSharedPlan: null
     },
 
-    // Exercise database for AI generation and descriptions
+    // =============================================
+    // BASE DE DADOS DE TÉCNICAS AVANÇADAS
+    // =============================================
+    
+    tecnicasDatabase: {
+        'pre-exaustao': 'Exercício de isolamento antes do composto para pré-fadigar o músculo alvo',
+        'pos-exaustao': 'Exercício de isolamento após o composto para finalizar o músculo',
+        'bi-set': 'Dois exercícios executados em sequência sem descanso',
+        'tri-set': 'Três exercícios executados em sequência sem descanso',
+        'drop-set': 'Redução progressiva da carga na mesma série',
+        'rest-pause': 'Pause breves durante a série para completar mais repetições',
+        'serie-queima': 'Repetições parciais no final da série até a falha',
+        'tempo-controlado': 'Execução lenta e controlada (3-4 segundos na fase excêntrica)',
+        'pausa-contracao': 'Pausa de 1-2 segundos na contração máxima',
+        'unilateral-alternado': 'Execução alternada entre membros',
+        'piramide-crescente': 'Aumento progressivo da carga a cada série',
+        'piramide-decrescente': 'Diminuição progressiva da carga a cada série',
+        'clusters': 'Séries divididas em mini-séries com pausas curtas',
+        'negativas': 'Enfase na fase excêntrica do movimento',
+        'isometrico': 'Contração muscular sem movimento articular',
+        'metodo-21': 'Série de 21 repetições (7 parciais + 7 parciais + 7 completas)',
+        'onda': 'Variação de repetições em padrão ondulatório',
+        'strip-set': 'Redução de carga sem pausa entre as mudanças'
+    },
+
+    // Técnicas por nível de experiência
+    tecnicasPorNivel: {
+        iniciante: ['tempo-controlado', 'pausa-contracao'],
+        intermediario: ['pre-exaustao', 'pos-exaustao', 'drop-set', 'bi-set', 'tempo-controlado', 'pausa-contracao'],
+        avancado: ['pre-exaustao', 'pos-exaustao', 'bi-set', 'tri-set', 'drop-set', 'rest-pause', 'serie-queima', 'clusters', 'negativas', 'metodo-21', 'strip-set']
+    },
+
+    // =============================================
+    // BASE DE DADOS DE EXERCÍCIOS
+    // =============================================
+    
     exerciseDatabase: {
         peito: {
             iniciante: [
@@ -155,7 +199,10 @@ const app = {
         }
     },
 
-    // Exercise descriptions database
+    // =============================================
+    // BASE DE DADOS DE DESCRIÇÕES DE EXERCÍCIOS
+    // =============================================
+    
     exerciseDescriptions: {
         'Supino Reto com Barra': 'Exercício fundamental para desenvolvimento do peitoral. Deitado no banco, segure a barra com pegada média, desça controladamente até o peito e empurre para cima.',
         'Supino Inclinado com Barra': 'Trabalha a parte superior do peitoral. Banco inclinado entre 30-45°, mesma execução do supino reto.',
@@ -229,7 +276,10 @@ const app = {
         'Alongamento': 'Essencial para flexibilidade e recuperação muscular.'
     },
 
-    // Application State
+    // =============================================
+    // ESTADO DA APLICAÇÃO
+    // =============================================
+    
     currentPlan: {
         id: null,
         nome: '',
@@ -247,6 +297,10 @@ const app = {
     currentWorkoutIndex: null,
     selectedDays: 1,
     isEditing: false,
+
+    // =============================================
+    // FUNÇÕES DE API E COMPARTILHAMENTO
+    // =============================================
 
     // Verificar status da API
     async checkAPIStatus() {
@@ -294,7 +348,7 @@ const app = {
         return result;
     },
 
-    // Compartilhar plano (nova função)
+    // Compartilhar plano
     async sharePlan(planId) {
         const plan = this.savedPlans.find(p => p.id === planId);
         if (!plan) {
@@ -317,14 +371,12 @@ const app = {
                 shareId: shareId,
                 plan: {
                     ...plan,
-                    // Remover dados sensíveis se necessário
                     sharedAt: new Date().toISOString(),
                     sharedBy: 'personal_trainer'
                 }
             };
 
             if (apiAvailable) {
-                // Tentar enviar para servidor
                 try {
                     const response = await this.makeAPIRequest(
                         `${this.apiConfig.baseUrl}${this.apiConfig.endpoints.shareWorkout}`,
@@ -335,12 +387,9 @@ const app = {
                     );
 
                     if (response.ok) {
-                        // Salvar também localmente como backup
                         this.saveSharedPlanLocally(shareId, shareData.plan);
-                        
                         this.sharingState.currentShareId = shareId;
                         this.sharingState.lastSharedPlan = plan;
-                        
                         this.showShareSuccessModal(shareId, 'server');
                         this.showMessage('✅ Plano compartilhado com sucesso no servidor!', 'success');
                         return;
@@ -349,7 +398,6 @@ const app = {
                     }
                 } catch (serverError) {
                     console.warn('Falha no servidor, usando armazenamento local:', serverError);
-                    // Fallback para local
                     this.saveSharedPlanLocally(shareId, shareData.plan);
                     this.sharingState.currentShareId = shareId;
                     this.sharingState.lastSharedPlan = plan;
@@ -357,7 +405,6 @@ const app = {
                     this.showMessage('⚠️ Plano compartilhado localmente (servidor indisponível)', 'warning');
                 }
             } else {
-                // API indisponível, usar apenas local
                 this.saveSharedPlanLocally(shareId, shareData.plan);
                 this.sharingState.currentShareId = shareId;
                 this.sharingState.lastSharedPlan = plan;
@@ -399,13 +446,11 @@ const app = {
 
     // Mostrar modal de sucesso do compartilhamento
     showShareSuccessModal(shareId, source) {
-        // Remover modal existente se houver
         const existingModal = document.getElementById('shareSuccessModal');
         if (existingModal) {
             existingModal.remove();
         }
 
-        // Criar modal
         const modal = document.createElement('div');
         modal.id = 'shareSuccessModal';
         modal.className = 'modal active';
@@ -458,7 +503,6 @@ const app = {
 
         document.body.appendChild(modal);
 
-        // Auto-selecionar o ID para facilitar cópia
         setTimeout(() => {
             const shareCodeElement = modal.querySelector('.share-id-code');
             if (shareCodeElement && window.getSelection) {
@@ -486,7 +530,6 @@ const app = {
                 await navigator.clipboard.writeText(shareId);
                 this.showMessage('📋 ID copiado para a área de transferência!', 'success');
             } else {
-                // Fallback para browsers antigos
                 const textArea = document.createElement('textarea');
                 textArea.value = shareId;
                 textArea.style.position = 'fixed';
@@ -541,15 +584,12 @@ const app = {
             return;
         }
 
-        // Gerar novo ID
         const newShareId = this.generateShareId();
         
         try {
-            // Verificar se API está disponível
             const apiAvailable = await this.checkAPIStatus();
             
             if (apiAvailable) {
-                // Tentar enviar para servidor com novo ID
                 const response = await this.makeAPIRequest(
                     `${this.apiConfig.baseUrl}${this.apiConfig.endpoints.shareWorkout}`,
                     {
@@ -566,13 +606,11 @@ const app = {
                 }
             }
 
-            // Salvar localmente com novo ID
             sharedPlans[newShareId] = {
                 ...planData,
                 sharedAt: new Date().toISOString()
             };
             
-            // Remover ID antigo
             delete sharedPlans[oldShareId];
             
             localStorage.setItem('jsfitapp_shared_plans', JSON.stringify(sharedPlans));
@@ -586,14 +624,92 @@ const app = {
         }
     },
 
-    // Initialize app
+    // =============================================
+    // FUNÇÕES DE TÉCNICAS AVANÇADAS
+    // =============================================
+
+    getTecnicaForExercise(exerciseIndex, nivel, grupo) {
+        const tecnicasDisponiveis = this.tecnicasPorNivel[nivel] || this.tecnicasPorNivel.intermediario;
+        
+        if (exerciseIndex === 0) {
+            return Math.random() > 0.7 ? 'pre-exaustao' : 'tempo-controlado';
+        } else if (exerciseIndex === 1) {
+            return nivel === 'avancado' && Math.random() > 0.5 ? 'rest-pause' : '';
+        } else {
+            const tecnicasFinais = tecnicasDisponiveis.filter(t => 
+                ['pos-exaustao', 'drop-set', 'serie-queima', 'bi-set'].includes(t)
+            );
+            return Math.random() > 0.6 ? 
+                tecnicasFinais[Math.floor(Math.random() * tecnicasFinais.length)] || '' : '';
+        }
+    },
+
+    getObservacaoEspecial(tecnica, nomeExercicio) {
+        if (!tecnica) return '';
+        
+        const observacoes = {
+            'pre-exaustao': `Executar antes do exercício principal para pré-fadigar o músculo`,
+            'pos-exaustao': `Exercício final para esgotamento completo do músculo`,
+            'bi-set': `Executar em sequência com próximo exercício, sem descanso`,
+            'tri-set': `Executar em sequência com próximos 2 exercícios, sem descanso`,
+            'drop-set': `Reduzir carga imediatamente após falha e continuar`,
+            'rest-pause': `Pausar 10-15s após falha e continuar até nova falha`,
+            'serie-queima': `Após falha, fazer repetições parciais até esgotamento`,
+            'tempo-controlado': `3-4 segundos na descida, 1-2 segundos na subida`,
+            'pausa-contracao': `Pausar 2 segundos na contração máxima`,
+            'unilateral-alternado': `Alternar membros a cada repetição`,
+            'metodo-21': `7 reps na metade inferior + 7 superior + 7 completas`,
+            'negativas': `Enfatizar fase excêntrica com 4-6 segundos`,
+            'clusters': `Dividir série em mini-séries de 3-4 reps com 15s pausa`
+        };
+        
+        return observacoes[tecnica] || '';
+    },
+
+    getTecnicasAplicadasFromPlan(treinos) {
+        const tecnicasUsadas = new Set();
+        
+        treinos.forEach(treino => {
+            if (treino.exercicios) {
+                treino.exercicios.forEach(ex => {
+                    if (ex.tecnica && this.tecnicasDatabase[ex.tecnica]) {
+                        tecnicasUsadas.add(ex.tecnica);
+                    }
+                });
+            }
+        });
+        
+        const tecnicasAplicadas = {};
+        tecnicasUsadas.forEach(tecnica => {
+            tecnicasAplicadas[tecnica] = this.tecnicasDatabase[tecnica];
+        });
+        
+        return tecnicasAplicadas;
+    },
+
+    getUsedTechniques(nivel) {
+        const tecnicasUsadas = {};
+        const tecnicasDisponiveis = this.tecnicasPorNivel[nivel] || this.tecnicasPorNivel.intermediario;
+        
+        tecnicasDisponiveis.forEach(tecnica => {
+            if (this.tecnicasDatabase[tecnica]) {
+                tecnicasUsadas[tecnica] = this.tecnicasDatabase[tecnica];
+            }
+        });
+        
+        return tecnicasUsadas;
+    },
+
+    // =============================================
+    // INICIALIZAÇÃO DA APLICAÇÃO
+    // =============================================
+
     init() {
         this.loadSavedPlans();
         this.setDefaultDates();
         this.showPlanList();
         this.setupEventListeners();
         
-        // Verificar status da API de compartilhamento
         this.checkAPIStatus().then(status => {
             console.log('Status da API de compartilhamento:', status ? 'Online' : 'Offline');
         }).catch(() => {
@@ -636,6 +752,12 @@ const app = {
         if (exerciseSelect) {
             exerciseSelect.addEventListener('change', this.updateExerciseDescription.bind(this));
         }
+
+        // Technique change handler
+        const techniqueSelect = document.getElementById('exerciseTechnique');
+        if (techniqueSelect) {
+            techniqueSelect.addEventListener('change', this.updateTechniqueDescription.bind(this));
+        }
     },
 
     closeAllModals() {
@@ -655,12 +777,15 @@ const app = {
         if (endInput) endInput.value = endDate.toISOString().split('T')[0];
     },
 
+    // =============================================
+    // FUNÇÕES DE INTERFACE - IA
+    // =============================================
+
     showAIPlanCreator() {
         document.getElementById('aiPlanCreator').style.display = 'block';
         document.getElementById('planCreator').style.display = 'none';
         document.getElementById('planList').style.display = 'none';
         
-        // Clear form
         const form = document.getElementById('aiPlanCreator');
         const inputs = form.querySelectorAll('input, textarea');
         inputs.forEach(input => {
@@ -669,379 +794,8 @@ const app = {
             }
         });
         
-        // Set default values
         document.getElementById('aiAvailableDays').value = '3';
         document.getElementById('aiSessionTime').value = '60';
-    },
-
-    showPlanCreator(planId = null) {
-        document.getElementById('planCreator').style.display = 'block';
-        document.getElementById('aiPlanCreator').style.display = 'none';
-        document.getElementById('planList').style.display = 'none';
-        
-        if (planId) {
-            this.loadPlanForEditing(planId);
-        } else {
-            this.resetPlanForm();
-            this.selectPlanType(1, 'A', document.querySelector('.plan-type-btn'));
-        }
-    },
-
-    loadPlanForEditing(planId) {
-        const plan = this.savedPlans.find(p => p.id === planId);
-        if (!plan) return;
-
-        this.isEditing = true;
-        this.currentPlan = { ...plan };
-        
-        // Fill form with plan data
-        document.getElementById('currentPlanId').value = planId;
-        document.getElementById('studentName').value = plan.aluno?.nome || '';
-        document.getElementById('studentBirthDate').value = plan.aluno?.dataNascimento || '';
-        document.getElementById('studentCpf').value = plan.aluno?.cpf || '';
-        document.getElementById('studentHeight').value = plan.aluno?.altura || plan.perfil?.altura || '';
-        document.getElementById('studentWeight').value = plan.aluno?.peso || plan.perfil?.peso || '';
-        document.getElementById('planName').value = plan.nome || '';
-        document.getElementById('planObjective').value = plan.perfil?.objetivo || '';
-        document.getElementById('planStartDate').value = plan.dataInicio || '';
-        document.getElementById('planEndDate').value = plan.dataFim || '';
-        document.getElementById('planObservations').value = plan.observacoes?.geral || '';
-        
-        // Set plan type
-        this.selectedDays = plan.dias;
-        this.selectPlanTypeForEdit(plan.dias);
-        
-        // Show cancel button
-        document.getElementById('cancelEditBtn').style.display = 'inline-flex';
-        
-        this.showMessage('Modo de edição ativado 📝', 'success');
-    },
-
-    selectPlanTypeForEdit(days) {
-        // Update active button
-        document.querySelectorAll('.plan-type-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.plan-type-btn')[days - 1]?.classList.add('active');
-        
-        this.selectedDays = days;
-        this.generateWorkoutEditorForEdit(days);
-    },
-
-    generateWorkoutEditorForEdit(days) {
-        const editor = document.getElementById('workoutEditor');
-        let html = '<div class="form-section"><h2>🏋️ Treinos</h2>';
-        
-        for (let i = 0; i < days; i++) {
-            const workout = this.currentPlan.treinos[i] || {
-                id: String.fromCharCode(65 + i), // A, B, C, etc.
-                nome: `Treino ${String.fromCharCode(65 + i)}`,
-                foco: 'Treino geral',
-                exercicios: []
-            };
-            
-            html += `
-                <div class="workout-editor">
-                    <div class="workout-header">
-                        <h3 class="workout-title">${workout.nome}</h3>
-                        <button class="btn btn-primary btn-small" onclick="app.addExercise(${i})">
-                            ➕ Adicionar Exercício
-                        </button>
-                    </div>
-                    <div class="exercise-list" id="exerciseList${i}">
-                        ${this.renderExercises(workout.exercicios, i)}
-                    </div>
-                </div>
-            `;
-        }
-        
-        html += '</div>';
-        editor.innerHTML = html;
-    },
-
-    cancelEdit() {
-        this.isEditing = false;
-        this.currentPlan = {
-            id: null,
-            nome: '',
-            aluno: { nome: '', idade: 25, altura: '1,75m', peso: '75kg' },
-            dias: 1,
-            dataInicio: '',
-            dataFim: '',
-            perfil: { objetivo: 'Hipertrofia e ganho de massa muscular' },
-            observacoes: {},
-            treinos: []
-        };
-        document.getElementById('cancelEditBtn').style.display = 'none';
-        document.getElementById('currentPlanId').value = '';
-        this.showPlanList();
-    },
-
-    showPlanList() {
-        document.getElementById('planCreator').style.display = 'none';
-        document.getElementById('aiPlanCreator').style.display = 'none';
-        document.getElementById('planList').style.display = 'block';
-        this.renderPlanList();
-    },
-
-    resetPlanForm() {
-        // Clear form inputs
-        const inputs = document.querySelectorAll('#planCreator input, #planCreator textarea, #planCreator select');
-        inputs.forEach(input => {
-            if (input.type === 'number') {
-                input.value = input.placeholder || '';
-            } else {
-                input.value = '';
-            }
-        });
-        
-        this.setDefaultDates();
-        this.currentPlan.treinos = [];
-        this.selectedDays = 1;
-        this.isEditing = false;
-        document.getElementById('cancelEditBtn').style.display = 'none';
-        document.getElementById('currentPlanId').value = '';
-    },
-
-    selectPlanType(days, letters, element) {
-        // Update active button
-        document.querySelectorAll('.plan-type-btn').forEach(btn => btn.classList.remove('active'));
-        element.classList.add('active');
-        
-        this.selectedDays = days;
-        this.generateWorkoutEditor(days);
-    },
-
-    generateWorkoutEditor(days) {
-        const editor = document.getElementById('workoutEditor');
-        const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
-        const workoutNames = {
-            1: ['A - Corpo Inteiro'],
-            2: ['A - Membros Superiores', 'B - Membros Inferiores'],
-            3: ['A - Peito e Tríceps', 'B - Costas e Bíceps', 'C - Pernas e Ombros'],
-            4: ['A - Peito e Tríceps', 'B - Costas e Bíceps', 'C - Ombros', 'D - Pernas'],
-            5: ['A - Peito e Tríceps', 'B - Costas e Bíceps', 'C - Ombros e Trapézio', 'D - Pernas (Quadríceps)', 'E - Posterior e Core'],
-            6: ['A - Peito', 'B - Costas', 'C - Ombros', 'D - Braços', 'E - Pernas (Quadríceps)', 'F - Posterior e Core']
-        };
-
-        let html = '<div class="form-section"><h2>🏋️ Treinos</h2>';
-        
-        // Initialize treinos array
-        this.currentPlan.treinos = [];
-        
-        for (let i = 0; i < days; i++) {
-            const workout = {
-                id: letters[i],
-                nome: workoutNames[days][i],
-                foco: workoutNames[days][i].split(' - ')[1] || 'Treino geral',
-                exercicios: [
-                    {
-                        id: i * 10 + 1,
-                        nome: 'Aquecimento',
-                        descricao: 'Aquecimento geral de 5-10 minutos',
-                        series: 1,
-                        repeticoes: '8-10 min',
-                        carga: 'Leve',
-                        descanso: '0',
-                        observacoesEspeciais: '',
-                        concluido: false
-                    }
-                ],
-                concluido: false,
-                execucoes: 0
-            };
-            
-            this.currentPlan.treinos.push(workout);
-            
-            html += `
-                <div class="workout-editor">
-                    <div class="workout-header">
-                        <h3 class="workout-title">${workout.nome}</h3>
-                        <button class="btn btn-primary btn-small" onclick="app.addExercise(${i})">
-                            ➕ Adicionar Exercício
-                        </button>
-                    </div>
-                    <div class="exercise-list" id="exerciseList${i}">
-                        ${this.renderExercises(workout.exercicios, i)}
-                    </div>
-                </div>
-            `;
-        }
-        
-        html += '</div>';
-        editor.innerHTML = html;
-    },
-
-    renderExercises(exercicios, workoutIndex) {
-        if (!exercicios || exercicios.length === 0) {
-            return '<p>Nenhum exercício adicionado</p>';
-        }
-
-        return exercicios.map((ex, exIndex) => `
-            <div class="exercise-item">
-                <div class="exercise-info">
-                    <div>
-                        <div class="exercise-name">${ex.nome}</div>
-                        <div class="exercise-description">${ex.descricao}</div>
-                        ${ex.observacoesEspeciais ? `<div class="exercise-special-notes">${ex.observacoesEspeciais}</div>` : ''}
-                    </div>
-                    <div><strong>Séries:</strong> ${ex.series}</div>
-                    <div><strong>Reps:</strong> ${ex.repeticoes}</div>
-                    <div><strong>Carga:</strong> ${ex.carga}</div>
-                    <div><strong>Descanso:</strong> ${ex.descanso || '60s'}</div>
-                </div>
-                <div class="exercise-actions">
-                    <button class="btn btn-outline btn-small" onclick="app.editExercise(${workoutIndex}, ${exIndex})">
-                        ✏️ Editar
-                    </button>
-                    <button class="btn btn-danger btn-small" onclick="app.removeExercise(${workoutIndex}, ${exIndex})">
-                        🗑️ Remover
-                    </button>
-                </div>
-            </div>
-        `).join('');
-    },
-
-    addExercise(workoutIndex) {
-        const newExercise = {
-            id: Date.now(),
-            nome: 'Novo Exercício',
-            descricao: 'Descrição do exercício',
-            series: 3,
-            repeticoes: '10-12',
-            carga: '20kg',
-            descanso: '90 segundos',
-            observacoesEspeciais: '',
-            concluido: false
-        };
-        
-        this.currentPlan.treinos[workoutIndex].exercicios.push(newExercise);
-        this.updateExerciseList(workoutIndex);
-    },
-
-    editExercise(workoutIndex, exerciseIndex) {
-        this.currentWorkoutIndex = workoutIndex;
-        this.currentExerciseIndex = exerciseIndex;
-        
-        const exercise = this.currentPlan.treinos[workoutIndex].exercicios[exerciseIndex];
-        
-        // Fill modal with exercise data
-        const exerciseSelect = document.getElementById('exerciseName');
-        const customGroup = document.getElementById('customExerciseGroup');
-        const customInput = document.getElementById('customExerciseName');
-        
-        // Check if exercise name exists in options
-        const option = Array.from(exerciseSelect.options).find(opt => opt.value === exercise.nome);
-        if (option) {
-            exerciseSelect.value = exercise.nome;
-            customGroup.style.display = 'none';
-        } else {
-            exerciseSelect.value = 'custom';
-            customGroup.style.display = 'block';
-            customInput.value = exercise.nome;
-        }
-        
-        document.getElementById('exerciseSets').value = exercise.series;
-        document.getElementById('exerciseReps').value = exercise.repeticoes;
-        document.getElementById('exerciseWeight').value = exercise.carga;
-        document.getElementById('exerciseRest').value = exercise.descanso || '90 segundos';
-        document.getElementById('exerciseDescription').value = exercise.descricao;
-        
-        // Handle special notes
-        const specialSelect = document.getElementById('exerciseSpecialNotes');
-        const customNotesGroup = document.getElementById('customNotesGroup');
-        const customNotesInput = document.getElementById('customSpecialNotes');
-        
-        if (exercise.observacoesEspeciais) {
-            const specialOption = Array.from(specialSelect.options).find(opt => opt.value === exercise.observacoesEspeciais);
-            if (specialOption) {
-                specialSelect.value = exercise.observacoesEspeciais;
-                customNotesGroup.style.display = 'none';
-            } else {
-                specialSelect.value = 'custom';
-                customNotesGroup.style.display = 'block';
-                customNotesInput.value = exercise.observacoesEspeciais;
-            }
-        } else {
-            specialSelect.value = '';
-            customNotesGroup.style.display = 'none';
-        }
-        
-        // Show modal
-        document.getElementById('exerciseModal').classList.add('active');
-    },
-
-    updateExerciseDescription() {
-        const exerciseSelect = document.getElementById('exerciseName');
-        const customGroup = document.getElementById('customExerciseGroup');
-        const descriptionTextarea = document.getElementById('exerciseDescription');
-        
-        if (exerciseSelect.value === 'custom') {
-            customGroup.style.display = 'block';
-            descriptionTextarea.value = '';
-        } else {
-            customGroup.style.display = 'none';
-            // Set description from database
-            const description = this.exerciseDescriptions[exerciseSelect.value] || 'Descrição não disponível';
-            descriptionTextarea.value = description;
-        }
-    },
-
-    updateSpecialNotesInput() {
-        const specialSelect = document.getElementById('exerciseSpecialNotes');
-        const customGroup = document.getElementById('customNotesGroup');
-        
-        if (specialSelect.value === 'custom') {
-            customGroup.style.display = 'block';
-        } else {
-            customGroup.style.display = 'none';
-        }
-    },
-
-    saveExercise() {
-        if (this.currentWorkoutIndex === null || this.currentExerciseIndex === null) return;
-        
-        const exercise = this.currentPlan.treinos[this.currentWorkoutIndex].exercicios[this.currentExerciseIndex];
-        
-        const exerciseSelect = document.getElementById('exerciseName');
-        const customName = document.getElementById('customExerciseName');
-        const specialSelect = document.getElementById('exerciseSpecialNotes');
-        const customNotes = document.getElementById('customSpecialNotes');
-        
-        // Set exercise name
-        exercise.nome = exerciseSelect.value === 'custom' ? customName.value : exerciseSelect.value;
-        exercise.series = parseInt(document.getElementById('exerciseSets').value) || 3;
-        exercise.repeticoes = document.getElementById('exerciseReps').value;
-        exercise.carga = document.getElementById('exerciseWeight').value;
-        exercise.descanso = document.getElementById('exerciseRest').value;
-        exercise.descricao = document.getElementById('exerciseDescription').value;
-        
-        // Set special notes
-        exercise.observacoesEspeciais = specialSelect.value === 'custom' ? customNotes.value : specialSelect.value;
-        
-        this.updateExerciseList(this.currentWorkoutIndex);
-        this.closeExerciseModal();
-    },
-
-    removeExercise(workoutIndex, exerciseIndex) {
-        if (confirm('Tem certeza que deseja remover este exercício?')) {
-            this.currentPlan.treinos[workoutIndex].exercicios.splice(exerciseIndex, 1);
-            this.updateExerciseList(workoutIndex);
-        }
-    },
-
-    updateExerciseList(workoutIndex) {
-        const container = document.getElementById(`exerciseList${workoutIndex}`);
-        if (container) {
-            container.innerHTML = this.renderExercises(
-                this.currentPlan.treinos[workoutIndex].exercicios, 
-                workoutIndex
-            );
-        }
-    },
-
-    closeExerciseModal() {
-        document.getElementById('exerciseModal').classList.remove('active');
-        this.currentWorkoutIndex = null;
-        this.currentExerciseIndex = null;
     },
 
     calculateAge(birthDate) {
@@ -1058,7 +812,6 @@ const app = {
     },
 
     generateAIPlan() {
-        // Get AI form data
         const aiData = {
             nome: document.getElementById('aiStudentName').value,
             dataNascimento: document.getElementById('aiStudentBirthDate').value,
@@ -1075,21 +828,17 @@ const app = {
             observacoes: document.getElementById('aiSpecialNotes').value
         };
 
-        // Calculate age from birth date
         aiData.idade = aiData.dataNascimento ? this.calculateAge(aiData.dataNascimento) : 25;
 
-        // Validation
         if (!aiData.nome) {
             this.showMessage('Por favor, preencha o nome do aluno', 'error');
             return;
         }
 
-        // Show generating indicator
         const indicator = document.getElementById('generatingIndicator');
         const progressFill = document.getElementById('progressFill');
         indicator.classList.add('active');
 
-        // Simulate AI generation with progress
         let progress = 0;
         const progressInterval = setInterval(() => {
             progress += Math.random() * 15;
@@ -1097,16 +846,13 @@ const app = {
             progressFill.style.width = progress + '%';
         }, 200);
 
-        // Generate plan after delay
         setTimeout(() => {
             clearInterval(progressInterval);
             progressFill.style.width = '100%';
 
             try {
-                // Create AI-generated plan
                 const aiGeneratedPlan = this.createAIPlan(aiData);
                 
-                // Save the AI generated plan
                 const existingIndex = this.savedPlans.findIndex(p => p.id === aiGeneratedPlan.id);
                 if (existingIndex >= 0) {
                     this.savedPlans[existingIndex] = { ...aiGeneratedPlan };
@@ -1114,16 +860,12 @@ const app = {
                     this.savedPlans.push({ ...aiGeneratedPlan });
                 }
 
-                // Save to localStorage
                 this.savePlansToStorage();
                 
-                // Hide indicator
                 indicator.classList.remove('active');
                 
-                // Show success message and redirect to plan list
                 this.showMessage('Plano gerado com sucesso pela IA! ✨', 'success');
                 
-                // Redirect to plan list after a short delay
                 setTimeout(() => {
                     this.showPlanList();
                 }, 1500);
@@ -1134,13 +876,13 @@ const app = {
                 this.showMessage('Erro ao gerar plano. Tente novamente.', 'error');
             }
 
-        }, 2000 + Math.random() * 2000); // 2-4 seconds
+        }, 2000 + Math.random() * 2000);
     },
 
     createAIPlan(aiData) {
         const plan = {
             id: Date.now(),
-            nome: `${this.getWorkoutLetters(aiData.dias)} - ${aiData.dias} Dias ${aiData.objetivo.split(' ')[0]} (${aiData.idade} anos)`,
+            nome: `${aiData.nome} - Treino ${this.getWorkoutLetters(aiData.dias)} (${aiData.nivel.charAt(0).toUpperCase() + aiData.nivel.slice(1)}) ${aiData.objetivo.split(' ')[0]}`,
             aluno: {
                 nome: aiData.nome,
                 dataNascimento: aiData.dataNascimento,
@@ -1151,7 +893,7 @@ const app = {
             },
             dias: aiData.dias,
             dataInicio: new Date().toISOString().split('T')[0],
-            dataFim: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 6 months
+            dataFim: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             perfil: {
                 idade: aiData.idade,
                 altura: aiData.altura,
@@ -1160,7 +902,8 @@ const app = {
                 objetivo: aiData.objetivo
             },
             treinos: this.generateAIWorkouts(aiData),
-            observacoes: this.generateObservations(aiData)
+            observacoes: this.generateObservations(aiData),
+            tecnicas_aplicadas: this.getUsedTechniques(aiData.nivel)
         };
 
         return plan;
@@ -1256,6 +999,7 @@ const app = {
             carga: this.getWarmupIntensity(),
             descanso: '0',
             observacoesEspeciais: '',
+            tecnica: '',
             concluido: false
         });
 
@@ -1264,11 +1008,11 @@ const app = {
             if (this.exerciseDatabase[grupo] && this.exerciseDatabase[grupo][nivel]) {
                 const groupExercises = this.exerciseDatabase[grupo][nivel];
                 
-                // Selecionar 2-4 exercícios por grupo dependendo do número de grupos
                 const numExercises = grupos.length <= 2 ? 4 : (grupos.length <= 3 ? 3 : 2);
                 
                 for (let i = 0; i < Math.min(numExercises, groupExercises.length); i++) {
                     const baseExercise = groupExercises[i];
+                    const tecnicaSelecionada = this.getTecnicaForExercise(i, nivel, grupo);
                     exercises.push({
                         id: exerciseId++,
                         nome: baseExercise.nome,
@@ -1277,7 +1021,8 @@ const app = {
                         repeticoes: baseExercise.repeticoes,
                         carga: this.adjustLoadForLevel(baseExercise.carga, nivel),
                         descanso: this.getRestByObjective(objetivo),
-                        observacoesEspeciais: this.getRandomSpecialNote(nivel),
+                        observacoesEspeciais: this.getObservacaoEspecial(tecnicaSelecionada, baseExercise.nome),
+                        tecnica: tecnicaSelecionada,
                         concluido: false
                     });
                 }
@@ -1295,6 +1040,7 @@ const app = {
                 carga: "Peso corporal",
                 descanso: '0',
                 observacoesEspeciais: '',
+                tecnica: '',
                 concluido: false
             });
         }
@@ -1330,17 +1076,6 @@ const app = {
         return "Intensidade moderada";
     },
 
-    getRandomSpecialNote(nivel) {
-        const specialNotes = {
-            iniciante: ['', '', '', ''], // Mais chances de nenhuma observação especial
-            intermediario: ['', '', 'Drop set', 'Bi-set', 'Tempo controlado'],
-            avancado: ['Drop set', 'Bi-set', 'Rest-pause', 'Negativa', 'Método 21', 'Pirâmide crescente']
-        };
-        
-        const notes = specialNotes[nivel] || specialNotes.intermediario;
-        return notes[Math.floor(Math.random() * notes.length)];
-    },
-
     adjustLoadForLevel(baseCarga, nivel) {
         if (typeof baseCarga !== 'string') return baseCarga;
         
@@ -1352,7 +1087,6 @@ const app = {
         
         const multiplier = multipliers[nivel] || 1.0;
         
-        // Extract numbers from carga string and adjust
         return baseCarga.replace(/(\d+)/g, (match) => {
             const num = parseInt(match);
             const adjusted = Math.round(num * multiplier);
@@ -1410,13 +1144,415 @@ const app = {
         }
     },
 
+    // =============================================
+    // FUNÇÕES DE INTERFACE - CRIAÇÃO MANUAL
+    // =============================================
+
+    showPlanCreator(planId = null) {
+        document.getElementById('planCreator').style.display = 'block';
+        document.getElementById('aiPlanCreator').style.display = 'none';
+        document.getElementById('planList').style.display = 'none';
+        
+        if (planId) {
+            this.loadPlanForEditing(planId);
+        } else {
+            this.resetPlanForm();
+            this.selectPlanType(1, 'A', document.querySelector('.plan-type-btn'));
+        }
+    },
+
+    loadPlanForEditing(planId) {
+        const plan = this.savedPlans.find(p => p.id === planId);
+        if (!plan) return;
+
+        this.isEditing = true;
+        this.currentPlan = { ...plan };
+        
+        document.getElementById('currentPlanId').value = planId;
+        document.getElementById('studentName').value = plan.aluno?.nome || '';
+        document.getElementById('studentBirthDate').value = plan.aluno?.dataNascimento || '';
+        document.getElementById('studentCpf').value = plan.aluno?.cpf || '';
+        document.getElementById('studentHeight').value = plan.aluno?.altura || plan.perfil?.altura || '';
+        document.getElementById('studentWeight').value = plan.aluno?.peso || plan.perfil?.peso || '';
+        document.getElementById('planName').value = plan.nome || '';
+        document.getElementById('planObjective').value = plan.perfil?.objetivo || '';
+        document.getElementById('planStartDate').value = plan.dataInicio || '';
+        document.getElementById('planEndDate').value = plan.dataFim || '';
+        document.getElementById('planObservations').value = plan.observacoes?.geral || '';
+        
+        this.selectedDays = plan.dias;
+        this.selectPlanTypeForEdit(plan.dias);
+        
+        document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+        
+        this.showMessage('Modo de edição ativado 📝', 'success');
+    },
+
+    selectPlanTypeForEdit(days) {
+        document.querySelectorAll('.plan-type-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.plan-type-btn')[days - 1]?.classList.add('active');
+        
+        this.selectedDays = days;
+        this.generateWorkoutEditorForEdit(days);
+    },
+
+    generateWorkoutEditorForEdit(days) {
+        const editor = document.getElementById('workoutEditor');
+        let html = '<div class="form-section"><h2>🏋️ Treinos</h2>';
+        
+        for (let i = 0; i < days; i++) {
+            const workout = this.currentPlan.treinos[i] || {
+                id: String.fromCharCode(65 + i),
+                nome: `Treino ${String.fromCharCode(65 + i)}`,
+                foco: 'Treino geral',
+                exercicios: []
+            };
+            
+            if (workout.exercicios) {
+                workout.exercicios.forEach(ex => {
+                    if (!ex.tecnica) ex.tecnica = '';
+                });
+            }
+            
+            html += `
+                <div class="workout-editor">
+                    <div class="workout-header">
+                        <h3 class="workout-title">${workout.nome}</h3>
+                        <button class="btn btn-primary btn-small" onclick="app.addExercise(${i})">
+                            ➕ Adicionar Exercício
+                        </button>
+                    </div>
+                    <div class="exercise-list" id="exerciseList${i}">
+                        ${this.renderExercises(workout.exercicios, i)}
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += '</div>';
+        editor.innerHTML = html;
+    },
+
+    cancelEdit() {
+        this.isEditing = false;
+        this.currentPlan = {
+            id: null,
+            nome: '',
+            aluno: { nome: '', idade: 25, altura: '1,75m', peso: '75kg' },
+            dias: 1,
+            dataInicio: '',
+            dataFim: '',
+            perfil: { objetivo: 'Hipertrofia e ganho de massa muscular' },
+            observacoes: {},
+            treinos: []
+        };
+        document.getElementById('cancelEditBtn').style.display = 'none';
+        document.getElementById('currentPlanId').value = '';
+        this.showPlanList();
+    },
+
+    showPlanList() {
+        document.getElementById('planCreator').style.display = 'none';
+        document.getElementById('aiPlanCreator').style.display = 'none';
+        document.getElementById('planList').style.display = 'block';
+        this.renderPlanList();
+    },
+
+    resetPlanForm() {
+        const inputs = document.querySelectorAll('#planCreator input, #planCreator textarea, #planCreator select');
+        inputs.forEach(input => {
+            if (input.type === 'number') {
+                input.value = input.placeholder || '';
+            } else {
+                input.value = '';
+            }
+        });
+        
+        this.setDefaultDates();
+        this.currentPlan.treinos = [];
+        this.selectedDays = 1;
+        this.isEditing = false;
+        document.getElementById('cancelEditBtn').style.display = 'none';
+        document.getElementById('currentPlanId').value = '';
+    },
+
+    selectPlanType(days, letters, element) {
+        document.querySelectorAll('.plan-type-btn').forEach(btn => btn.classList.remove('active'));
+        element.classList.add('active');
+        
+        this.selectedDays = days;
+        this.generateWorkoutEditor(days);
+    },
+
+    generateWorkoutEditor(days) {
+        const editor = document.getElementById('workoutEditor');
+        const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+        const workoutNames = {
+            1: ['A - Corpo Inteiro'],
+            2: ['A - Membros Superiores', 'B - Membros Inferiores'],
+            3: ['A - Peito e Tríceps', 'B - Costas e Bíceps', 'C - Pernas e Ombros'],
+            4: ['A - Peito e Tríceps', 'B - Costas e Bíceps', 'C - Ombros', 'D - Pernas'],
+            5: ['A - Peito e Tríceps', 'B - Costas e Bíceps', 'C - Ombros e Trapézio', 'D - Pernas (Quadríceps)', 'E - Posterior e Core'],
+            6: ['A - Peito', 'B - Costas', 'C - Ombros', 'D - Braços', 'E - Pernas (Quadríceps)', 'F - Posterior e Core']
+        };
+
+        let html = '<div class="form-section"><h2>🏋️ Treinos</h2>';
+        
+        this.currentPlan.treinos = [];
+        
+        for (let i = 0; i < days; i++) {
+            const workout = {
+                id: letters[i],
+                nome: workoutNames[days][i],
+                foco: workoutNames[days][i].split(' - ')[1] || 'Treino geral',
+                exercicios: [
+                    {
+                        id: i * 10 + 1,
+                        nome: 'Aquecimento',
+                        descricao: 'Aquecimento geral de 5-10 minutos',
+                        series: 1,
+                        repeticoes: '8-10 min',
+                        carga: 'Leve',
+                        descanso: '0',
+                        observacoesEspeciais: '',
+                        tecnica: '',
+                        concluido: false
+                    }
+                ],
+                concluido: false,
+                execucoes: 0
+            };
+            
+            this.currentPlan.treinos.push(workout);
+            
+            html += `
+                <div class="workout-editor">
+                    <div class="workout-header">
+                        <h3 class="workout-title">${workout.nome}</h3>
+                        <button class="btn btn-primary btn-small" onclick="app.addExercise(${i})">
+                            ➕ Adicionar Exercício
+                        </button>
+                    </div>
+                    <div class="exercise-list" id="exerciseList${i}">
+                        ${this.renderExercises(workout.exercicios, i)}
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += '</div>';
+        editor.innerHTML = html;
+    },
+
+    renderExercises(exercicios, workoutIndex) {
+        if (!exercicios || exercicios.length === 0) {
+            return '<p>Nenhum exercício adicionado</p>';
+        }
+
+        return exercicios.map((ex, exIndex) => `
+            <div class="exercise-item">
+                <div class="exercise-info">
+                    <div>
+                        <div class="exercise-name">${ex.nome}</div>
+                        <div class="exercise-description">${ex.descricao}</div>
+                        ${ex.tecnica ? `<div class="exercise-special-notes">🎯 ${ex.tecnica.replace('-', ' ').toUpperCase()}</div>` : ''}
+                        ${ex.observacoesEspeciais ? `<div class="exercise-special-notes">💡 ${ex.observacoesEspeciais}</div>` : ''}
+                    </div>
+                    <div><strong>Séries:</strong> ${ex.series}</div>
+                    <div><strong>Reps:</strong> ${ex.repeticoes}</div>
+                    <div><strong>Carga:</strong> ${ex.carga}</div>
+                    <div><strong>Descanso:</strong> ${ex.descanso || '60s'}</div>
+                </div>
+                <div class="exercise-actions">
+                    <button class="btn btn-outline btn-small" onclick="app.editExercise(${workoutIndex}, ${exIndex})">
+                        ✏️ Editar
+                    </button>
+                    <button class="btn btn-danger btn-small" onclick="app.removeExercise(${workoutIndex}, ${exIndex})">
+                        🗑️ Remover
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    addExercise(workoutIndex) {
+        const newExercise = {
+            id: Date.now(),
+            nome: 'Novo Exercício',
+            descricao: 'Descrição do exercício',
+            series: 3,
+            repeticoes: '10-12',
+            carga: '20kg',
+            descanso: '90 segundos',
+            observacoesEspeciais: '',
+            tecnica: '',
+            concluido: false
+        };
+        
+        this.currentPlan.treinos[workoutIndex].exercicios.push(newExercise);
+        this.updateExerciseList(workoutIndex);
+    },
+
+    editExercise(workoutIndex, exerciseIndex) {
+        this.currentWorkoutIndex = workoutIndex;
+        this.currentExerciseIndex = exerciseIndex;
+        
+        const exercise = this.currentPlan.treinos[workoutIndex].exercicios[exerciseIndex];
+        
+        const exerciseSelect = document.getElementById('exerciseName');
+        const customGroup = document.getElementById('customExerciseGroup');
+        const customInput = document.getElementById('customExerciseName');
+        
+        const option = Array.from(exerciseSelect.options).find(opt => opt.value === exercise.nome);
+        if (option) {
+            exerciseSelect.value = exercise.nome;
+            customGroup.style.display = 'none';
+        } else {
+            exerciseSelect.value = 'custom';
+            customGroup.style.display = 'block';
+            customInput.value = exercise.nome;
+        }
+        
+        document.getElementById('exerciseSets').value = exercise.series;
+        document.getElementById('exerciseReps').value = exercise.repeticoes;
+        document.getElementById('exerciseWeight').value = exercise.carga;
+        document.getElementById('exerciseRest').value = exercise.descanso || '90 segundos';
+        document.getElementById('exerciseDescription').value = exercise.descricao;
+        
+        // Handle technique selection
+        const techniqueSelect = document.getElementById('exerciseTechnique');
+        if (exercise.tecnica && this.tecnicasDatabase[exercise.tecnica]) {
+            techniqueSelect.value = exercise.tecnica;
+            this.updateTechniqueDescription();
+        } else {
+            techniqueSelect.value = '';
+            this.updateTechniqueDescription();
+        }
+        
+        const specialSelect = document.getElementById('exerciseSpecialNotes');
+        const customNotesGroup = document.getElementById('customNotesGroup');
+        const customNotesInput = document.getElementById('customSpecialNotes');
+        
+        if (exercise.observacoesEspeciais) {
+            const specialOption = Array.from(specialSelect.options).find(opt => opt.value === exercise.observacoesEspeciais);
+            if (specialOption) {
+                specialSelect.value = exercise.observacoesEspeciais;
+                customNotesGroup.style.display = 'none';
+            } else {
+                specialSelect.value = 'custom';
+                customNotesGroup.style.display = 'block';
+                customNotesInput.value = exercise.observacoesEspeciais;
+            }
+        } else {
+            specialSelect.value = '';
+            customNotesGroup.style.display = 'none';
+        }
+        
+        document.getElementById('exerciseModal').classList.add('active');
+    },
+
+    updateTechniqueDescription() {
+        const techniqueSelect = document.getElementById('exerciseTechnique');
+        const descriptionGroup = document.getElementById('techniqueDescriptionGroup');
+        const descriptionTextarea = document.getElementById('techniqueDescription');
+        
+        if (techniqueSelect.value && this.tecnicasDatabase[techniqueSelect.value]) {
+            descriptionGroup.style.display = 'block';
+            descriptionTextarea.value = this.tecnicasDatabase[techniqueSelect.value];
+        } else {
+            descriptionGroup.style.display = 'none';
+            descriptionTextarea.value = '';
+        }
+    },
+
+    updateExerciseDescription() {
+        const exerciseSelect = document.getElementById('exerciseName');
+        const customGroup = document.getElementById('customExerciseGroup');
+        const descriptionTextarea = document.getElementById('exerciseDescription');
+        
+        if (exerciseSelect.value === 'custom') {
+            customGroup.style.display = 'block';
+            descriptionTextarea.value = '';
+        } else {
+            customGroup.style.display = 'none';
+            const description = this.exerciseDescriptions[exerciseSelect.value] || 'Descrição não disponível';
+            descriptionTextarea.value = description;
+        }
+    },
+
+    updateSpecialNotesInput() {
+        const specialSelect = document.getElementById('exerciseSpecialNotes');
+        const customGroup = document.getElementById('customNotesGroup');
+        
+        if (specialSelect.value === 'custom') {
+            customGroup.style.display = 'block';
+        } else {
+            customGroup.style.display = 'none';
+        }
+    },
+
+    saveExercise() {
+        if (this.currentWorkoutIndex === null || this.currentExerciseIndex === null) return;
+        
+        const exercise = this.currentPlan.treinos[this.currentWorkoutIndex].exercicios[this.currentExerciseIndex];
+        
+        const exerciseSelect = document.getElementById('exerciseName');
+        const customName = document.getElementById('customExerciseName');
+        const specialSelect = document.getElementById('exerciseSpecialNotes');
+        const customNotes = document.getElementById('customSpecialNotes');
+        const techniqueSelect = document.getElementById('exerciseTechnique');
+        
+        exercise.nome = exerciseSelect.value === 'custom' ? customName.value : exerciseSelect.value;
+        exercise.series = parseInt(document.getElementById('exerciseSets').value) || 3;
+        exercise.repeticoes = document.getElementById('exerciseReps').value;
+        exercise.carga = document.getElementById('exerciseWeight').value;
+        exercise.descanso = document.getElementById('exerciseRest').value;
+        exercise.descricao = document.getElementById('exerciseDescription').value;
+        
+        exercise.observacoesEspeciais = specialSelect.value === 'custom' ? customNotes.value : specialSelect.value;
+        
+        exercise.tecnica = techniqueSelect.value;
+        
+        if (exercise.tecnica && !exercise.observacoesEspeciais) {
+            exercise.observacoesEspeciais = this.getObservacaoEspecial(exercise.tecnica, exercise.nome);
+        }
+        
+        this.updateExerciseList(this.currentWorkoutIndex);
+        this.closeExerciseModal();
+    },
+
+    removeExercise(workoutIndex, exerciseIndex) {
+        if (confirm('Tem certeza que deseja remover este exercício?')) {
+            this.currentPlan.treinos[workoutIndex].exercicios.splice(exerciseIndex, 1);
+            this.updateExerciseList(workoutIndex);
+        }
+    },
+
+    updateExerciseList(workoutIndex) {
+        const container = document.getElementById(`exerciseList${workoutIndex}`);
+        if (container) {
+            container.innerHTML = this.renderExercises(
+                this.currentPlan.treinos[workoutIndex].exercicios, 
+                workoutIndex
+            );
+        }
+    },
+
+    closeExerciseModal() {
+        document.getElementById('exerciseModal').classList.remove('active');
+        this.currentWorkoutIndex = null;
+        this.currentExerciseIndex = null;
+    },
+
+    // =============================================
+    // FUNÇÕES DE PERSISTÊNCIA
+    // =============================================
+
     savePlan() {
         try {
-            // Get data from manual form
             const currentPlanId = document.getElementById('currentPlanId').value;
             const isEditingPlan = this.isEditing && currentPlanId;
             
-            // Calculate age from birth date
             const birthDate = document.getElementById('studentBirthDate')?.value;
             const calculatedAge = birthDate ? this.calculateAge(birthDate) : 25;
             
@@ -1438,7 +1574,10 @@ const app = {
                     idade: calculatedAge,
                     altura: document.getElementById('studentHeight')?.value || '1,75m',
                     peso: document.getElementById('studentWeight')?.value || '75kg',
-                    porte: 'médio',
+                    porte: this.calculateBodyType(
+                        document.getElementById('studentHeight')?.value || '1,75m',
+                        document.getElementById('studentWeight')?.value || '75kg'
+                    ),
                     objetivo: document.getElementById('planObjective')?.value || 'Condicionamento geral'
                 },
                 treinos: [...this.currentPlan.treinos],
@@ -1449,16 +1588,15 @@ const app = {
                     descanso: '60-90 segundos entre séries',
                     hidratacao: 'Mantenha-se bem hidratado durante todo o treino',
                     consulta: 'Acompanhamento profissional recomendado'
-                }
+                },
+                tecnicas_aplicadas: this.getTecnicasAplicadasFromPlan([...this.currentPlan.treinos])
             };
 
-            // Validation
             if (!planData.nome || planData.nome === 'Plano sem nome') {
                 this.showMessage('Por favor, preencha o nome do plano', 'error');
                 return;
             }
 
-            // Save or update plan
             if (isEditingPlan) {
                 const existingIndex = this.savedPlans.findIndex(p => p.id == currentPlanId);
                 if (existingIndex >= 0) {
@@ -1475,7 +1613,6 @@ const app = {
             
             this.savePlansToStorage();
             
-            // Reset editing state
             this.isEditing = false;
             document.getElementById('cancelEditBtn').style.display = 'none';
             
@@ -1506,7 +1643,6 @@ const app = {
         const plan = this.savedPlans.find(p => p.id === planId);
         if (!plan) return;
 
-        // Create export structure similar to the JSON format
         const exportData = {
             planos: [plan]
         };
@@ -1533,26 +1669,20 @@ const app = {
             try {
                 const importedData = JSON.parse(e.target.result);
                 
-                // Handle different import formats
                 let plansToImport = [];
                 
                 if (importedData.planos) {
-                    // New format with planos array
                     plansToImport = importedData.planos;
                 } else if (Array.isArray(importedData)) {
-                    // Array of plans
                     plansToImport = importedData;
                 } else {
-                    // Single plan object
                     plansToImport = [importedData];
                 }
                 
                 plansToImport.forEach(planData => {
-                    // Assign new ID to avoid conflicts
                     planData.id = Date.now() + Math.random();
                     planData.nome = planData.nome + ' (Importado)';
                     
-                    // Ensure proper structure
                     if (!planData.aluno) {
                         planData.aluno = {
                             nome: '',
@@ -1564,16 +1694,27 @@ const app = {
                         };
                     }
                     
-                    // Ensure exercises have all required fields
                     if (planData.treinos) {
                         planData.treinos.forEach(treino => {
                             if (treino.exercicios) {
                                 treino.exercicios.forEach(ex => {
                                     if (!ex.descanso) ex.descanso = '90 segundos';
                                     if (!ex.observacoesEspeciais) ex.observacoesEspeciais = '';
+                                    if (!ex.tecnica) ex.tecnica = '';
                                 });
                             }
                         });
+                    }
+                    
+                    if (!planData.tecnicas_aplicadas) {
+                        planData.tecnicas_aplicadas = {};
+                    }
+                    
+                    if (planData.perfil && !planData.perfil.porte) {
+                        planData.perfil.porte = this.calculateBodyType(
+                            planData.perfil.altura || '1,75m',
+                            planData.perfil.peso || '75kg'
+                        );
                     }
                     
                     this.savedPlans.push(planData);
@@ -1591,7 +1732,6 @@ const app = {
         };
         reader.readAsText(file);
         
-        // Clear file input
         event.target.value = '';
     },
 
@@ -1621,9 +1761,23 @@ const app = {
                                 treino.exercicios.forEach(ex => {
                                     if (!ex.descanso) ex.descanso = '90 segundos';
                                     if (!ex.observacoesEspeciais) ex.observacoesEspeciais = '';
+                                    if (!ex.tecnica) ex.tecnica = '';
                                 });
                             }
                         });
+                    }
+                    
+                    // Add tecnicas_aplicadas if not present
+                    if (!plan.tecnicas_aplicadas) {
+                        plan.tecnicas_aplicadas = {};
+                    }
+                    
+                    // Ensure perfil has porte field
+                    if (plan.perfil && !plan.perfil.porte) {
+                        plan.perfil.porte = this.calculateBodyType(
+                            plan.perfil.altura || '1,75m',
+                            plan.perfil.peso || '75kg'
+                        );
                     }
                 });
                 
@@ -1642,6 +1796,10 @@ const app = {
             console.error('Erro ao salvar planos:', error);
         }
     },
+
+    // =============================================
+    // FUNÇÕES DE VISUALIZAÇÃO
+    // =============================================
 
     renderPlanList() {
         const container = document.getElementById('planListContent');
@@ -1790,7 +1948,8 @@ const app = {
                             <div class="exercise-card">
                                 <div class="exercise-header">
                                     <strong>${ex.nome}</strong>
-                                    ${ex.observacoesEspeciais ? `<div class="exercise-special-display">${ex.observacoesEspeciais}</div>` : ''}
+                                    ${ex.tecnica ? `<div class="exercise-special-display">🎯 Técnica: ${ex.tecnica.replace('-', ' ').toUpperCase()}</div>` : ''}
+                                    ${ex.observacoesEspeciais ? `<div class="exercise-special-display">💡 ${ex.observacoesEspeciais}</div>` : ''}
                                 </div>
                                 <p>${ex.descricao}</p>
                                 <div class="exercise-specs">
@@ -1816,6 +1975,21 @@ const app = {
                     </div>
                 `;
             });
+        }
+
+        // Add techniques section if available
+        if (plan.tecnicas_aplicadas && Object.keys(plan.tecnicas_aplicadas).length > 0) {
+            content += `
+                <div class="techniques-section">
+                    <h3>🎯 Técnicas Aplicadas no Plano</h3>
+                    ${Object.entries(plan.tecnicas_aplicadas).map(([tecnica, descricao]) => `
+                        <div class="technique-item">
+                            <div class="technique-name">${tecnica.replace('-', ' ')}</div>
+                            <div class="technique-description">${descricao}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
         }
 
         if (plan.observacoes) {
@@ -1871,6 +2045,10 @@ const app = {
         return date.toLocaleDateString('pt-BR');
     },
 
+    // =============================================
+    // FUNÇÕES DE MENSAGENS
+    // =============================================
+
     showMessage(message, type = 'success') {
         // Remove any existing messages
         const existingMessages = document.querySelectorAll('.success-message, .error-message, .warning-message, .info-message');
@@ -1906,6 +2084,10 @@ const app = {
         }
     }
 };
+
+// =============================================
+// INICIALIZAÇÃO DA APLICAÇÃO
+// =============================================
 
 // Initialize app when page loads
 document.addEventListener('DOMContentLoaded', function() {
