@@ -17,19 +17,19 @@
   },
   "icons": [
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iNDgiIGZpbGw9IiMyNTYzZWIiLz4KPHN2ZyB4PSI0OCIgeT0iNDgiIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJtNi4zIDIwLjMgMi4zLTIuM2E0IDQgMCAwIDEgNS42NiAwIDQgNCAwIDAgMCA1LjY2IDBsMi4zIDIuMyIvPgo8cGF0aCBkPSJNNiAzaDEyYTMgMyAwIDAgMSAzIDN2NmEzIDMgMCAwIDEtMyAzSDZhMyAzIDAgMCAxLTMtM1Y2YTMgMyAwIDAgMSAzLTN6Ii8+Cjwvc3ZnPgo8L3N2Zz4K",
+      "src": "/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/png"
     },
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTI4IiBmaWxsPSIjMjU2M2ViIi8+CjxzdmcgeD0iMTI4IiB5PSIxMjgiIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiI+CjxwYXRoIGQ9Im02LjMgMjAuMyAyLjMtMi4zYTQgNCAwIDAgMSA1LjY2IDAgNCA0IDAgMCAwIDUuNjYgMGwyLjMgMi4zIi8+CjxwYXRoIGQ9Ik02IDNoMTJhMyAzIDAgMCAxIDMgM3Y2YTMgMyAwIDAgMS0zIDNINmEzIDMgMCAwIDEtMy0zVjZhMyAzIDAgMCAxIDMtM3oiLz4KPC9zdmc+Cjwvc3ZnPgo=",
+      "src": "/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png"
     },
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9IiMyNTYzZWIiLz4KPHN2ZyB4PSI0NSIgeT0iNDUiIHdpZHRoPSI5MCIgaGVpZ2h0PSI5MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJtNi4zIDIwLjMgMi4zLTIuM2E0IDQgMCAwIDEgNS42NiAwIDQgNCAwIDAgMCA1LjY2IDBsMi4zIDIuMyIvPgo8cGF0aCBkPSJNNiAzaDEyYTMgMyAwIDAgMSAzIDN2NmEzIDMgMCAwIDEtMyAzSDZhMyAzIDAgMCAxLTMtM1Y2YTMgMyAwIDAgMSAzLTN6Ci8+Cjwvc3ZnPgo8L3N2Zz4K",
+      "src": "/apple-touch-icon.png",
       "sizes": "180x180",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "apple-touch-icon"
     }
   ],
@@ -41,9 +41,9 @@
       "url": "/aluno.html",
       "icons": [
         {
-          "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9Ijk2IiBoZWlnaHQ9Ijk2IiByeD0iMjQiIGZpbGw9IiMxMGI5ODEiLz4KPHN2ZyB4PSIyNCIgeT0iMjQiIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJtNi4zIDIwLjMgMi4zLTIuM2E0IDQgMCAwIDEgNS42NiAwIDQgNCAwIDAgMCA1LjY2IDBsMi4zIDIuMyIvPgo8cGF0aCBkPSJNNiAzaDEyYTMgMyAwIDAgMSAzIDN2NmEzIDMgMCAwIDEtMyAzSDZhMyAzIDAgMCAxLTMtM1Y2YTMgMyAwIDAgMSAzLTN6Ii8+Cjwvc3ZnPgo8L3N2Zz4K",
+          "src": "/icon-96x96.png",
           "sizes": "96x96",
-          "type": "image/svg+xml"
+          "type": "image/png"
         }
       ]
     },
@@ -54,20 +54,20 @@
       "url": "/personal.html",
       "icons": [
         {
-          "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9Ijk2IiBoZWlnaHQ9Ijk2IiByeD0iMjQiIGZpbGw9IiM4YjVjZjYiLz4KPHN2ZyB4PSIyNCIgeT0iMjQiIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJtNi4zIDIwLjMgMi4zLTIuM2E0IDQgMCAwIDEgNS42NiAwIDQgNCAwIDAgMCA1LjY2IDBsMi4zIDIuMyIvPgo8cGF0aCBkPSJNNiAzaDEyYTMgMyAwIDAgMSAzIDN2NmEzIDMgMCAwIDEtMyAzSDZhMyAzIDAgMCAxLTMtM1Y2YTMgMyAwIDAgMSAzLTN6Ii8+Cjwvc3ZnPgo8L3N2Zz4K",
+          "src": "/icon-96x96.png",
           "sizes": "96x96",
-          "type": "image/svg+xml"
+          "type": "image/png"
         }
       ]
     }
   ],
   "screenshots": [
     {
-      "src": "/screenshots/screenshot-540x960.png",
+      "src": "/screenshot-narrow.png",
       "sizes": "540x960",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Tela inicial do aplicativo"
+      "label": "Tela inicial do aplicativo móvel"
     }
   ],
   "related_applications": [],
