@@ -12,179 +12,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzc5NDVmZiIvPgo8cGF0aCBkPSJtMTYgOGMtNC40MTggMC04IDMuNTgyLTggOHY4YzAgNC40MTggMy41ODIgOCA4IDhzOC0zLjU4MiA4LTh2LThjMC00LjQxOC0zLjU4Mi04LTgtOHoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPg==">
     
     <!-- CSS -->
-    <link rel="stylesheet" type="text/css" href="css/style.css">
-    
-    <style>
-        /* Estilos adicionais para garantir funcionamento */
-        .generating-indicator {
-            display: none;
-            text-align: center;
-            padding: 40px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            margin: 20px 0;
-        }
-        
-        .generating-indicator.active {
-            display: block;
-        }
-        
-        .spinner {
-            width: 40px;
-            height: 40px;
-            margin: 0 auto 20px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #7945ff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e9ecef;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 15px;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: #7945ff;
-            transition: width 0.3s ease;
-            border-radius: 4px;
-        }
-        
-        .workout-section {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .workout-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .exercises-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .exercise-item {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            border: 1px solid #e9ecef;
-        }
-        
-        .exercise-name {
-            font-weight: bold;
-            color: #495057;
-            margin-bottom: 5px;
-        }
-        
-        .exercise-description {
-            font-size: 0.9rem;
-            color: #6c757d;
-            margin-bottom: 8px;
-        }
-        
-        .exercise-special-notes {
-            font-size: 0.8rem;
-            color: #7945ff;
-            font-style: italic;
-            margin-bottom: 8px;
-        }
-        
-        .exercise-specs {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            font-size: 0.9rem;
-            color: #495057;
-            margin-bottom: 10px;
-        }
-        
-        .exercise-actions {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 0.8rem;
-        }
-        
-        .plan-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-        
-        .plan-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        
-        .plan-info p {
-            margin: 8px 0;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-        
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 0;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #6c757d;
-        }
-        
-        .close-btn:hover {
-            color: #495057;
-        }
-    </style>
+    <link rel="stylesheet" href="css/personal.css">
 </head>
 <body>
     <div class="container">
@@ -247,4 +75,391 @@
                         <label class="form-label">Objetivo Principal</label>
                         <select id="aiPlanObjective" class="form-select">
                             <option value="Hipertrofia e ganho de massa muscular">Hipertrofia e ganho de massa muscular</option>
-                            <option value="Perda de peso e definição">Perda de peso e definição
+                            <option value="Perda de peso e definição">Perda de peso e definição</option>
+                            <option value="Condicionamento geral">Condicionamento geral</option>
+                            <option value="Força e potência">Força e potência</option>
+                            <option value="Resistência muscular">Resistência muscular</option>
+                            <option value="Reabilitação">Reabilitação</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nível de Experiência</label>
+                        <select id="aiExperienceLevel" class="form-select">
+                            <option value="iniciante">Iniciante (0-6 meses)</option>
+                            <option value="intermediario">Intermediário (6 meses - 2 anos)</option>
+                            <option value="avancado">Avançado (2+ anos)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Dias Disponíveis por Semana</label>
+                        <select id="aiAvailableDays" class="form-select">
+                            <option value="2">2 dias</option>
+                            <option value="3" selected>3 dias</option>
+                            <option value="4">4 dias</option>
+                            <option value="5">5 dias</option>
+                            <option value="6">6 dias</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tempo por Sessão (minutos)</label>
+                        <select id="aiSessionTime" class="form-select">
+                            <option value="45">45 minutos</option>
+                            <option value="60" selected>60 minutos</option>
+                            <option value="75">75 minutos</option>
+                            <option value="90">90 minutos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>🏋️ Preferências de Treino</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Equipamentos Disponíveis</label>
+                        <select id="aiEquipment" class="form-select">
+                            <option value="academia_completa">Academia Completa</option>
+                            <option value="home_gym">Home Gym (Halteres + Barra)</option>
+                            <option value="peso_corporal">Apenas Peso Corporal</option>
+                            <option value="funcional">Equipamentos Funcionais</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Foco Muscular Preferido</label>
+                        <select id="aiMusclePreference" class="form-select">
+                            <option value="equilibrado">Desenvolvimento Equilibrado</option>
+                            <option value="superior">Foco Membros Superiores</option>
+                            <option value="inferior">Foco Membros Inferiores</option>
+                            <option value="core">Foco Core e Funcional</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Limitações ou Lesões</label>
+                    <textarea id="aiLimitations" class="form-textarea" placeholder="Descreva qualquer limitação física, lesão prévia ou exercício que deve ser evitado..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Observações Especiais</label>
+                    <textarea id="aiSpecialNotes" class="form-textarea" placeholder="Exercícios preferidos, horários de treino, metas específicas, etc..."></textarea>
+                </div>
+            </div>
+
+            <div class="generating-indicator" id="generatingIndicator">
+                <div class="spinner"></div>
+                <h3>🤖 IA Criando Seu Plano...</h3>
+                <p>Analisando suas informações e gerando o plano personalizado. Isso pode levar alguns segundos.</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-ai" onclick="app.generateAIPlan()">
+                    🤖 Gerar Plano com IA
+                </button>
+                <button class="btn btn-outline" onclick="app.showPlanList()">
+                    📋 Ver Meus Planos
+                </button>
+            </div>
+        </div>
+
+        <!-- Manual Plan Creator -->
+        <div id="planCreator" class="content-card" style="display: none;">
+            <input type="hidden" id="currentPlanId" value="">
+            <div class="form-section">
+                <h2>👤 Dados do Aluno</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nome do Aluno</label>
+                        <input type="text" id="studentName" class="form-input" placeholder="Digite o nome completo">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Data de Nascimento</label>
+                        <input type="date" id="studentBirthDate" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CPF (opcional)</label>
+                        <input type="text" id="studentCpf" class="form-input" placeholder="000.000.000-00" maxlength="14">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Altura</label>
+                        <input type="text" id="studentHeight" class="form-input" placeholder="1,75m">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Peso</label>
+                        <input type="text" id="studentWeight" class="form-input" placeholder="75kg">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>🎯 Configurações do Plano</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nome do Plano</label>
+                        <input type="text" id="planName" class="form-input" placeholder="Plano Hipertrofia 2024">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Objetivo</label>
+                        <select id="planObjective" class="form-select">
+                            <option value="Hipertrofia e ganho de massa muscular">Hipertrofia e ganho de massa muscular</option>
+                            <option value="Condicionamento geral">Condicionamento geral</option>
+                            <option value="Perda de peso">Perda de peso</option>
+                            <option value="Definição muscular">Definição muscular</option>
+                            <option value="Força">Ganho de força</option>
+                            <option value="Resistência">Resistência</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Data de Início</label>
+                        <input type="date" id="planStartDate" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Data de Fim</label>
+                        <input type="date" id="planEndDate" class="form-input">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Observações Gerais</label>
+                    <textarea id="planObservations" class="form-textarea" placeholder="Digite observações importantes sobre o plano de treino..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>📅 Tipo de Plano</h2>
+                <div class="plan-type-selector" id="planTypeSelector">
+                    <div class="plan-type-btn active" onclick="app.selectPlanType(1, 'A', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">A</div>
+                        <div style="font-size: 0.9rem;">1 Dia</div>
+                    </div>
+                    <div class="plan-type-btn" onclick="app.selectPlanType(2, 'AB', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">AB</div>
+                        <div style="font-size: 0.9rem;">2 Dias</div>
+                    </div>
+                    <div class="plan-type-btn" onclick="app.selectPlanType(3, 'ABC', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">ABC</div>
+                        <div style="font-size: 0.9rem;">3 Dias</div>
+                    </div>
+                    <div class="plan-type-btn" onclick="app.selectPlanType(4, 'ABCD', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">ABCD</div>
+                        <div style="font-size: 0.9rem;">4 Dias</div>
+                    </div>
+                    <div class="plan-type-btn" onclick="app.selectPlanType(5, 'ABCDE', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">ABCDE</div>
+                        <div style="font-size: 0.9rem;">5 Dias</div>
+                    </div>
+                    <div class="plan-type-btn" onclick="app.selectPlanType(6, 'ABCDEF', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">ABCDEF</div>
+                        <div style="font-size: 0.9rem;">6 Dias</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="workoutEditor">
+                <!-- Workouts will be generated here -->
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="app.savePlan()">
+                    💾 Salvar Plano
+                </button>
+                <button class="btn btn-outline" onclick="app.showPlanList()">
+                    📋 Ver Meus Planos
+                </button>
+                <button class="btn btn-danger" onclick="app.cancelEdit()" style="display: none;" id="cancelEditBtn">
+                    ❌ Cancelar Edição
+                </button>
+            </div>
+        </div>
+
+        <!-- Plan List -->
+        <div id="planList" class="content-card">
+            <h2>📋 Meus Planos de Treino</h2>
+            <div id="planListContent">
+                <div class="plan-card">
+                    <h3>Nenhum plano encontrado</h3>
+                    <p>Crie seu primeiro plano de treino clicando em "Novo Plano" ou "Criar com IA"!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Plan Details -->
+    <div id="planModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="planModalTitle">Detalhes do Plano</h2>
+                <button class="close-btn" onclick="app.closePlanModal()">&times;</button>
+            </div>
+            <div id="planModalContent">
+                <!-- Plan details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Exercise Editor -->
+    <div id="exerciseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Editar Exercício</h2>
+                <button class="close-btn" onclick="app.closeExerciseModal()">&times;</button>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Nome do Exercício</label>
+                    <select id="exerciseName" class="form-select" onchange="app.updateExerciseDescription()">
+                        <option value="custom">Exercício Personalizado</option>
+                        <!-- Peito -->
+                        <optgroup label="Peito">
+                            <option value="Supino Reto com Barra">Supino Reto com Barra</option>
+                            <option value="Supino Inclinado com Barra">Supino Inclinado com Barra</option>
+                            <option value="Supino Declinado com Barra">Supino Declinado com Barra</option>
+                            <option value="Supino com Halteres">Supino com Halteres</option>
+                            <option value="Supino Inclinado com Halteres">Supino Inclinado com Halteres</option>
+                            <option value="Crucifixo com Halteres">Crucifixo com Halteres</option>
+                            <option value="Crucifixo Inclinado">Crucifixo Inclinado</option>
+                            <option value="Crossover">Crossover</option>
+                            <option value="Flexão de Braços">Flexão de Braços</option>
+                            <option value="Mergulho em Paralelas">Mergulho em Paralelas</option>
+                        </optgroup>
+                        <!-- Costas -->
+                        <optgroup label="Costas">
+                            <option value="Puxada Frontal">Puxada Frontal</option>
+                            <option value="Puxada Atrás da Nuca">Puxada Atrás da Nuca</option>
+                            <option value="Barra Fixa">Barra Fixa</option>
+                            <option value="Remada Baixa">Remada Baixa</option>
+                            <option value="Remada Curvada">Remada Curvada</option>
+                            <option value="Remada com Halter">Remada com Halter</option>
+                            <option value="Remada T-Bar">Remada T-Bar</option>
+                            <option value="Levantamento Terra">Levantamento Terra</option>
+                            <option value="Pullover">Pullover</option>
+                        </optgroup>
+                        <!-- Ombros -->
+                        <optgroup label="Ombros">
+                            <option value="Desenvolvimento com Barra">Desenvolvimento com Barra</option>
+                            <option value="Desenvolvimento com Halteres">Desenvolvimento com Halteres</option>
+                            <option value="Desenvolvimento Arnold">Desenvolvimento Arnold</option>
+                            <option value="Elevação Lateral">Elevação Lateral</option>
+                            <option value="Elevação Frontal">Elevação Frontal</option>
+                            <option value="Elevação Posterior">Elevação Posterior</option>
+                            <option value="Encolhimento">Encolhimento</option>
+                            <option value="Face Pull">Face Pull</option>
+                        </optgroup>
+                        <!-- Bíceps -->
+                        <optgroup label="Bíceps">
+                            <option value="Rosca Direta">Rosca Direta</option>
+                            <option value="Rosca Alternada">Rosca Alternada</option>
+                            <option value="Rosca Martelo">Rosca Martelo</option>
+                            <option value="Rosca Scott">Rosca Scott</option>
+                            <option value="Rosca Concentrada">Rosca Concentrada</option>
+                            <option value="Rosca 21">Rosca 21</option>
+                            <option value="Rosca Spider">Rosca Spider</option>
+                            <option value="Rosca no Cabo">Rosca no Cabo</option>
+                        </optgroup>
+                        <!-- Tríceps -->
+                        <optgroup label="Tríceps">
+                            <option value="Tríceps Testa">Tríceps Testa</option>
+                            <option value="Tríceps Francês">Tríceps Francês</option>
+                            <option value="Tríceps Pulley">Tríceps Pulley</option>
+                            <option value="Tríceps Corda">Tríceps Corda</option>
+                            <option value="Supino Fechado">Supino Fechado</option>
+                            <option value="Mergulho no Banco">Mergulho no Banco</option>
+                        </optgroup>
+                        <!-- Quadríceps -->
+                        <optgroup label="Quadríceps">
+                            <option value="Agachamento Livre">Agachamento Livre</option>
+                            <option value="Agachamento Frontal">Agachamento Frontal</option>
+                            <option value="Leg Press">Leg Press</option>
+                            <option value="Extensão de Pernas">Extensão de Pernas</option>
+                            <option value="Afundo">Afundo</option>
+                            <option value="Agachamento Búlgaro">Agachamento Búlgaro</option>
+                            <option value="Hack Squat">Hack Squat</option>
+                        </optgroup>
+                        <!-- Posterior -->
+                        <optgroup label="Posterior de Coxa">
+                            <option value="Stiff">Stiff</option>
+                            <option value="Flexão de Pernas">Flexão de Pernas</option>
+                            <option value="Mesa Flexora">Mesa Flexora</option>
+                            <option value="Good Morning">Good Morning</option>
+                            <option value="Hip Thrust">Hip Thrust</option>
+                            <option value="Elevação Pélvica">Elevação Pélvica</option>
+                        </optgroup>
+                        <!-- Panturrilha -->
+                        <optgroup label="Panturrilha">
+                            <option value="Panturrilha em Pé">Panturrilha em Pé</option>
+                            <option value="Panturrilha Sentado">Panturrilha Sentado</option>
+                            <option value="Panturrilha no Leg Press">Panturrilha no Leg Press</option>
+                        </optgroup>
+                        <!-- Outros -->
+                        <optgroup label="Aquecimento/Cardio">
+                            <option value="Esteira">Esteira</option>
+                            <option value="Bicicleta">Bicicleta</option>
+                            <option value="Elíptico">Elíptico</option>
+                            <option value="Aquecimento Articular">Aquecimento Articular</option>
+                            <option value="Alongamento">Alongamento</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="form-group" id="customExerciseGroup" style="display: none;">
+                    <label class="form-label">Nome Personalizado</label>
+                    <input type="text" id="customExerciseName" class="form-input" placeholder="Digite o nome do exercício">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Séries</label>
+                    <input type="number" id="exerciseSets" class="form-input" placeholder="4" min="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Repetições</label>
+                    <input type="text" id="exerciseReps" class="form-input" placeholder="8-12">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Carga</label>
+                    <input type="text" id="exerciseWeight" class="form-input" placeholder="80kg">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descanso</label>
+                    <input type="text" id="exerciseRest" class="form-input" placeholder="90 segundos">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Observações Especiais</label>
+                    <select id="exerciseSpecialNotes" class="form-select" onchange="app.updateSpecialNotesInput()">
+                        <option value="">Nenhuma</option>
+                        <option value="Bi-set">Bi-set</option>
+                        <option value="Tri-set">Tri-set</option>
+                        <option value="Drop set">Drop set</option>
+                        <option value="Rest-pause">Rest-pause</option>
+                        <option value="Pirâmide crescente">Pirâmide crescente</option>
+                        <option value="Pirâmide decrescente">Pirâmide decrescente</option>
+                        <option value="Método 21">Método 21</option>
+                        <option value="Negativa">Negativa</option>
+                        <option value="Isométrico">Isométrico</option>
+                        <option value="Tempo controlado">Tempo controlado</option>
+                        <option value="custom">Personalizada...</option>
+                    </select>
+                </div>
+                <div class="form-group" id="customNotesGroup" style="display: none;">
+                    <label class="form-label">Observação Personalizada</label>
+                    <input type="text" id="customSpecialNotes" class="form-input" placeholder="Digite a observação...">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Descrição/Técnica</label>
+                <textarea id="exerciseDescription" class="form-textarea" placeholder="Instruções técnicas do exercício..."></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="app.saveExercise()">💾 Salvar</button>
+                <button class="btn btn-outline" onclick="app.closeExerciseModal()">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="importFile" style="display: none;" accept=".json" onchange="app.importPlan(event)">
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
