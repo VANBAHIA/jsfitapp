@@ -1,4 +1,4 @@
-// aluno.js - JS Fit Student App - Compatible with Backend System
+// aluno.js - JS Fit Student App - Complete with JSON File Upload
 // Sistema modernizado compatível com PostgreSQL e Netlify Functions
 
 class JSFitStudentApp {
@@ -23,7 +23,8 @@ class JSFitStudentApp {
             connectionStatus: 'unknown',
             isOnline: navigator.onLine,
             user: null,
-            token: null
+            token: null,
+            selectedFile: null
         };
 
         // Initialize app
@@ -76,6 +77,55 @@ class JSFitStudentApp {
                 this.saveToStorage();
             } else {
                 this.checkServerConnection();
+            }
+        });
+
+        // Setup file upload listeners
+        this.setupFileUploadListeners();
+    }
+
+    setupFileUploadListeners() {
+        // Set up file input listeners when the modal is shown
+        document.addEventListener('change', (e) => {
+            if (e.target.id === 'fileInput') {
+                this.handleFileSelection(e.target.files[0]);
+            }
+        });
+
+        // Set up drag and drop listeners
+        document.addEventListener('dragover', (e) => {
+            if (e.target.closest('#fileUploadArea')) {
+                e.preventDefault();
+                e.target.closest('#fileUploadArea').classList.add('drag-over');
+            }
+        });
+
+        document.addEventListener('dragleave', (e) => {
+            if (e.target.closest('#fileUploadArea')) {
+                e.target.closest('#fileUploadArea').classList.remove('drag-over');
+            }
+        });
+
+        document.addEventListener('drop', (e) => {
+            const uploadArea = e.target.closest('#fileUploadArea');
+            if (uploadArea) {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.handleFileSelection(files[0]);
+                }
+            }
+        });
+
+        // Click to select file
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#fileUploadArea')) {
+                const fileInput = document.getElementById('fileInput');
+                if (fileInput) {
+                    fileInput.click();
+                }
             }
         });
     }
@@ -277,6 +327,253 @@ class JSFitStudentApp {
     }
 
     // =============================================================================
+    // FILE UPLOAD MANAGEMENT
+    // =============================================================================
+
+    showFileUploadModal() {
+        const modal = document.getElementById('fileUploadModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            this.resetFileUploadModal();
+        }
+    }
+
+    hideFileUploadModal() {
+        const modal = document.getElementById('fileUploadModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            this.resetFileUploadModal();
+        }
+    }
+
+    resetFileUploadModal() {
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileError = document.getElementById('fileError');
+        const importBtn = document.getElementById('importFileBtn');
+        
+        if (fileInput) fileInput.value = '';
+        if (fileInfo) fileInfo.classList.add('hidden');
+        if (fileError) fileError.classList.add('hidden');
+        if (importBtn) importBtn.disabled = true;
+        
+        this.state.selectedFile = null;
+    }
+
+    handleFileSelection(file) {
+        const fileInfo = document.getElementById('fileInfo');
+        const fileError = document.getElementById('fileError');
+        const importBtn = document.getElementById('importFileBtn');
+        
+        if (!file) {
+            this.resetFileUploadModal();
+            return;
+        }
+
+        // Validate file type
+        if (!file.name.toLowerCase().endsWith('.json')) {
+            this.showFileError('Apenas arquivos JSON são aceitos');
+            return;
+        }
+
+        // Validate file size (max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            this.showFileError('Arquivo muito grande. Máximo 10MB');
+            return;
+        }
+
+        // Show file info
+        if (fileInfo) {
+            const fileName = fileInfo.querySelector('.file-name');
+            const fileSize = fileInfo.querySelector('.file-size');
+            
+            if (fileName) fileName.textContent = file.name;
+            if (fileSize) fileSize.textContent = this.formatFileSize(file.size);
+            
+            fileInfo.classList.remove('hidden');
+        }
+
+        // Hide error and enable import button
+        if (fileError) fileError.classList.add('hidden');
+        if (importBtn) importBtn.disabled = false;
+
+        // Store selected file
+        this.state.selectedFile = file;
+    }
+
+    showFileError(message) {
+        const fileError = document.getElementById('fileError');
+        const fileInfo = document.getElementById('fileInfo');
+        const importBtn = document.getElementById('importFileBtn');
+        
+        if (fileError) {
+            fileError.textContent = message;
+            fileError.classList.remove('hidden');
+        }
+        
+        if (fileInfo) fileInfo.classList.add('hidden');
+        if (importBtn) importBtn.disabled = true;
+        
+        this.state.selectedFile = null;
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    async handleFileImport() {
+        if (!this.state.selectedFile) {
+            this.showFileError('Nenhum arquivo selecionado');
+            return;
+        }
+
+        const importBtn = document.getElementById('importFileBtn');
+        const originalText = importBtn?.innerHTML;
+        
+        try {
+            // Update UI for loading state
+            if (importBtn) {
+                importBtn.innerHTML = '<span class="loading-spinner"></span> Importando...';
+                importBtn.disabled = true;
+            }
+
+            // Read and parse file
+            const fileContent = await this.readFileContent(this.state.selectedFile);
+            const planData = await this.parseJSONFile(fileContent);
+            
+            // Validate and process plan data
+            const processedPlan = await this.processFileData(planData);
+            
+            // Check if plan already exists
+            const existing = this.state.workoutPlans.find(p => 
+                p.nome === processedPlan.nome && 
+                p.aluno?.nome === processedPlan.aluno?.nome
+            );
+            
+            if (existing) {
+                const confirmed = confirm(
+                    `Um plano com nome "${processedPlan.nome}" já existe.\n\nDeseja importar mesmo assim?`
+                );
+                if (!confirmed) {
+                    return;
+                }
+            }
+
+            // Add to plans and save
+            this.state.workoutPlans.push(processedPlan);
+            await this.saveToStorage();
+
+            // Success feedback
+            this.showNotification(`✅ Plano "${processedPlan.nome}" importado com sucesso!`, 'success');
+            this.hideFileUploadModal();
+            this.renderHome();
+
+        } catch (error) {
+            console.error('File import error:', error);
+            this.showFileError(`Erro ao importar: ${error.message}`);
+        } finally {
+            // Reset button
+            if (importBtn && originalText) {
+                importBtn.innerHTML = originalText;
+                importBtn.disabled = false;
+            }
+        }
+    }
+
+    async readFileContent(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                resolve(e.target.result);
+            };
+            
+            reader.onerror = () => {
+                reject(new Error('Erro ao ler o arquivo'));
+            };
+            
+            reader.readAsText(file, 'UTF-8');
+        });
+    }
+
+    async parseJSONFile(content) {
+        try {
+            const data = JSON.parse(content);
+            
+            if (!data || typeof data !== 'object') {
+                throw new Error('Arquivo JSON inválido');
+            }
+            
+            return data;
+        } catch (error) {
+            if (error instanceof SyntaxError) {
+                throw new Error('Formato JSON inválido');
+            }
+            throw error;
+        }
+    }
+
+    async processFileData(data) {
+        // Validate required fields
+        if (!data.nome && !data.name) {
+            throw new Error('Nome do plano não encontrado no arquivo');
+        }
+
+        if (!data.treinos && !data.workouts) {
+            throw new Error('Treinos não encontrados no arquivo');
+        }
+
+        // Generate unique ID for imported plan
+        const processedPlan = {
+            id: this.generateId(),
+            nome: data.nome || data.name || 'Plano Importado',
+            importedAt: new Date().toISOString(),
+            importedFrom: 'file',
+            execucoesPlanCompleto: 0,
+            
+            // Student data
+            aluno: {
+                nome: data.aluno?.nome || data.student?.name || '',
+                dataNascimento: data.aluno?.dataNascimento || data.student?.birth_date || '',
+                idade: data.aluno?.idade || data.student?.age || null,
+                altura: data.aluno?.altura || data.student?.height || '',
+                peso: data.aluno?.peso || data.student?.weight || '',
+                cpf: data.aluno?.cpf || data.student?.cpf || ''
+            },
+            
+            // Plan metadata
+            dias: data.dias || data.frequency_per_week || 3,
+            dataInicio: data.dataInicio || data.start_date || new Date().toISOString().split('T')[0],
+            dataFim: data.dataFim || data.end_date || '',
+            
+            // Profile and objectives
+            perfil: {
+                objetivo: data.perfil?.objetivo || data.objective || 'Condicionamento geral',
+                altura: data.aluno?.altura || data.student?.height || '',
+                peso: data.aluno?.peso || data.student?.weight || '',
+                idade: data.aluno?.idade || data.student?.age || null
+            },
+            
+            // Convert workouts
+            treinos: this.convertWorkoutsToFrontendFormat(data.treinos || data.workouts || []),
+            
+            // Observations
+            observacoes: data.observacoes || data.observations || {}
+        };
+
+        // Validate processed plan
+        if (processedPlan.treinos.length === 0) {
+            throw new Error('Nenhum treino válido encontrado no arquivo');
+        }
+
+        return processedPlan;
+    }
+
+    // =============================================================================
     // WORKOUT MANAGEMENT
     // =============================================================================
 
@@ -463,7 +760,7 @@ class JSFitStudentApp {
                 workoutPlans: this.state.workoutPlans,
                 activeWorkoutSessions: Array.from(this.state.activeWorkoutSessions.entries()),
                 lastSaved: new Date().toISOString(),
-                version: '3.0.0'
+                version: '3.1.0'
             };
             
             localStorage.setItem('jsfitapp_student_data', JSON.stringify(data));
@@ -511,6 +808,11 @@ class JSFitStudentApp {
                             peso: plan.perfil.peso || '',
                             cpf: ''
                         };
+                    }
+                    
+                    // Add importedFrom if missing
+                    if (!plan.importedFrom) {
+                        plan.importedFrom = 'legacy';
                     }
                 });
                 
@@ -747,7 +1049,7 @@ class JSFitStudentApp {
             <div class="card import-by-id-card">
                 <div class="card-content">
                     <h3 class="import-title">
-                        🔗 Importar Treino por ID
+                        🔗 Importar Treino
                     </h3>
                     <div class="server-status ${isOnline ? 'online' : 'offline'}">
                         ${isOnline ? 
@@ -755,24 +1057,46 @@ class JSFitStudentApp {
                             '🟡 Servidor offline - Usando cache local'
                         }
                     </div>
-                    <div class="import-form">
-                        <input type="text" id="importIdInput" class="import-input" 
-                               placeholder="Digite o ID (6 caracteres)" 
-                               maxlength="6" 
-                               autocomplete="off"
-                               oninput="this.value = this.value.toUpperCase()"
-                               onkeypress="if(event.key==='Enter') app.handleImportById()">
-                        <button id="importIdButton" class="btn import-btn" onclick="app.handleImportById()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                <polyline points="7,10 12,15 17,10"/>
-                                <line x1="12" x2="12" y1="15" y2="3"/>
-                            </svg>
-                            Importar por ID
-                        </button>
+                    
+                    <!-- Import by ID section -->
+                    <div class="import-section">
+                        <h4 class="import-method-title">Por ID do Servidor</h4>
+                        <div class="import-form">
+                            <input type="text" id="importIdInput" class="import-input" 
+                                   placeholder="Digite o ID (6 caracteres)" 
+                                   maxlength="6" 
+                                   autocomplete="off"
+                                   oninput="this.value = this.value.toUpperCase()"
+                                   onkeypress="if(event.key==='Enter') app.handleImportById()">
+                            <button id="importIdButton" class="btn import-btn" onclick="app.handleImportById()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7,10 12,15 17,10"/>
+                                    <line x1="12" x2="12" y1="15" y2="3"/>
+                                </svg>
+                                Importar por ID
+                            </button>
+                        </div>
+                        <div id="importStatus" class="import-status">
+                            Peça o ID do seu personal trainer
+                        </div>
                     </div>
-                    <div id="importStatus" class="import-status">
-                        Peça o ID do seu personal trainer
+
+                    <!-- Import by file section -->
+                    <div class="import-section">
+                        <div class="import-divider">
+                            <span>OU</span>
+                        </div>
+                        <h4 class="import-method-title">Por Arquivo JSON</h4>
+                        <button class="btn btn-secondary import-file-btn" onclick="app.showFileUploadModal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                            </svg>
+                            Selecionar Arquivo JSON
+                        </button>
+                        <div class="import-file-hint">
+                            Importe diretamente o arquivo JSON fornecido pelo seu personal trainer
+                        </div>
                     </div>
                 </div>
             </div>
@@ -786,7 +1110,7 @@ class JSFitStudentApp {
                     <div class="empty-icon">🏋️</div>
                     <h3 class="empty-title">Nenhum plano importado</h3>
                     <p class="empty-description">
-                        Use o ID fornecido pelo seu personal trainer para importar seu plano de treino
+                        Use o ID fornecido pelo seu personal trainer para importar seu plano de treino, ou selecione um arquivo JSON
                     </p>
                     <div class="empty-actions">
                         <button onclick="app.loadExampleData()" class="btn btn-secondary">
@@ -857,12 +1181,15 @@ class JSFitStudentApp {
                     <div class="plan-period">
                         ${this.formatDate(plan.dataInicio)} - ${this.formatDate(plan.dataFim)}
                     </div>
-                    ${plan.originalShareId ? `
+                    ${plan.originalShareId || plan.importedFrom ? `
                         <div class="plan-badges">
-                            <span class="badge badge-id">ID: ${plan.originalShareId}</span>
+                            ${plan.originalShareId ? `<span class="badge badge-id">ID: ${plan.originalShareId}</span>` : ''}
                             ${plan.importedFrom ? `
                                 <span class="badge badge-source">
-                                    ${plan.importedFrom === 'server' ? '🌐 Servidor' : '💾 Cache'}
+                                    ${plan.importedFrom === 'server' ? '🌐 Servidor' : 
+                                      plan.importedFrom === 'file' ? '📁 Arquivo' : 
+                                      plan.importedFrom === 'example' ? '📋 Exemplo' : 
+                                      plan.importedFrom === 'legacy' ? '📜 Legado' : '💾 Cache'}
                                 </span>
                             ` : ''}
                         </div>
@@ -1425,6 +1752,8 @@ class JSFitStudentApp {
         const examplePlan = {
             id: this.generateId(),
             nome: "Plano Exemplo - Adaptação Iniciante",
+            importedAt: new Date().toISOString(),
+            importedFrom: 'example',
             aluno: {
                 nome: "Usuário Exemplo",
                 dataNascimento: "1990-01-01",
@@ -1551,7 +1880,7 @@ class JSFitStudentApp {
 }
 
 // =============================================================================
-// GLOBAL INITIALIZATION
+// GLOBAL INITIALIZATION AND NAVIGATION FUNCTIONS
 // =============================================================================
 
 let app;
@@ -1567,3 +1896,27 @@ window.addEventListener('load', () => {
         app = new JSFitStudentApp();
     }
 });
+
+// Global navigation functions for onclick handlers
+function showHome() {
+    if (app) app.showHome();
+}
+
+function showPlan() {
+    if (app && app.state.currentPlan) app.showPlan(app.state.currentPlan.id);
+}
+
+function hideConfirmation() {
+    const modal = document.getElementById('confirmationModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+function hideSuccessModal() {
+    const modal = document.getElementById('successModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+function hideErrorModal() {
+    const modal = document.getElementById('errorModal');
+    if (modal) modal.classList.add('hidden');
+}
