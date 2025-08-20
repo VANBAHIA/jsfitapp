@@ -1,588 +1,63 @@
 {
-  "name": "JS Fit - Aluno Training App",
-  "short_name": "JS Fit",
-  "description": "Aplicativo completo para acompanhamento de treinos personalizados. Importe planos do seu personal trainer e acompanhe seu progresso.",
-  "start_url": "/aluno.html",
-  "scope": "/",
+  "name": "JS Fit App - Sistema de Treinos",
+  "short_name": "JS Fit App",
+  "description": "Sistema de compartilhamento de treinos entre personal trainers e alunos",
+  "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "theme_color": "#2563eb",
   "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
+  "scope": "/",
   "lang": "pt-BR",
   "dir": "ltr",
-  "categories": ["fitness", "health", "lifestyle", "sports"],
-  {
-    "icons": [
-      {
-        "src": "windows11/SmallTile.scale-100.png",
-        "sizes": "71x71"
-      },
-      {
-        "src": "windows11/SmallTile.scale-125.png",
-        "sizes": "89x89"
-      },
-      {
-        "src": "windows11/SmallTile.scale-150.png",
-        "sizes": "107x107"
-      },
-      {
-        "src": "windows11/SmallTile.scale-200.png",
-        "sizes": "142x142"
-      },
-      {
-        "src": "windows11/SmallTile.scale-400.png",
-        "sizes": "284x284"
-      },
-      {
-        "src": "windows11/Square150x150Logo.scale-100.png",
-        "sizes": "150x150"
-      },
-      {
-        "src": "windows11/Square150x150Logo.scale-125.png",
-        "sizes": "188x188"
-      },
-      {
-        "src": "windows11/Square150x150Logo.scale-150.png",
-        "sizes": "225x225"
-      },
-      {
-        "src": "windows11/Square150x150Logo.scale-200.png",
-        "sizes": "300x300"
-      },
-      {
-        "src": "windows11/Square150x150Logo.scale-400.png",
-        "sizes": "600x600"
-      },
-      {
-        "src": "windows11/Wide310x150Logo.scale-100.png",
-        "sizes": "310x150"
-      },
-      {
-        "src": "windows11/Wide310x150Logo.scale-125.png",
-        "sizes": "388x188"
-      },
-      {
-        "src": "windows11/Wide310x150Logo.scale-150.png",
-        "sizes": "465x225"
-      },
-      {
-        "src": "windows11/Wide310x150Logo.scale-200.png",
-        "sizes": "620x300"
-      },
-      {
-        "src": "windows11/Wide310x150Logo.scale-400.png",
-        "sizes": "1240x600"
-      },
-      {
-        "src": "windows11/LargeTile.scale-100.png",
-        "sizes": "310x310"
-      },
-      {
-        "src": "windows11/LargeTile.scale-125.png",
-        "sizes": "388x388"
-      },
-      {
-        "src": "windows11/LargeTile.scale-150.png",
-        "sizes": "465x465"
-      },
-      {
-        "src": "windows11/LargeTile.scale-200.png",
-        "sizes": "620x620"
-      },
-      {
-        "src": "windows11/LargeTile.scale-400.png",
-        "sizes": "1240x1240"
-      },
-      {
-        "src": "windows11/Square44x44Logo.scale-100.png",
-        "sizes": "44x44"
-      },
-      {
-        "src": "windows11/Square44x44Logo.scale-125.png",
-        "sizes": "55x55"
-      },
-      {
-        "src": "windows11/Square44x44Logo.scale-150.png",
-        "sizes": "66x66"
-      },
-      {
-        "src": "windows11/Square44x44Logo.scale-200.png",
-        "sizes": "88x88"
-      },
-      {
-        "src": "windows11/Square44x44Logo.scale-400.png",
-        "sizes": "176x176"
-      },
-      {
-        "src": "windows11/StoreLogo.scale-100.png",
-        "sizes": "50x50"
-      },
-      {
-        "src": "windows11/StoreLogo.scale-125.png",
-        "sizes": "63x63"
-      },
-      {
-        "src": "windows11/StoreLogo.scale-150.png",
-        "sizes": "75x75"
-      },
-      {
-        "src": "windows11/StoreLogo.scale-200.png",
-        "sizes": "100x100"
-      },
-      {
-        "src": "windows11/StoreLogo.scale-400.png",
-        "sizes": "200x200"
-      },
-      {
-        "src": "windows11/SplashScreen.scale-100.png",
-        "sizes": "620x300"
-      },
-      {
-        "src": "windows11/SplashScreen.scale-125.png",
-        "sizes": "775x375"
-      },
-      {
-        "src": "windows11/SplashScreen.scale-150.png",
-        "sizes": "930x450"
-      },
-      {
-        "src": "windows11/SplashScreen.scale-200.png",
-        "sizes": "1240x600"
-      },
-      {
-        "src": "windows11/SplashScreen.scale-400.png",
-        "sizes": "2480x1200"
-      },
-      {
-        "src": "windows11/Square44x44Logo.targetsize-16.png",
-        "sizes": "16x16"
-      },
-      {
-        "src": "windows11/Square44x44Logo.targetsize-20.png",
-        "sizes": "20x20"
-      },
-      {
-        "src": "windows11/Square44x44Logo.targetsize-24.png",
-        "sizes": "24x24"
-      },
-      {
-        "src": "windows11/Square44x44Logo.targetsize-30.png",
-        "sizes": "30x30"
-      },
-      {
-        "src": "windows11/Square44x44Logo.targetsize-32.png",
-        "sizes": "32x32"
-      },
-      {
-        "src": "windows11/Square44x44Logo.targetsize-36.png",
-        "sizes": "36x36"
-      },
-      {
-        "src": "windows11/Square44x44Logo.targetsize-40.png",
-        "sizes": "40x40"
-      },
-      {
-        "src": "windows11/Square44x44Logo.targetsize-44.png",
-        "sizes": "44x44"
-      },
-      {
-        "src": "windows11/Square44x44Logo.targetsize-48.png",
-        "sizes": "48x48"
-      },
-      {
-        "src": "windows11/Square44x44Logo.targetsize-60.png",
-        "sizes": "60x60"
-      },
-      {
-        "src": "windows11/Square44x44Logo.targetsize-64.png",
-        "sizes": "64x64"
-      },
-      {
-        "src": "windows11/Square44x44Logo.targetsize-72.png",
-        "sizes": "72x72"
-      },
-      {
-        "src": "windows11/Square44x44Logo.targetsize-80.png",
-        "sizes": "80x80"
-      },
-      {
-        "src": "windows11/Square44x44Logo.targetsize-96.png",
-        "sizes": "96x96"
-      },
-      {
-        "src": "windows11/Square44x44Logo.targetsize-256.png",
-        "sizes": "256x256"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-unplated_targetsize-16.png",
-        "sizes": "16x16"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-unplated_targetsize-20.png",
-        "sizes": "20x20"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-unplated_targetsize-24.png",
-        "sizes": "24x24"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-unplated_targetsize-30.png",
-        "sizes": "30x30"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-unplated_targetsize-32.png",
-        "sizes": "32x32"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-unplated_targetsize-36.png",
-        "sizes": "36x36"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-unplated_targetsize-40.png",
-        "sizes": "40x40"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-unplated_targetsize-44.png",
-        "sizes": "44x44"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-unplated_targetsize-48.png",
-        "sizes": "48x48"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-unplated_targetsize-60.png",
-        "sizes": "60x60"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-unplated_targetsize-64.png",
-        "sizes": "64x64"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-unplated_targetsize-72.png",
-        "sizes": "72x72"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-unplated_targetsize-80.png",
-        "sizes": "80x80"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-unplated_targetsize-96.png",
-        "sizes": "96x96"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-unplated_targetsize-256.png",
-        "sizes": "256x256"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-lightunplated_targetsize-16.png",
-        "sizes": "16x16"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-lightunplated_targetsize-20.png",
-        "sizes": "20x20"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-lightunplated_targetsize-24.png",
-        "sizes": "24x24"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-lightunplated_targetsize-30.png",
-        "sizes": "30x30"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-lightunplated_targetsize-32.png",
-        "sizes": "32x32"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-lightunplated_targetsize-36.png",
-        "sizes": "36x36"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-lightunplated_targetsize-40.png",
-        "sizes": "40x40"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-lightunplated_targetsize-44.png",
-        "sizes": "44x44"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-lightunplated_targetsize-48.png",
-        "sizes": "48x48"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-lightunplated_targetsize-60.png",
-        "sizes": "60x60"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-lightunplated_targetsize-64.png",
-        "sizes": "64x64"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-lightunplated_targetsize-72.png",
-        "sizes": "72x72"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-lightunplated_targetsize-80.png",
-        "sizes": "80x80"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-lightunplated_targetsize-96.png",
-        "sizes": "96x96"
-      },
-      {
-        "src": "windows11/Square44x44Logo.altform-lightunplated_targetsize-256.png",
-        "sizes": "256x256"
-      },
-      {
-        "src": "android/android-launchericon-512-512.png",
-        "sizes": "512x512"
-      },
-      {
-        "src": "android/android-launchericon-192-192.png",
-        "sizes": "192x192"
-      },
-      {
-        "src": "android/android-launchericon-144-144.png",
-        "sizes": "144x144"
-      },
-      {
-        "src": "android/android-launchericon-96-96.png",
-        "sizes": "96x96"
-      },
-      {
-        "src": "android/android-launchericon-72-72.png",
-        "sizes": "72x72"
-      },
-      {
-        "src": "android/android-launchericon-48-48.png",
-        "sizes": "48x48"
-      },
-      {
-        "src": "ios/16.png",
-        "sizes": "16x16"
-      },
-      {
-        "src": "ios/20.png",
-        "sizes": "20x20"
-      },
-      {
-        "src": "ios/29.png",
-        "sizes": "29x29"
-      },
-      {
-        "src": "ios/32.png",
-        "sizes": "32x32"
-      },
-      {
-        "src": "ios/40.png",
-        "sizes": "40x40"
-      },
-      {
-        "src": "ios/50.png",
-        "sizes": "50x50"
-      },
-      {
-        "src": "ios/57.png",
-        "sizes": "57x57"
-      },
-      {
-        "src": "ios/58.png",
-        "sizes": "58x58"
-      },
-      {
-        "src": "ios/60.png",
-        "sizes": "60x60"
-      },
-      {
-        "src": "ios/64.png",
-        "sizes": "64x64"
-      },
-      {
-        "src": "ios/72.png",
-        "sizes": "72x72"
-      },
-      {
-        "src": "ios/76.png",
-        "sizes": "76x76"
-      },
-      {
-        "src": "ios/80.png",
-        "sizes": "80x80"
-      },
-      {
-        "src": "ios/87.png",
-        "sizes": "87x87"
-      },
-      {
-        "src": "ios/100.png",
-        "sizes": "100x100"
-      },
-      {
-        "src": "ios/114.png",
-        "sizes": "114x114"
-      },
-      {
-        "src": "ios/120.png",
-        "sizes": "120x120"
-      },
-      {
-        "src": "ios/128.png",
-        "sizes": "128x128"
-      },
-      {
-        "src": "ios/144.png",
-        "sizes": "144x144"
-      },
-      {
-        "src": "ios/152.png",
-        "sizes": "152x152"
-      },
-      {
-        "src": "ios/167.png",
-        "sizes": "167x167"
-      },
-      {
-        "src": "ios/180.png",
-        "sizes": "180x180"
-      },
-      {
-        "src": "ios/192.png",
-        "sizes": "192x192"
-      },
-      {
-        "src": "ios/256.png",
-        "sizes": "256x256"
-      },
-      {
-        "src": "ios/512.png",
-        "sizes": "512x512"
-      },
-      {
-        "src": "ios/1024.png",
-        "sizes": "1024x1024"
-      }
-    ]
-  },
-  "screenshots": [
+  "categories": ["health", "fitness", "productivity"],
+  "icons": [
     {
-      "src": "screenshots/home-mobile.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Tela inicial com planos de treino importados"
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iNDgiIGZpbGw9IiMyNTYzZWIiLz4KPHN2ZyB4PSI0OCIgeT0iNDgiIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJtNi4zIDIwLjMgMi4zLTIuM2E0IDQgMCAwIDEgNS42NiAwIDQgNCAwIDAgMCA1LjY2IDBsMi4zIDIuMyIvPgo8cGF0aCBkPSJNNiAzaDEyYTMgMyAwIDAgMSAzIDN2NmEzIDMgMCAwIDEtMyAzSDZhMyAzIDAgMCAxLTMtM1Y2YTMgMyAwIDAgMSAzLTN6Ii8+Cjwvc3ZnPgo8L3N2Zz4K",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
     },
     {
-      "src": "screenshots/workout-mobile.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Tela de execução de exercícios durante treino"
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTI4IiBmaWxsPSIjMjU2M2ViIi8+CjxzdmcgeD0iMTI4IiB5PSIxMjgiIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiI+CjxwYXRoIGQ9Im02LjMgMjAuMyAyLjMtMi4zYTQgNCAwIDAgMSA1LjY2IDAgNCA0IDAgMCAwIDUuNjYgMGwyLjMgMi4zIi8+CjxwYXRoIGQ9Ik02IDNoMTJhMyAzIDAgMCAxIDMgM3Y2YTMgMyAwIDAgMS0zIDNINmEzIDMgMCAwIDEtMy0zVjZhMyAzIDAgMCAxIDMtM3oiLz4KPC9zdmc+Cjwvc3ZnPgo=",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
     },
     {
-      "src": "screenshots/home-desktop.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Interface desktop com visão completa dos treinos"
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9IiMyNTYzZWIiLz4KPHN2ZyB4PSI0NSIgeT0iNDUiIHdpZHRoPSI5MCIgaGVpZ2h0PSI5MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJtNi4zIDIwLjMgMi4zLTIuM2E0IDQgMCAwIDEgNS42NiAwIDQgNCAwIDAgMCA1LjY2IDBsMi4zIDIuMyIvPgo8cGF0aCBkPSJNNiAzaDEyYTMgMyAwIDAgMSAzIDN2NmEzIDMgMCAwIDEtMyAzSDZhMyAzIDAgMCAxLTMtM1Y2YTMgMyAwIDAgMSAzLTN6Ii8+Cjwvc3ZnPgo8L3N2Zz4K",
+      "sizes": "180x180",
+      "type": "image/svg+xml",
+      "purpose": "apple-touch-icon"
     }
   ],
   "shortcuts": [
     {
-      "name": "Importar Treino",
-      "short_name": "Importar",
-      "description": "Importar novo plano de treino usando ID",
-      "url": "/aluno.html#import",
+      "name": "Aplicação do Aluno",
+      "short_name": "Aluno",
+      "description": "Acessar aplicação do aluno",
+      "url": "/aluno.html",
       "icons": [
         {
-          "src": "icons/shortcut-import.png",
+          "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9Ijk2IiBoZWlnaHQ9Ijk2IiByeD0iMjQiIGZpbGw9IiMxMGI5ODEiLz4KPHN2ZyB4PSIyNCIgeT0iMjQiIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJtNi4zIDIwLjMgMi4zLTIuM2E0IDQgMCAwIDEgNS42NiAwIDQgNCAwIDAgMCA1LjY2IDBsMi4zIDIuMyIvPgo8cGF0aCBkPSJNNiAzaDEyYTMgMyAwIDAgMSAzIDN2NmEzIDMgMCAwIDEtMyAzSDZhMyAzIDAgMCAxLTMtM1Y2YTMgMyAwIDAgMSAzLTN6Ii8+Cjwvc3ZnPgo8L3N2Zz4K",
           "sizes": "96x96",
-          "type": "image/png"
+          "type": "image/svg+xml"
         }
       ]
     },
     {
-      "name": "Meus Planos",
-      "short_name": "Planos",
-      "description": "Ver todos os planos de treino",
-      "url": "/aluno.html#plans",
+      "name": "Aplicação do Personal",
+      "short_name": "Personal",
+      "description": "Acessar aplicação do personal trainer",
+      "url": "/personal.html",
       "icons": [
         {
-          "src": "icons/shortcut-plans.png",
+          "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9Ijk2IiBoZWlnaHQ9Ijk2IiByeD0iMjQiIGZpbGw9IiM4YjVjZjYiLz4KPHN2ZyB4PSIyNCIgeT0iMjQiIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJtNi4zIDIwLjMgMi4zLTIuM2E0IDQgMCAwIDEgNS42NiAwIDQgNCAwIDAgMCA1LjY2IDBsMi4zIDIuMyIvPgo8cGF0aCBkPSJNNiAzaDEyYTMgMyAwIDAgMSAzIDN2NmEzIDMgMCAwIDEtMyAzSDZhMyAzIDAgMCAxLTMtM1Y2YTMgMyAwIDAgMSAzLTN6Ii8+Cjwvc3ZnPgo8L3N2Zz4K",
           "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Treino Ativo",
-      "short_name": "Treino",
-      "description": "Acessar treino em andamento",
-      "url": "/aluno.html#active-workout",
-      "icons": [
-        {
-          "src": "icons/shortcut-workout.png",
-          "sizes": "96x96",
-          "type": "image/png"
+          "type": "image/svg+xml"
         }
       ]
     }
   ],
-  "prefer_related_applications": false,
   "edge_side_panel": {
     "preferred_width": 400
-  },
-  "launch_handler": {
-    "client_mode": "focus-existing"
-  },
-  "handle_links": "preferred",
-  "protocol_handlers": [
-    {
-      "protocol": "web+meustrenios",
-      "url": "/aluno.html?import=%s"
-    }
-  ],
-  "share_target": {
-    "action": "/share-workout",
-    "method": "POST",
-    "enctype": "multipart/form-data",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  },
-  "file_handlers": [
-    {
-      "action": "/open-workout",
-      "accept": {
-        "application/json": [".json"],
-        "text/plain": [".txt"]
-      }
-    }
-  ],
-  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
-  "id": "com.meustrenios.pwa",
-  "version": "1.0.0",
-  "permissions": [
-    "storage",
-    "notifications"
-  ],
-  "features": [
-    {
-      "name": "offline-support",
-      "description": "Funciona sem conexão com internet"
-    },
-    {
-      "name": "workout-tracking",
-      "description": "Acompanhamento completo de treinos"
-    },
-    {
-      "name": "progress-monitoring",
-      "description": "Monitoramento de progresso e estatísticas"
-    },
-    {
-      "name": "plan-import",
-      "description": "Importação de planos via ID ou arquivo"
-    }
-  ]
+  }
 }
