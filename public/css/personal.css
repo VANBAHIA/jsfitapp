@@ -1230,3 +1230,9 @@ body {
         border: 1px solid #000;
     }
 }
+.form-textarea[readonly] {
+    background-color: #f5f5f5; /* Cor de fundo cinza claro */
+    color: #666; /* Texto mais escuro */
+    border-color: #ddd; /* Borda mais suave */
+    cursor: not-allowed; /* Cursor indicando que não é editável */
+}

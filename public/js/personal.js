@@ -1394,62 +1394,46 @@ const app = {
     },
 
     editExercise(workoutIndex, exerciseIndex) {
-        this.currentWorkoutIndex = workoutIndex;
-        this.currentExerciseIndex = exerciseIndex;
-        
-        const exercise = this.currentPlan.treinos[workoutIndex].exercicios[exerciseIndex];
-        
-        const exerciseSelect = document.getElementById('exerciseName');
-        const customGroup = document.getElementById('customExerciseGroup');
-        const customInput = document.getElementById('customExerciseName');
-        
-        const option = Array.from(exerciseSelect.options).find(opt => opt.value === exercise.nome);
-        if (option) {
-            exerciseSelect.value = exercise.nome;
-            customGroup.style.display = 'none';
-        } else {
-            exerciseSelect.value = 'custom';
-            customGroup.style.display = 'block';
-            customInput.value = exercise.nome;
-        }
-        
-        document.getElementById('exerciseSets').value = exercise.series;
-        document.getElementById('exerciseReps').value = exercise.repeticoes;
-        document.getElementById('exerciseWeight').value = exercise.carga;
-        document.getElementById('exerciseRest').value = exercise.descanso || '90 segundos';
-        document.getElementById('exerciseDescription').value = exercise.descricao;
-        
-        // Handle technique selection
-        const techniqueSelect = document.getElementById('exerciseTechnique');
-        if (exercise.tecnica && this.tecnicasDatabase[exercise.tecnica]) {
-            techniqueSelect.value = exercise.tecnica;
-            this.updateTechniqueDescription();
-        } else {
-            techniqueSelect.value = '';
-            this.updateTechniqueDescription();
-        }
-        
-        const specialSelect = document.getElementById('exerciseSpecialNotes');
-        const customNotesGroup = document.getElementById('customNotesGroup');
-        const customNotesInput = document.getElementById('customSpecialNotes');
-        
-        if (exercise.observacoesEspeciais) {
-            const specialOption = Array.from(specialSelect.options).find(opt => opt.value === exercise.observacoesEspeciais);
-            if (specialOption) {
-                specialSelect.value = exercise.observacoesEspeciais;
-                customNotesGroup.style.display = 'none';
-            } else {
-                specialSelect.value = 'custom';
-                customNotesGroup.style.display = 'block';
-                customNotesInput.value = exercise.observacoesEspeciais;
-            }
-        } else {
-            specialSelect.value = '';
-            customNotesGroup.style.display = 'none';
-        }
-        
-        document.getElementById('exerciseModal').classList.add('active');
-    },
+    this.currentWorkoutIndex = workoutIndex;
+    this.currentExerciseIndex = exerciseIndex;
+    
+    const exercise = this.currentPlan.treinos[workoutIndex].exercicios[exerciseIndex];
+    
+    // Configurar nome do exercício
+    const exerciseSelect = document.getElementById('exerciseName');
+    const customGroup = document.getElementById('customExerciseGroup');
+    const customInput = document.getElementById('customExerciseName');
+    
+    const option = Array.from(exerciseSelect.options).find(opt => opt.value === exercise.nome);
+    if (option) {
+        exerciseSelect.value = exercise.nome;
+        customGroup.style.display = 'none';
+    } else {
+        exerciseSelect.value = 'custom';
+        customGroup.style.display = 'block';
+        customInput.value = exercise.nome;
+    }
+    
+    // Configurar dados básicos
+    document.getElementById('exerciseSets').value = exercise.series;
+    document.getElementById('exerciseReps').value = exercise.repeticoes;
+    document.getElementById('exerciseWeight').value = exercise.carga;
+    document.getElementById('exerciseRest').value = exercise.descanso || '90 segundos';
+    document.getElementById('exerciseDescription').value = exercise.descricao;
+    
+    // Configurar técnica selecionada
+    const techniqueSelect = document.getElementById('exerciseTechnique');
+    if (exercise.tecnica && this.tecnicasDatabase[exercise.tecnica]) {
+        techniqueSelect.value = exercise.tecnica;
+        this.updateTechniqueDescription();
+    } else {
+        techniqueSelect.value = '';
+        this.updateTechniqueDescription();
+    }
+    
+    // Abrir modal
+    document.getElementById('exerciseModal').classList.add('active');
+},
 
     updateTechniqueDescription() {
         const techniqueSelect = document.getElementById('exerciseTechnique');
@@ -1480,46 +1464,39 @@ const app = {
         }
     },
 
-    updateSpecialNotesInput() {
-        const specialSelect = document.getElementById('exerciseSpecialNotes');
-        const customGroup = document.getElementById('customNotesGroup');
-        
-        if (specialSelect.value === 'custom') {
-            customGroup.style.display = 'block';
-        } else {
-            customGroup.style.display = 'none';
-        }
-    },
+
 
     saveExercise() {
-        if (this.currentWorkoutIndex === null || this.currentExerciseIndex === null) return;
-        
-        const exercise = this.currentPlan.treinos[this.currentWorkoutIndex].exercicios[this.currentExerciseIndex];
-        
-        const exerciseSelect = document.getElementById('exerciseName');
-        const customName = document.getElementById('customExerciseName');
-        const specialSelect = document.getElementById('exerciseSpecialNotes');
-        const customNotes = document.getElementById('customSpecialNotes');
-        const techniqueSelect = document.getElementById('exerciseTechnique');
-        
-        exercise.nome = exerciseSelect.value === 'custom' ? customName.value : exerciseSelect.value;
-        exercise.series = parseInt(document.getElementById('exerciseSets').value) || 3;
-        exercise.repeticoes = document.getElementById('exerciseReps').value;
-        exercise.carga = document.getElementById('exerciseWeight').value;
-        exercise.descanso = document.getElementById('exerciseRest').value;
-        exercise.descricao = document.getElementById('exerciseDescription').value;
-        
-        exercise.observacoesEspeciais = specialSelect.value === 'custom' ? customNotes.value : specialSelect.value;
-        
-        exercise.tecnica = techniqueSelect.value;
-        
-        if (exercise.tecnica && !exercise.observacoesEspeciais) {
-            exercise.observacoesEspeciais = this.getObservacaoEspecial(exercise.tecnica, exercise.nome);
-        }
-        
-        this.updateExerciseList(this.currentWorkoutIndex);
-        this.closeExerciseModal();
-    },
+    if (this.currentWorkoutIndex === null || this.currentExerciseIndex === null) return;
+    
+    const exercise = this.currentPlan.treinos[this.currentWorkoutIndex].exercicios[this.currentExerciseIndex];
+    
+    const exerciseSelect = document.getElementById('exerciseName');
+    const customName = document.getElementById('customExerciseName');
+    const techniqueSelect = document.getElementById('exerciseTechnique');
+    
+    // Atualizar dados básicos do exercício
+    exercise.nome = exerciseSelect.value === 'custom' ? customName.value : exerciseSelect.value;
+    exercise.series = parseInt(document.getElementById('exerciseSets').value) || 3;
+    exercise.repeticoes = document.getElementById('exerciseReps').value;
+    exercise.carga = document.getElementById('exerciseWeight').value;
+    exercise.descanso = document.getElementById('exerciseRest').value;
+    exercise.descricao = document.getElementById('exerciseDescription').value;
+    
+    // Configurar técnica selecionada
+    exercise.tecnica = techniqueSelect.value;
+    
+    // Gerar observações especiais automaticamente baseadas na técnica
+    if (exercise.tecnica && this.tecnicasDatabase[exercise.tecnica]) {
+        exercise.observacoesEspeciais = this.getObservacaoEspecial(exercise.tecnica, exercise.nome);
+    } else {
+        exercise.observacoesEspeciais = '';
+    }
+    
+    // Atualizar a lista de exercícios e fechar modal
+    this.updateExerciseList(this.currentWorkoutIndex);
+    this.closeExerciseModal();
+},
 
     removeExercise(workoutIndex, exerciseIndex) {
         if (confirm('Tem certeza que deseja remover este exercício?')) {
