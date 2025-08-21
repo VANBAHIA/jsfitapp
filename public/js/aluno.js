@@ -1,7 +1,5 @@
-// aluno.js - JS Fit Student App - Complete with Techniques and Special Observations
+// aluno.js - JS Fit Student App - Complete with JSON File Upload
 // Sistema modernizado compatível com PostgreSQL e Netlify Functions
-// Suporte completo a técnicas avançadas e observações especiais
-// VERSÃO CORRIGIDA - Robustez melhorada para inicialização
 
 class JSFitStudentApp {
     constructor() {
@@ -29,28 +27,6 @@ class JSFitStudentApp {
             selectedFile: null
         };
 
-        // Técnicas Database - Compatível com personal.js
-        this.techniquesDatabase = {
-            'pre-exaustao': 'Exercício de isolamento antes do composto para pré-fadigar o músculo alvo',
-            'pos-exaustao': 'Exercício de isolamento após o composto para finalizar o músculo',
-            'bi-set': 'Dois exercícios executados em sequência sem descanso',
-            'tri-set': 'Três exercícios executados em sequência sem descanso',
-            'drop-set': 'Redução progressiva da carga na mesma série',
-            'rest-pause': 'Pause breves durante a série para completar mais repetições',
-            'serie-queima': 'Repetições parciais no final da série até a falha',
-            'tempo-controlado': 'Execução lenta e controlada (3-4 segundos na fase excêntrica)',
-            'pausa-contracao': 'Pausa de 1-2 segundos na contração máxima',
-            'unilateral-alternado': 'Execução alternada entre membros',
-            'piramide-crescente': 'Aumento progressivo da carga a cada série',
-            'piramide-decrescente': 'Diminuição progressiva da carga a cada série',
-            'clusters': 'Séries divididas em mini-séries com pausas curtas',
-            'negativas': 'Enfase na fase excêntrica do movimento',
-            'isometrico': 'Contração muscular sem movimento articular',
-            'metodo-21': 'Série de 21 repetições (7 parciais + 7 parciais + 7 completas)',
-            'onda': 'Variação de repetições em padrão ondulatório',
-            'strip-set': 'Redução de carga sem pausa entre as mudanças'
-        };
-
         // Initialize app
         this.init();
     }
@@ -60,14 +36,9 @@ class JSFitStudentApp {
     // =============================================================================
 
     async init() {
-        console.log('🚀 Initializing JS Fit Student App - Backend Compatible with Techniques');
+        console.log('🚀 Initializing JS Fit Student App - Backend Compatible');
         
         try {
-            // Aguarda o DOM estar pronto
-            if (document.readyState === 'loading') {
-                await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
-            }
-
             this.setupEventListeners();
             this.setupPWAFeatures();
             await this.loadFromStorage();
@@ -79,13 +50,6 @@ class JSFitStudentApp {
         } catch (error) {
             console.error('❌ Initialization failed:', error);
             this.showNotification('Erro ao inicializar aplicativo', 'error');
-            
-            // Fallback: tentar renderizar home mesmo com erro
-            try {
-                this.renderHome();
-            } catch (renderError) {
-                console.error('❌ Fallback render failed:', renderError);
-            }
         }
     }
 
@@ -184,168 +148,6 @@ class JSFitStudentApp {
             navigator.serviceWorker.register('/sw.js')
                 .then(reg => console.log('SW registered:', reg))
                 .catch(err => console.log('SW registration failed:', err));
-        }
-    }
-
-    // =============================================================================
-    // TECHNIQUES MANAGEMENT
-    // =============================================================================
-
-    getTechniqueDisplayName(techniqueKey) {
-        if (!techniqueKey) return '';
-        
-        // Convert technique key to display name
-        const displayNames = {
-            'pre-exaustao': 'Pré-exaustão',
-            'pos-exaustao': 'Pós-exaustão',
-            'bi-set': 'Bi-set',
-            'tri-set': 'Tri-set',
-            'drop-set': 'Drop Set',
-            'rest-pause': 'Rest Pause',
-            'serie-queima': 'Série Queima',
-            'tempo-controlado': 'Tempo Controlado',
-            'pausa-contracao': 'Pausa Contração',
-            'unilateral-alternado': 'Unilateral Alternado',
-            'piramide-crescente': 'Pirâmide Crescente',
-            'piramide-decrescente': 'Pirâmide Decrescente',
-            'clusters': 'Clusters',
-            'negativas': 'Negativas',
-            'isometrico': 'Isométrico',
-            'metodo-21': 'Método 21',
-            'onda': 'Onda',
-            'strip-set': 'Strip Set'
-        };
-        
-        return displayNames[techniqueKey] || techniqueKey.replace('-', ' ').toUpperCase();
-    }
-
-    getTechniqueDescription(techniqueKey) {
-        return this.techniquesDatabase[techniqueKey] || 'Descrição não disponível';
-    }
-
-    showExerciseTechniqueModal(exerciseName, techniqueKey) {
-        const modal = document.getElementById('exerciseTechniqueModal');
-        const title = document.getElementById('exerciseTechniqueTitle');
-        const content = document.getElementById('exerciseTechniqueContent');
-        
-        if (!modal || !title || !content) return;
-        
-        const displayName = this.getTechniqueDisplayName(techniqueKey);
-        const description = this.getTechniqueDescription(techniqueKey);
-        
-        title.innerHTML = `🎯 ${displayName}`;
-        
-        content.innerHTML = `
-            <div class="technique-detail">
-                <div class="technique-exercise">
-                    <strong>Exercício:</strong> ${exerciseName}
-                </div>
-                
-                <div class="technique-description-card">
-                    <h4>📋 Como Executar:</h4>
-                    <p>${description}</p>
-                </div>
-                
-                <div class="technique-tips">
-                    <h4>💡 Dicas Importantes:</h4>
-                    <ul>
-                        ${this.getTechniqueTips(techniqueKey)}
-                    </ul>
-                </div>
-            </div>
-        `;
-        
-        modal.classList.remove('hidden');
-    }
-
-    getTechniqueTips(techniqueKey) {
-        const tips = {
-            'pre-exaustao': [
-                'Execute imediatamente antes do exercício principal',
-                'Use cargas moderadas para não comprometer o movimento composto',
-                'Foque na contração muscular durante o isolamento'
-            ],
-            'pos-exaustao': [
-                'Execute imediatamente após o exercício principal',
-                'Use cargas mais leves que o normal',
-                'Continue até a falha muscular completa'
-            ],
-            'drop-set': [
-                'Reduza 20-30% da carga após a falha',
-                'Não descanse entre as reduções',
-                'Execute no máximo 2-3 reduções'
-            ],
-            'rest-pause': [
-                'Pause apenas 10-15 segundos',
-                'Execute até nova falha muscular',
-                'Respire profundamente durante a pausa'
-            ],
-            'tempo-controlado': [
-                'Conte mentalmente os segundos',
-                'Mantenha a tensão muscular constante',
-                'Controle tanto a subida quanto a descida'
-            ],
-            'bi-set': [
-                'Não descanse entre os exercícios',
-                'Escolha exercícios para músculos complementares',
-                'Prepare os equipamentos antecipadamente'
-            ]
-        };
-        
-        const exerciseTips = tips[techniqueKey] || ['Siga as orientações do seu personal trainer'];
-        
-        return exerciseTips.map(tip => `<li>${tip}</li>`).join('');
-    }
-
-    showTechniquesModal() {
-        const modal = document.getElementById('techniquesModal');
-        const content = document.getElementById('techniquesModalContent');
-        
-        if (!modal || !content) return;
-        
-        if (!this.state.currentPlan || !this.state.currentPlan.tecnicas_aplicadas) {
-            content.innerHTML = `
-                <div class="no-techniques">
-                    <p>Este plano não possui técnicas avançadas aplicadas.</p>
-                </div>
-            `;
-        } else {
-            const techniques = this.state.currentPlan.tecnicas_aplicadas;
-            
-            content.innerHTML = `
-                <div class="techniques-list">
-                    <p class="techniques-intro">
-                        Este plano utiliza as seguintes técnicas avançadas para maximizar seus resultados:
-                    </p>
-                    ${Object.entries(techniques).map(([key, description]) => `
-                        <div class="technique-card">
-                            <div class="technique-header">
-                                <span class="technique-name">${this.getTechniqueDisplayName(key)}</span>
-                                <span class="technique-badge">🎯</span>
-                            </div>
-                            <div class="technique-description">
-                                ${description}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-        
-        modal.classList.remove('hidden');
-    }
-
-    closeTechniquesModal() {
-        const modal = document.getElementById('techniquesModal');
-        if (modal) {
-            modal.classList.add('hidden');
-        }
-    }
-
-    closeExerciseTechniqueModal() {
-        const modal = document.getElementById('exerciseTechniqueModal');
-        if (modal) {
-            modal.classList.add('hidden');
         }
     }
 
@@ -456,7 +258,7 @@ class JSFitStudentApp {
     }
 
     processPlanData(planData, shareId, source) {
-        // Convert backend format to frontend format with technique support
+        // Convert backend format to frontend format
         const processedPlan = {
             id: this.generateId(),
             nome: planData.nome || planData.name || 'Plano Importado',
@@ -488,25 +290,17 @@ class JSFitStudentApp {
                 idade: planData.aluno?.idade || planData.student?.age || null
             },
             
-            // Convert workouts with techniques support
+            // Convert workouts
             treinos: this.convertWorkoutsToFrontendFormat(planData.treinos || planData.workouts || []),
             
             // Observations
-            observacoes: planData.observacoes || planData.observations || {},
-            
-            // Techniques applied (new field)
-            tecnicas_aplicadas: planData.tecnicas_aplicadas || planData.applied_techniques || {}
+            observacoes: planData.observacoes || planData.observations || {}
         };
 
         return { plan: processedPlan, source };
     }
 
     convertWorkoutsToFrontendFormat(workouts) {
-        if (!Array.isArray(workouts)) {
-            console.warn('Workouts is not an array:', workouts);
-            return [];
-        }
-
         return workouts.map((workout, index) => ({
             id: workout.id || String.fromCharCode(65 + index),
             nome: workout.nome || workout.name || `Treino ${String.fromCharCode(65 + index)}`,
@@ -518,11 +312,6 @@ class JSFitStudentApp {
     }
 
     convertExercisesToFrontendFormat(exercises) {
-        if (!Array.isArray(exercises)) {
-            console.warn('Exercises is not an array:', exercises);
-            return [];
-        }
-
         return exercises.map((exercise, index) => ({
             id: exercise.id || this.generateId(),
             nome: exercise.nome || exercise.name || 'Exercício',
@@ -532,8 +321,8 @@ class JSFitStudentApp {
             carga: exercise.carga || exercise.weight || 'A definir',
             currentCarga: exercise.currentCarga || exercise.current_weight || exercise.carga || exercise.weight || 'A definir',
             descanso: exercise.descanso || exercise.rest_time || '90 segundos',
-            observacoesEspeciais: exercise.observacoesEspeciais || exercise.special_instructions || exercise.special_observations || '',
-            tecnica: exercise.tecnica || exercise.technique || '',
+            observacoesEspeciais: exercise.observacoesEspeciais || exercise.special_instructions || '',
+            tecnica: exercise.tecnica || '', // NOVO CAMPO
             concluido: false
         }));
     }
@@ -720,7 +509,13 @@ class JSFitStudentApp {
                 throw new Error('Arquivo JSON inválido');
             }
             
-            return data;
+            // NOVA VALIDAÇÃO: verificar se tem array planos
+            if (!data.planos || !Array.isArray(data.planos) || data.planos.length === 0) {
+                throw new Error('Formato JSON inválido: deve conter array "planos" com pelo menos um plano');
+            }
+            
+            // Retornar o primeiro plano do array
+            return data.planos[0];
         } catch (error) {
             if (error instanceof SyntaxError) {
                 throw new Error('Formato JSON inválido');
@@ -734,11 +529,11 @@ class JSFitStudentApp {
         if (!data.nome && !data.name) {
             throw new Error('Nome do plano não encontrado no arquivo');
         }
-
+    
         if (!data.treinos && !data.workouts) {
             throw new Error('Treinos não encontrados no arquivo');
         }
-
+    
         // Generate unique ID for imported plan
         const processedPlan = {
             id: this.generateId(),
@@ -767,24 +562,25 @@ class JSFitStudentApp {
                 objetivo: data.perfil?.objetivo || data.objective || 'Condicionamento geral',
                 altura: data.aluno?.altura || data.student?.height || '',
                 peso: data.aluno?.peso || data.student?.weight || '',
-                idade: data.aluno?.idade || data.student?.age || null
+                idade: data.aluno?.idade || data.student?.age || null,
+                porte: data.perfil?.porte || '' // NOVO CAMPO
             },
             
-            // Convert workouts with techniques support
+            // Convert workouts
             treinos: this.convertWorkoutsToFrontendFormat(data.treinos || data.workouts || []),
             
             // Observations
             observacoes: data.observacoes || data.observations || {},
             
-            // Techniques applied (new field)
-            tecnicas_aplicadas: data.tecnicas_aplicadas || data.applied_techniques || {}
+            // NOVO: Técnicas aplicadas
+            tecnicasAplicadas: data.tecnicas_aplicadas || {}
         };
-
+    
         // Validate processed plan
         if (processedPlan.treinos.length === 0) {
             throw new Error('Nenhum treino válido encontrado no arquivo');
         }
-
+    
         return processedPlan;
     }
 
@@ -972,10 +768,10 @@ class JSFitStudentApp {
     async saveToStorage() {
         try {
             const data = {
-                workoutPlans: this.state.workoutPlans || [],
-                activeWorkoutSessions: Array.from(this.state.activeWorkoutSessions.entries() || []),
+                workoutPlans: this.state.workoutPlans,
+                activeWorkoutSessions: Array.from(this.state.activeWorkoutSessions.entries()),
                 lastSaved: new Date().toISOString(),
-                version: '3.2.1'
+                version: '3.1.0'
             };
             
             localStorage.setItem('jsfitapp_student_data', JSON.stringify(data));
@@ -988,122 +784,66 @@ class JSFitStudentApp {
     async loadFromStorage() {
         try {
             const stored = localStorage.getItem('jsfitapp_student_data');
-            if (!stored) {
-                // Initialize with empty state
-                this.state.workoutPlans = [];
-                this.state.activeWorkoutSessions = new Map();
-                return;
-            }
+            if (!stored) return;
 
             const data = JSON.parse(stored);
-            
-            // Ensure data has the expected structure
-            this.state.workoutPlans = Array.isArray(data.workoutPlans) ? data.workoutPlans : [];
+            this.state.workoutPlans = data.workoutPlans || [];
             
             // Restore active sessions
-            if (Array.isArray(data.activeWorkoutSessions)) {
-                try {
-                    this.state.activeWorkoutSessions = new Map(data.activeWorkoutSessions);
-                } catch (mapError) {
-                    console.warn('Error restoring active sessions:', mapError);
-                    this.state.activeWorkoutSessions = new Map();
-                }
-            } else {
-                this.state.activeWorkoutSessions = new Map();
+            if (data.activeWorkoutSessions) {
+                this.state.activeWorkoutSessions = new Map(data.activeWorkoutSessions);
             }
 
             // Migrate legacy data
             this.migrateLegacyData();
         } catch (error) {
             console.error('Storage load failed:', error);
-            // Reset to safe state
             this.state.workoutPlans = [];
-            this.state.activeWorkoutSessions = new Map();
-            
-            // Try to recover from backup or show notification
-            this.showNotification('Dados corrompidos. Iniciando com estado limpo.', 'warning');
         }
     }
 
     migrateLegacyData() {
-        try {
-            // Migrate old localStorage key
-            const oldData = localStorage.getItem('studentWorkoutPlans');
-            if (oldData) {
-                try {
-                    const plans = JSON.parse(oldData);
-                    if (Array.isArray(plans)) {
-                        plans.forEach(plan => {
-                            // Convert old format to new format
-                            if (!plan.aluno && plan.perfil) {
-                                plan.aluno = {
-                                    nome: '',
-                                    dataNascimento: '',
-                                    idade: plan.perfil.idade || null,
-                                    altura: plan.perfil.altura || '',
-                                    peso: plan.perfil.peso || '',
-                                    cpf: ''
-                                };
-                            }
-                            
-                            // Add importedFrom if missing
-                            if (!plan.importedFrom) {
-                                plan.importedFrom = 'legacy';
-                            }
-
-                            // Add techniques support
-                            if (!plan.tecnicas_aplicadas) {
-                                plan.tecnicas_aplicadas = {};
-                            }
-                        });
-                        
-                        this.state.workoutPlans = [...this.state.workoutPlans, ...plans];
-                        localStorage.removeItem('studentWorkoutPlans');
-                        this.saveToStorage();
+        // Migrate old localStorage key
+        const oldData = localStorage.getItem('studentWorkoutPlans');
+        if (oldData) {
+            try {
+                const plans = JSON.parse(oldData);
+                plans.forEach(plan => {
+                    // Convert old format to new format
+                    if (!plan.aluno && plan.perfil) {
+                        plan.aluno = {
+                            nome: '',
+                            dataNascimento: '',
+                            idade: plan.perfil.idade || null,
+                            altura: plan.perfil.altura || '',
+                            peso: plan.perfil.peso || '',
+                            cpf: ''
+                        };
                     }
-                } catch (error) {
-                    console.warn('Legacy data migration failed:', error);
-                }
-            }
-
-            // Ensure all plans have proper structure including techniques
-            if (Array.isArray(this.state.workoutPlans)) {
-                this.state.workoutPlans.forEach(plan => {
-                    if (plan && typeof plan === 'object') {
-                        // Ensure treinos array exists
-                        if (!Array.isArray(plan.treinos)) {
-                            plan.treinos = [];
-                        }
-
-                        plan.treinos.forEach(treino => {
-                            if (treino && typeof treino === 'object') {
-                                // Ensure exercicios array exists
-                                if (!Array.isArray(treino.exercicios)) {
-                                    treino.exercicios = [];
-                                }
-
-                                treino.exercicios.forEach(ex => {
-                                    if (ex && typeof ex === 'object') {
-                                        if (!ex.id) ex.id = this.generateId();
-                                        if (!ex.currentCarga) ex.currentCarga = ex.carga || '';
-                                        if (!ex.observacoesEspeciais) ex.observacoesEspeciais = '';
-                                        if (!ex.tecnica) ex.tecnica = '';
-                                    }
-                                });
-                            }
-                        });
-
-                        // Add techniques support to plans
-                        if (!plan.tecnicas_aplicadas) {
-                            plan.tecnicas_aplicadas = {};
-                        }
+                    
+                    // Add importedFrom if missing
+                    if (!plan.importedFrom) {
+                        plan.importedFrom = 'legacy';
                     }
                 });
+                
+                this.state.workoutPlans = [...this.state.workoutPlans, ...plans];
+                localStorage.removeItem('studentWorkoutPlans');
+                this.saveToStorage();
+            } catch (error) {
+                console.warn('Legacy data migration failed:', error);
             }
-        } catch (error) {
-            console.error('Migration failed:', error);
-            // Don't throw error - app should continue working
         }
+
+        // Ensure all exercises have IDs and proper structure
+        this.state.workoutPlans.forEach(plan => {
+            plan.treinos?.forEach(treino => {
+                treino.exercicios?.forEach(ex => {
+                    if (!ex.id) ex.id = this.generateId();
+                    if (!ex.currentCarga) ex.currentCarga = ex.carga || '';
+                });
+            });
+        });
     }
 
     savePlanToCache(shareId, planData) {
@@ -1300,33 +1040,17 @@ class JSFitStudentApp {
 
     renderHome() {
         const content = document.getElementById('homeContent');
-        if (!content) {
-            console.error('Home content element not found');
-            return;
-        }
+        if (!content) return;
 
-        try {
-            let html = this.renderImportCard();
-            
-            if (!Array.isArray(this.state.workoutPlans) || this.state.workoutPlans.length === 0) {
-                html += this.renderEmptyState();
-            } else {
-                html += this.state.workoutPlans.map(plan => this.renderPlanCard(plan)).join('');
-            }
-            
-            content.innerHTML = html;
-        } catch (error) {
-            console.error('Error rendering home:', error);
-            content.innerHTML = `
-                <div class="card">
-                    <div class="card-content">
-                        <h3>Erro ao carregar</h3>
-                        <p>Ocorreu um erro ao carregar a tela inicial. Tente recarregar a página.</p>
-                        <button onclick="location.reload()" class="btn btn-primary">Recarregar</button>
-                    </div>
-                </div>
-            `;
+        let html = this.renderImportCard();
+        
+        if (this.state.workoutPlans.length === 0) {
+            html += this.renderEmptyState();
+        } else {
+            html += this.state.workoutPlans.map(plan => this.renderPlanCard(plan)).join('');
         }
+        
+        content.innerHTML = html;
     }
 
     renderImportCard() {
@@ -1410,42 +1134,22 @@ class JSFitStudentApp {
     }
 
     renderPlanCard(plan) {
-        try {
-            if (!plan || typeof plan !== 'object') {
-                console.warn('Invalid plan object:', plan);
-                return '';
-            }
+        const student = plan.aluno || {};
+        const age = this.calculateAge(student.dataNascimento) || student.idade;
+        const completedWorkouts = plan.treinos.filter(t => t.concluido).length;
+        const totalWorkouts = plan.treinos.length;
+        const totalExecutions = plan.treinos.reduce((sum, t) => sum + t.execucoes, 0);
 
-            const student = plan.aluno || {};
-            const age = this.calculateAge(student.dataNascimento) || student.idade;
-            const treinos = Array.isArray(plan.treinos) ? plan.treinos : [];
-            const completedWorkouts = treinos.filter(t => t.concluido).length;
-            const totalWorkouts = treinos.length;
-            const totalExecutions = treinos.reduce((sum, t) => sum + (t.execucoes || 0), 0);
-            const hasTechniques = plan.tecnicas_aplicadas && Object.keys(plan.tecnicas_aplicadas).length > 0;
-
-            return `
-                <div class="card plan-card">
-                    <div class="card-content">
-                        ${student.nome ? this.renderStudentInfo(student, age, plan.perfil) : ''}
-                        ${this.renderPlanInfo(plan, completedWorkouts, totalWorkouts, totalExecutions, hasTechniques)}
-                        ${this.renderWorkoutGrid(treinos)}
-                        ${this.renderPlanActions(plan.id)}
-                    </div>
+        return `
+            <div class="card plan-card">
+                <div class="card-content">
+                    ${student.nome ? this.renderStudentInfo(student, age, plan.perfil) : ''}
+                    ${this.renderPlanInfo(plan, completedWorkouts, totalWorkouts, totalExecutions)}
+                    ${this.renderWorkoutGrid(plan.treinos)}
+                    ${this.renderPlanActions(plan.id)}
                 </div>
-            `;
-        } catch (error) {
-            console.error('Error rendering plan card:', error);
-            return `
-                <div class="card">
-                    <div class="card-content">
-                        <h3>Erro no plano</h3>
-                        <p>Não foi possível carregar este plano.</p>
-                        <button onclick="app.deletePlan(${plan?.id})" class="btn btn-danger">Remover</button>
-                    </div>
-                </div>
-            `;
-        }
+            </div>
+        `;
     }
 
     renderStudentInfo(student, age, perfil) {
@@ -1480,15 +1184,15 @@ class JSFitStudentApp {
         `;
     }
 
-    renderPlanInfo(plan, completedWorkouts, totalWorkouts, totalExecutions, hasTechniques) {
+    renderPlanInfo(plan, completedWorkouts, totalWorkouts, totalExecutions) {
         return `
             <div class="plan-info-card">
                 <div class="plan-header">
-                    <h3 class="plan-title">${plan.nome || 'Plano sem nome'}</h3>
+                    <h3 class="plan-title">${plan.nome}</h3>
                     <div class="plan-period">
                         ${this.formatDate(plan.dataInicio)} - ${this.formatDate(plan.dataFim)}
                     </div>
-                    ${plan.originalShareId || plan.importedFrom || hasTechniques ? `
+                    ${plan.originalShareId || plan.importedFrom ? `
                         <div class="plan-badges">
                             ${plan.originalShareId ? `<span class="badge badge-id">ID: ${plan.originalShareId}</span>` : ''}
                             ${plan.importedFrom ? `
@@ -1497,11 +1201,6 @@ class JSFitStudentApp {
                                       plan.importedFrom === 'file' ? '📁 Arquivo' : 
                                       plan.importedFrom === 'example' ? '📋 Exemplo' : 
                                       plan.importedFrom === 'legacy' ? '📜 Legado' : '💾 Cache'}
-                                </span>
-                            ` : ''}
-                            ${hasTechniques ? `
-                                <span class="badge badge-techniques" onclick="app.showTechniquesModal()" style="cursor: pointer;">
-                                    🎯 Técnicas Avançadas
                                 </span>
                             ` : ''}
                         </div>
@@ -1531,19 +1230,6 @@ class JSFitStudentApp {
     }
 
     renderWorkoutGrid(treinos) {
-        if (!Array.isArray(treinos) || treinos.length === 0) {
-            return `
-                <div class="workout-grid">
-                    <div class="workout-item">
-                        <div class="workout-name">Nenhum treino encontrado</div>
-                        <div class="workout-details">
-                            <span class="workout-status not-started">Plano vazio</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
         return `
             <div class="workout-grid">
                 ${treinos.map(treino => this.renderWorkoutItem(treino)).join('')}
@@ -1552,15 +1238,14 @@ class JSFitStudentApp {
     }
 
     renderWorkoutItem(treino) {
-        const exercicios = Array.isArray(treino.exercicios) ? treino.exercicios : [];
-        const progress = exercicios.length > 0 ? 
-            (exercicios.filter(ex => ex.concluido).length / exercicios.length) * 100 : 0;
+        const progress = treino.exercicios.length > 0 ? 
+            (treino.exercicios.filter(ex => ex.concluido).length / treino.exercicios.length) * 100 : 0;
         
         return `
             <div class="workout-item ${treino.concluido ? 'completed' : ''}">
-                <div class="workout-name">${treino.nome || 'Treino'}</div>
+                <div class="workout-name">${treino.nome}</div>
                 <div class="workout-details">
-                    <span class="execution-count ${treino.concluido ? 'completed' : ''}">${treino.execucoes || 0}x</span>
+                    <span class="execution-count ${treino.concluido ? 'completed' : ''}">${treino.execucoes}x</span>
                     <div class="workout-status ${this.getWorkoutStatusClass(treino.concluido, progress)}">
                         ${this.getWorkoutStatusText(treino.concluido, progress)}
                     </div>
@@ -1616,12 +1301,10 @@ class JSFitStudentApp {
         if (!content) return;
 
         const plan = this.state.currentPlan;
-        const treinos = Array.isArray(plan.treinos) ? plan.treinos : [];
-        const completedWorkouts = treinos.filter(t => t.concluido).length;
-        const totalWorkouts = treinos.length;
+        const completedWorkouts = plan.treinos.filter(t => t.concluido).length;
+        const totalWorkouts = plan.treinos.length;
         const cycleProgress = totalWorkouts > 0 ? (completedWorkouts / totalWorkouts) * 100 : 0;
-        const totalExecutions = treinos.reduce((sum, t) => sum + (t.execucoes || 0), 0);
-        const hasTechniques = plan.tecnicas_aplicadas && Object.keys(plan.tecnicas_aplicadas).length > 0;
+        const totalExecutions = plan.treinos.reduce((sum, t) => sum + t.execucoes, 0);
 
         let html = '';
 
@@ -1631,7 +1314,7 @@ class JSFitStudentApp {
             html += this.renderStudentInfo(plan.aluno, age, plan.perfil);
         }
 
-        // Plan cycle information with techniques button
+        // Plan cycle information
         html += `
             <div class="plan-cycle-info">
                 <div class="cycle-counter">${plan.execucoesPlanCompleto || 0}</div>
@@ -1648,18 +1331,11 @@ class JSFitStudentApp {
                 <div class="total-executions">
                     Total de treinos executados: ${totalExecutions}
                 </div>
-                ${hasTechniques ? `
-                    <div class="techniques-button-container">
-                        <button onclick="app.showTechniquesModal()" class="btn btn-secondary techniques-btn">
-                            🎯 Ver Técnicas Aplicadas (${Object.keys(plan.tecnicas_aplicadas).length})
-                        </button>
-                    </div>
-                ` : ''}
             </div>
         `;
 
         // Workout cards
-        html += treinos.map(treino => this.renderWorkoutCard(treino, plan.id)).join('');
+        html += plan.treinos.map(treino => this.renderWorkoutCard(treino, plan.id)).join('');
 
         // Plan observations
         if (plan.observacoes && Object.keys(plan.observacoes).length > 0) {
@@ -1672,9 +1348,8 @@ class JSFitStudentApp {
     renderWorkoutCard(treino, planId) {
         const sessionKey = `${planId}-${treino.id}`;
         const isActive = this.state.activeWorkoutSessions.has(sessionKey);
-        const exercicios = Array.isArray(treino.exercicios) ? treino.exercicios : [];
-        const completedExercises = exercicios.filter(ex => ex.concluido).length;
-        const totalExercises = exercicios.length;
+        const completedExercises = treino.exercicios.filter(ex => ex.concluido).length;
+        const totalExercises = treino.exercicios.length;
         const workoutProgress = totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0;
         const isCompleted = treino.concluido;
         
@@ -1694,7 +1369,7 @@ class JSFitStudentApp {
                                 ` : ''}
                             </div>
                             <p class="workout-subtitle">
-                                ${treino.foco} • ${totalExercises} exercícios • Executado ${treino.execucoes || 0}x
+                                ${treino.foco} • ${totalExercises} exercícios • Executado ${treino.execucoes}x
                             </p>
                             ${isActive ? '<div class="active-workout">Treino em andamento</div>' : ''}
                             
@@ -1766,8 +1441,7 @@ class JSFitStudentApp {
         
         if (workoutTitle) workoutTitle.textContent = this.state.currentWorkout.nome;
         if (workoutSubtitle) {
-            const exercicios = Array.isArray(this.state.currentWorkout.exercicios) ? this.state.currentWorkout.exercicios : [];
-            workoutSubtitle.textContent = `${exercicios.length} exercícios • ${this.state.currentWorkout.foco}`;
+            workoutSubtitle.textContent = `${this.state.currentWorkout.exercicios.length} exercícios • ${this.state.currentWorkout.foco}`;
         }
 
         const content = document.getElementById('workoutContent');
@@ -1788,9 +1462,8 @@ class JSFitStudentApp {
             `;
         }
 
-        // Exercise cards with techniques support
-        const exercicios = Array.isArray(this.state.currentWorkout.exercicios) ? this.state.currentWorkout.exercicios : [];
-        html += exercicios.map((exercicio, index) => 
+        // Exercise cards
+        html += this.state.currentWorkout.exercicios.map((exercicio, index) => 
             this.renderExerciseCard(exercicio, index, isWorkoutActive)
         ).join('');
 
@@ -1808,67 +1481,152 @@ class JSFitStudentApp {
             ? (exercicio.concluido ? 'completed' : 'pending')
             : 'disabled';
         
+        // Buscar descrição da técnica se houver
+        const tecnicaDescricao = exercicio.tecnica && this.state.currentPlan?.tecnicasAplicadas
+            ? this.state.currentPlan.tecnicasAplicadas[exercicio.tecnica]
+            : '';
+        
         return `
             <div class="card exercise-card ${cardClass}">
                 <div class="card-content">
+                    <!-- CABEÇALHO DO EXERCÍCIO -->
                     <div class="exercise-header">
                         <div class="exercise-main">
-                            <h3 class="exercise-number">${index + 1}. ${exercicio.nome}</h3>
-                            <p class="exercise-description">${exercicio.descricao || 'Sem descrição'}</p>
+                            <div class="exercise-title-row">
+                                <h3 class="exercise-number">${index + 1}. ${exercicio.nome}</h3>
+                                ${exercicio.concluido && isWorkoutActive ? `
+                                    <div class="check-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="m9 12 2 2 4-4"/>
+                                        </svg>
+                                    </div>
+                                ` : ''}
+                            </div>
                             
-                            ${exercicio.tecnica ? `
-                                <div class="exercise-technique-display" onclick="app.showExerciseTechniqueModal('${exercicio.nome}', '${exercicio.tecnica}')">
-                                    <span class="technique-label">🎯 Técnica:</span>
-                                    <span class="technique-name">${this.getTechniqueDisplayName(exercicio.tecnica)}</span>
-                                    <span class="technique-info-btn">ℹ️</span>
+                            <!-- DESCRIÇÃO COMPLETA -->
+                            ${exercicio.descricao ? `
+                                <div class="exercise-description">
+                                    <div class="description-label">📝 Descrição:</div>
+                                    <div class="description-text">${exercicio.descricao}</div>
                                 </div>
                             ` : ''}
                             
+                            <!-- TÉCNICA APLICADA -->
+                            ${exercicio.tecnica ? `
+                                <div class="exercise-technique">
+                                    <div class="technique-header">
+                                        <span class="technique-badge" data-technique="${exercicio.tecnica}">
+                                            ${this.formatTechniqueName(exercicio.tecnica)}
+                                        </span>
+                                    </div>
+                                    ${tecnicaDescricao ? `
+                                        <div class="technique-description">
+                                            <strong>Como executar:</strong> ${tecnicaDescricao}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            ` : ''}
+                            
+                            <!-- OBSERVAÇÕES ESPECIAIS -->
                             ${exercicio.observacoesEspeciais ? `
                                 <div class="exercise-notes">
-                                    💡 ${exercicio.observacoesEspeciais}
+                                    <div class="notes-icon">💡</div>
+                                    <div class="notes-content">
+                                        <div class="notes-label">Observações Especiais:</div>
+                                        <div class="notes-text">${exercicio.observacoesEspeciais}</div>
+                                    </div>
                                 </div>
                             ` : ''}
                         </div>
-                        ${exercicio.concluido && isWorkoutActive ? `
-                            <div class="check-icon">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="m9 12 2 2 4-4"/>
-                                </svg>
+                    </div>
+                    
+                    <!-- ESPECIFICAÇÕES DETALHADAS -->
+                    <div class="exercise-specs-detailed">
+                        <div class="specs-grid">
+                            <div class="spec-item">
+                                <div class="spec-icon">🔢</div>
+                                <div class="spec-content">
+                                    <div class="spec-label">Séries</div>
+                                    <div class="spec-value">${exercicio.series}</div>
+                                </div>
                             </div>
-                        ` : ''}
+                            
+                            <div class="spec-item">
+                                <div class="spec-icon">🔄</div>
+                                <div class="spec-content">
+                                    <div class="spec-label">Repetições</div>
+                                    <div class="spec-value">${exercicio.repeticoes}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="spec-item">
+                                <div class="spec-icon">⚖️</div>
+                                <div class="spec-content">
+                                    <div class="spec-label">Carga Atual</div>
+                                    <div class="spec-value highlight">${exercicio.currentCarga}</div>
+                                    ${exercicio.currentCarga !== exercicio.carga ? `
+                                        <div class="spec-original">Original: ${exercicio.carga}</div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            
+                            ${exercicio.descanso && exercicio.descanso !== '0' ? `
+                            <div class="spec-item">
+                                <div class="spec-icon">⏱️</div>
+                                <div class="spec-content">
+                                    <div class="spec-label">Descanso</div>
+                                    <div class="spec-value">${exercicio.descanso}</div>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
                     </div>
                     
-                    <div class="exercise-specs-grid">
-                        <div class="spec-badge">
-                            <div class="spec-label">Séries</div>
-                            <div class="spec-value">${exercicio.series}</div>
-                        </div>
-                        <div class="spec-badge">
-                            <div class="spec-label">Reps</div>
-                            <div class="spec-value">${exercicio.repeticoes}</div>
-                        </div>
-                        <div class="spec-badge">
-                            <div class="spec-label">Carga</div>
-                            <div class="spec-value">${exercicio.currentCarga}</div>
-                        </div>
-                        ${exercicio.descanso && exercicio.descanso !== '0' ? `
-                        <div class="spec-badge">
-                            <div class="spec-label">Descanso</div>
-                            <div class="spec-value">${exercicio.descanso}</div>
-                        </div>` : ''}
-                    </div>
+                    <!-- HISTÓRICO DE CARGA (se disponível) -->
+                    ${this.renderWeightHistory(exercicio)}
                     
-                    ${exercicio.currentCarga !== exercicio.carga ? `
-                        <div class="current-weight">
-                            Carga original: ${exercicio.carga}
-                        </div>
-                    ` : ''}
-                    
+                    <!-- AÇÕES DO EXERCÍCIO -->
                     ${isEditing ? this.renderWeightEditForm(exercicio) : this.renderExerciseActions(exercicio, isWorkoutActive)}
                 </div>
             </div>
         `;
+    }
+    
+    // =============================================================================
+    // FUNÇÕES AUXILIARES NOVAS
+    // =============================================================================
+    
+    // Formatar nome da técnica para exibição
+    formatTechniqueName(tecnica) {
+        const nomes = {
+            'tempo-controlado': 'Tempo Controlado',
+            'bi-set': 'Bi-Set',
+            'pre-exaustao': 'Pré-Exaustão',
+            'pos-exaustao': 'Pós-Exaustão',
+            'drop-set': 'Drop Set',
+            'rest-pause': 'Rest-Pause',
+            'superset': 'Superset',
+            'cluster': 'Cluster Set'
+        };
+        return nomes[tecnica] || tecnica.charAt(0).toUpperCase() + tecnica.slice(1);
+    }
+    
+    // Renderizar histórico de mudanças de carga (futuro)
+    renderWeightHistory(exercicio) {
+        // Se no futuro quiser mostrar histórico de cargas
+        if (exercicio.historicoCargas && exercicio.historicoCargas.length > 0) {
+            return `
+                <div class="weight-history">
+                    <div class="history-label">📈 Histórico de Cargas:</div>
+                    <div class="history-items">
+                        ${exercicio.historicoCargas.slice(-3).map(item => `
+                            <span class="history-item">${item.data}: ${item.carga}</span>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        return '';
     }
 
     renderWeightEditForm(exercicio) {
@@ -1917,10 +1675,9 @@ class JSFitStudentApp {
     }
 
     renderWorkoutCompletionCard() {
-        const exercicios = Array.isArray(this.state.currentWorkout.exercicios) ? this.state.currentWorkout.exercicios : [];
-        const allCompleted = exercicios.every(ex => ex.concluido);
-        const completedCount = exercicios.filter(ex => ex.concluido).length;
-        const totalCount = exercicios.length;
+        const allCompleted = this.state.currentWorkout.exercicios.every(ex => ex.concluido);
+        const completedCount = this.state.currentWorkout.exercicios.filter(ex => ex.concluido).length;
+        const totalCount = this.state.currentWorkout.exercicios.length;
         
         return `
             <div class="card completion-card">
@@ -1939,7 +1696,6 @@ class JSFitStudentApp {
             </div>
         `;
     }
-
     // =============================================================================
     // UTILITY METHODS
     // =============================================================================
@@ -2129,9 +1885,7 @@ class JSFitStudentApp {
                             descanso: "0",
                             descricao: "Caminhada em ritmo moderado para aquecimento geral",
                             concluido: false,
-                            currentCarga: "Ritmo moderado",
-                            observacoesEspeciais: "",
-                            tecnica: ""
+                            currentCarga: "Ritmo moderado"
                         },
                         {
                             id: this.generateId(),
@@ -2142,9 +1896,7 @@ class JSFitStudentApp {
                             descanso: "90 segundos",
                             descricao: "Movimento básico fundamental, mantenha as costas retas",
                             concluido: false,
-                            currentCarga: "Peso corporal",
-                            observacoesEspeciais: "Desça até a coxa ficar paralela ao chão",
-                            tecnica: "tempo-controlado"
+                            currentCarga: "Peso corporal"
                         },
                         {
                             id: this.generateId(),
@@ -2155,9 +1907,7 @@ class JSFitStudentApp {
                             descanso: "90 segundos",
                             descricao: "Pode ser feito com joelhos apoiados se necessário",
                             concluido: false,
-                            currentCarga: "Peso corporal",
-                            observacoesEspeciais: "Se não conseguir, apoie os joelhos no chão",
-                            tecnica: ""
+                            currentCarga: "Peso corporal"
                         },
                         {
                             id: this.generateId(),
@@ -2168,5 +1918,109 @@ class JSFitStudentApp {
                             descanso: "60 segundos",
                             descricao: "Mantenha o corpo alinhado, contraindo o abdômen",
                             concluido: false,
-                            currentCarga: "Peso corporal",
-                            observacoesEspec
+                            currentCarga: "Peso corporal"
+                        }
+                    ],
+                    concluido: false,
+                    execucoes: 0
+                },
+                {
+                    id: "B",
+                    nome: "B - Cardio e Core",
+                    foco: "Condicionamento cardiovascular e fortalecimento do core",
+                    exercicios: [
+                        {
+                            id: this.generateId(),
+                            nome: "Aquecimento - Bicicleta",
+                            series: 1,
+                            repeticoes: "8 min",
+                            carga: "Resistência leve",
+                            descanso: "0",
+                            descricao: "Pedalada em ritmo moderado para aquecimento",
+                            concluido: false,
+                            currentCarga: "Resistência leve"
+                        },
+                        {
+                            id: this.generateId(),
+                            nome: "Burpee",
+                            series: 3,
+                            repeticoes: "5-8",
+                            carga: "Peso corporal",
+                            descanso: "90 segundos",
+                            descricao: "Exercício completo: agachamento, prancha, flexão e salto",
+                            concluido: false,
+                            currentCarga: "Peso corporal"
+                        },
+                        {
+                            id: this.generateId(),
+                            nome: "Mountain Climber",
+                            series: 3,
+                            repeticoes: "30 seg",
+                            carga: "Peso corporal",
+                            descanso: "60 segundos",
+                            descricao: "Posição de prancha, alternando joelhos ao peito rapidamente",
+                            concluido: false,
+                            currentCarga: "Peso corporal"
+                        }
+                    ],
+                    concluido: false,
+                    execucoes: 0
+                }
+            ],
+            observacoes: {
+                frequencia: "3x por semana com 1 dia de descanso entre sessões",
+                progressao: "Aumente as repetições gradualmente antes de adicionar peso",
+                descanso: "90 segundos entre séries",
+                hidratacao: "Beba água antes, durante e após o treino"
+            },
+            execucoesPlanCompleto: 0
+        };
+
+        this.state.workoutPlans.push(examplePlan);
+        this.saveToStorage();
+        this.renderHome();
+        this.showNotification('Plano de exemplo carregado!', 'success');
+    }
+}
+
+// =============================================================================
+// GLOBAL INITIALIZATION AND NAVIGATION FUNCTIONS
+// =============================================================================
+
+let app;
+
+// Initialize app when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    app = new JSFitStudentApp();
+});
+
+// Also initialize on window load as fallback
+window.addEventListener('load', () => {
+    if (!app) {
+        app = new JSFitStudentApp();
+    }
+});
+
+// Global navigation functions for onclick handlers
+function showHome() {
+    if (app) app.showHome();
+}
+
+function showPlan() {
+    if (app && app.state.currentPlan) app.showPlan(app.state.currentPlan.id);
+}
+
+function hideConfirmation() {
+    const modal = document.getElementById('confirmationModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+function hideSuccessModal() {
+    const modal = document.getElementById('successModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+function hideErrorModal() {
+    const modal = document.getElementById('errorModal');
+    if (modal) modal.classList.add('hidden');
+}
