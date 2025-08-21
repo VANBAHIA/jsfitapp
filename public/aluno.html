@@ -101,26 +101,6 @@
             height: 14px;
             opacity: 0.8;
         }
-        
-        /* Hide import elements */
-        #fileUploadModal,
-        .import-related,
-        [data-import="true"] {
-            display: none !important;
-        }
-        
-        /* Enhanced header styling */
-        .header {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
-        }
-        
-        .title {
-            background: linear-gradient(45deg, #ffffff, #e0e7ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
     </style>
 </head>
 <body>
@@ -260,6 +240,64 @@
             </div>
         </div>
     </div>
+    <!-- File Upload Modal -->
+<div id="fileUploadModal" class="modal-overlay hidden">
+    <div class="modal">
+        <h3 class="modal-title">📁 Importar Arquivo JSON</h3>
+        <p class="modal-message">
+            Selecione o arquivo JSON fornecido pelo seu personal trainer
+        </p>
+        
+        <div id="fileUploadArea" class="file-upload-area" style="
+            border: 2px dashed #ccc;
+            padding: 40px 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        ">
+            <input type="file" id="fileInput" accept=".json" style="display: none;">
+            <div class="upload-icon" style="font-size: 48px; margin-bottom: 10px;">📄</div>
+            <p>Clique aqui ou arraste um arquivo JSON</p>
+            <small style="color: #666;">Máximo 10MB</small>
+        </div>
+        
+        <div id="fileInfo" class="file-info hidden" style="
+            background: #f0f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #0ea5e9;
+        ">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 20px;">📄</span>
+                <div>
+                    <div class="file-name" style="font-weight: 600;"></div>
+                    <div class="file-size" style="font-size: 14px; color: #666;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="fileError" class="file-error hidden" style="
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #fca5a5;
+        ">
+            Erro no arquivo
+        </div>
+        
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="app.hideFileUploadModal()">Cancelar</button>
+            <button id="importFileBtn" class="btn btn-primary" disabled onclick="app.handleFileImport()">
+                📥 Importar Arquivo
+            </button>
+        </div>
+    </div>
+</div>
 
     <!-- File Upload Modal - HIDDEN -->
     <!-- 
