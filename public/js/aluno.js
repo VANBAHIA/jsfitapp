@@ -1062,16 +1062,16 @@ class JSFitStudentApp {
                     <h3 class="import-title">
                         🔗 Importar Treino
                     </h3>
-                    <div class="server-status ${isOnline ? 'online' : 'offline'}">
-                        ${isOnline ? 
-                            '🟢 Servidor online - Buscará do servidor' : 
-                            '🟡 Servidor offline - Usando cache local'
-                        }
-                    </div>
                     
                     <!-- Import by ID section -->
-                    <div class="import-section">
-                        <h4 class="import-method-title">Por ID do Servidor</h4>
+                    <div class="import-section1">
+                        <div class="server-status ${isOnline ? 'online' : 'offline'}">
+                            ${isOnline ? 
+                                '🟢 Servidor online - Buscará do servidor' : 
+                                '🟡 Servidor offline - Usando cache local'
+                            }
+                        </div>
+                            <h4 class="import-method-title">Por ID do Servidor</h4>
                         <div class="import-form">
                             <input type="text" id="importIdInput" class="import-input" 
                                    placeholder="Digite o ID (6 caracteres)" 
@@ -1098,7 +1098,6 @@ class JSFitStudentApp {
                         <div class="import-divider">
                             <span>OU</span>
                         </div>
-                        <h4 class="import-method-title">Por Arquivo JSON</h4>
                         <button class="btn btn-secondary import-file-btn" onclick="app.showFileUploadModal()">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>

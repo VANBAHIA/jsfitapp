@@ -332,7 +332,7 @@ body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: var(--space-6);
+    padding: var(--space-1);
     min-height: 100vh;
 }
 
@@ -470,7 +470,7 @@ body {
 
 .content {
     flex: 1;
-    padding: var(--space-6);
+    padding: var(--space-1);
     padding-bottom: calc(var(--space-6) + var(--safe-area-inset-bottom));
 }
 
@@ -711,7 +711,7 @@ body {
 .card {
     background: var(--bg-secondary);
     border-radius: var(--radius-2xl);
-    padding: var(--space-6);
+    padding: var(--space-1);
     border: 1px solid var(--border-light);
     box-shadow: var(--shadow-sm);
     transition: all var(--transition-base);
@@ -755,7 +755,7 @@ body {
     background: var(--gradient-primary);
     color: var(--text-inverse);
     border-radius: var(--radius-2xl);
-    padding: var(--space-6);
+    padding: var(--space-1);
     margin-bottom: var(--space-6);
     box-shadow: var(--shadow-xl);
     position: relative;
@@ -860,7 +860,7 @@ body {
 .plan-info-card {
     background: var(--bg-secondary);
     border-radius: var(--radius-2xl);
-    padding: var(--space-6);
+    padding: var(--space-1);
     margin-bottom: var(--space-6);
     border: 2px solid var(--border-light);
     box-shadow: var(--shadow-lg);
@@ -2043,7 +2043,7 @@ body {
 .plan-observations {
     background: var(--bg-tertiary);
     border-radius: var(--radius-xl);
-    padding: var(--space-6);
+    padding: var(--space-1);
     margin-top: var(--space-6);
     border: 1px solid var(--border-light);
     position: relative;
@@ -2265,7 +2265,7 @@ body {
 .plan-card {
     background: var(--bg-secondary);
     border-radius: var(--radius-2xl);
-    padding: var(--space-6);
+    padding: var(--space-1);
     border: 2px solid var(--border-light);
     position: relative;
     margin-bottom: var(--space-6);
@@ -2344,11 +2344,11 @@ body {
     .modal {
         width: 95vw;
         max-width: none;
-        padding: var(--space-6);
+        padding: var(--space-1);
     }
     
     .file-upload-area {
-        padding: var(--space-6) var(--space-4);
+        padding: var(--space-1) var(--space-4);
         min-height: 160px;
     }
     
@@ -2425,7 +2425,7 @@ body {
     }
     
     .container .header {
-        padding: var(--space-6);
+        padding: var(--space-1);
         margin-bottom: var(--space-6);
     }
     
@@ -2693,7 +2693,7 @@ body {
 .p-3 { padding: var(--space-3); }
 .p-4 { padding: var(--space-4); }
 .p-5 { padding: var(--space-5); }
-.p-6 { padding: var(--space-6); }
+.p-6 { padding: var(--space-1); }
 .p-8 { padding: var(--space-8); }
 
 /* Border Radius */
@@ -3046,11 +3046,11 @@ body {
     }
     
     .plan-cycle-info {
-        padding: var(--space-6);
+        padding: var(--space-1);
     }
     
     .container .header {
-        padding: var(--space-6);
+        padding: var(--space-1);
         margin-bottom: var(--space-6);
     }
     
@@ -3446,6 +3446,13 @@ body {
         flex-direction: column;
         gap: 8px;
     }
+}
+
+.import-section1 {
+    display: none;
+}
+.import-divider {
+    display: none;
 }
 
 /* =============================================================================
