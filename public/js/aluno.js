@@ -107,9 +107,9 @@ class JSFitStudentApp {
                     { codigo: 'TRI039', nome: 'Mergulho no Banco', gif: 'images/161.gif' }
                 ],
                 intermediario: [
-                    { codigo: 'TRE040', nome: 'Tríceps Francês', gif: 'images/119.gif' },
-                    { codigo: 'TRE041', nome: 'Tríceps Corda', gif: 'images/120.gif' },
-                    { codigo: 'TRE042', nome: 'Supino Fechado', gif: 'images/161.gif' }
+                    { codigo: 'TRE040', nome: 'Tríceps Francês', gif: 'images/113.gif' },
+                    { codigo: 'TRE041', nome: 'Tríceps Corda', gif: 'images/126.gif' },
+                    { codigo: 'TRE042', nome: 'Supino Fechado', gif: 'images/118.gif' }
                 ],
                 avancado: [
                     { codigo: 'TRA043', nome: 'Tríceps Francês com Halter', gif: 'images/119.gif' },
