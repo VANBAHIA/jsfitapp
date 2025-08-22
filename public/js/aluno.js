@@ -29,6 +29,143 @@ class JSFitStudentApp {
 
         // Initialize app
         this.init();
+
+        // NOVA: Base de dados de exercícios integrada
+        this.exerciseDatabase = {
+            peito: {
+                iniciante: [
+                    { codigo: 'PEI001', nome: 'Flexão de Braços', gif: 'images/56.gif' },
+                    { codigo: 'PEI002', nome: 'Supino com Halteres', gif: 'images/104.gif' },
+                    { codigo: 'PEI003', nome: 'Crucifixo com Halteres', gif: 'images/38.gif' }
+                ],
+                intermediario: [
+                    { codigo: 'PEE004', nome: 'Supino Reto com Barra', gif: 'images/106.gif' },
+                    { codigo: 'PEE005', nome: 'Supino Inclinado', gif: 'images/107.gif' },
+                    { codigo: 'PEE006', nome: 'Crossover', gif: 'images/34.gif' }
+                ],
+                avancado: [
+                    { codigo: 'PEA007', nome: 'Supino Reto com Barra', gif: 'images/106.gif' },
+                    { codigo: 'PEA008', nome: 'Supino Inclinado com Halteres', gif: 'images/105.gif' },
+                    { codigo: 'PEA009', nome: 'Mergulho em Paralelas', gif: 'images/161.gif' }
+                ]
+            },
+            costas: {
+                iniciante: [
+                    { codigo: 'COI010', nome: 'Puxada Frontal', gif: 'images/85.gif' },
+                    { codigo: 'COI011', nome: 'Remada Baixa', gif: 'images/251.gif' },
+                    { codigo: 'COI012', nome: 'Remada com Halter', gif: 'images/97.gif' }
+                ],
+                intermediario: [
+                    { codigo: 'COE013', nome: 'Puxada Frontal', gif: 'images/85.gif' },
+                    { codigo: 'COE014', nome: 'Remada Curvada', gif: 'images/93.gif' },
+                    { codigo: 'COE015', nome: 'Pullover', gif: 'images/86.gif' }
+                ],
+                avancado: [
+                    { codigo: 'COA016', nome: 'Barra Fixa', gif: 'images/29.gif' },
+                    { codigo: 'COA017', nome: 'Remada T-Bar', gif: 'images/93.gif' },
+                    { codigo: 'COA018', nome: 'Levantamento Terra', gif: 'images/_terra.gif' }
+                ]
+            },
+            ombros: {
+                iniciante: [
+                    { codigo: 'OMI019', nome: 'Desenvolvimento com Halteres', gif: 'images/42.gif' },
+                    { codigo: 'OMI020', nome: 'Elevação Lateral', gif: 'images/52.gif' },
+                    { codigo: 'OMI021', nome: 'Elevação Frontal', gif: 'images/51.gif' }
+                ],
+                intermediario: [
+                    { codigo: 'OME022', nome: 'Desenvolvimento com Barra', gif: 'images/40.gif' },
+                    { codigo: 'OME023', nome: 'Elevação Lateral', gif: 'images/52.gif' },
+                    { codigo: 'OME024', nome: 'Elevação Posterior', gif: 'images/36.gif' }
+                ],
+                avancado: [
+                    { codigo: 'OMA025', nome: 'Desenvolvimento Arnold', gif: 'images/42.gif' },
+                    { codigo: 'OMA026', nome: 'Elevação Lateral 21', gif: 'images/52.gif' },
+                    { codigo: 'OMA027', nome: 'Face Pull', gif: 'images/36.gif' }
+                ]
+            },
+            biceps: {
+                iniciante: [
+                    { codigo: 'BII028', nome: 'Rosca Direta', gif: 'images/102.gif' },
+                    { codigo: 'BII029', nome: 'Rosca Alternada', gif: 'images/98.gif' },
+                    { codigo: 'BII030', nome: 'Rosca Martelo', gif: 'images/99.gif' }
+                ],
+                intermediario: [
+                    { codigo: 'BIE031', nome: 'Rosca Direta', gif: 'images/102.gif' },
+                    { codigo: 'BIE032', nome: 'Rosca Scott', gif: 'images/103.gif' },
+                    { codigo: 'BIE033', nome: 'Rosca 21', gif: 'images/102.gif' }
+                ],
+                avancado: [
+                    { codigo: 'BIA034', nome: 'Rosca Direta Pegada Fechada', gif: 'images/102.gif' },
+                    { codigo: 'BIA035', nome: 'Rosca Spider', gif: 'images/103.gif' },
+                    { codigo: 'BIA036', nome: 'Rosca Drag Curl', gif: 'images/102.gif' }
+                ]
+            },
+            triceps: {
+                iniciante: [
+                    { codigo: 'TRI037', nome: 'Tríceps Testa', gif: 'images/121.gif' },
+                    { codigo: 'TRI038', nome: 'Tríceps Pulley', gif: 'images/118.gif' },
+                    { codigo: 'TRI039', nome: 'Mergulho no Banco', gif: 'images/161.gif' }
+                ],
+                intermediario: [
+                    { codigo: 'TRE040', nome: 'Tríceps Francês', gif: 'images/119.gif' },
+                    { codigo: 'TRE041', nome: 'Tríceps Corda', gif: 'images/120.gif' },
+                    { codigo: 'TRE042', nome: 'Supino Fechado', gif: 'images/161.gif' }
+                ],
+                avancado: [
+                    { codigo: 'TRA043', nome: 'Tríceps Francês com Halter', gif: 'images/119.gif' },
+                    { codigo: 'TRA044', nome: 'Mergulho em Paralelas', gif: 'images/161.gif' },
+                    { codigo: 'TRA045', nome: 'JM Press', gif: 'images/161.gif' }
+                ]
+            },
+            quadriceps: {
+                iniciante: [
+                    { codigo: 'QUI046', nome: 'Agachamento Livre', gif: 'images/9.gif' },
+                    { codigo: 'QUI047', nome: 'Leg Press', gif: 'images/72.gif' },
+                    { codigo: 'QUI048', nome: 'Extensão de Pernas', gif: 'images/54.gif' }
+                ],
+                intermediario: [
+                    { codigo: 'QUE049', nome: 'Agachamento Livre', gif: 'images/9.gif' },
+                    { codigo: 'QUE050', nome: 'Leg Press 45°', gif: 'images/72.gif' },
+                    { codigo: 'QUE051', nome: 'Afundo', gif: 'images/6.gif' }
+                ],
+                avancado: [
+                    { codigo: 'QUA052', nome: 'Agachamento Livre', gif: 'images/9.gif' },
+                    { codigo: 'QUA053', nome: 'Agachamento Frontal', gif: 'images/10.gif' },
+                    { codigo: 'QUA054', nome: 'Agachamento Búlgaro', gif: 'images/8.gif' }
+                ]
+            },
+            posterior: {
+                iniciante: [
+                    { codigo: 'POI055', nome: 'Stiff', gif: 'images/115.gif' },
+                    { codigo: 'POI056', nome: 'Flexão de Pernas', gif: 'images/57.gif' },
+                    { codigo: 'POI057', nome: 'Elevação Pélvica', gif: 'images/_elevacao_pelvica.gif' }
+                ],
+                intermediario: [
+                    { codigo: 'POE058', nome: 'Stiff com Barra', gif: 'images/115.gif' },
+                    { codigo: 'POE059', nome: 'Mesa Flexora', gif: 'images/57.gif' },
+                    { codigo: 'POE060', nome: 'Good Morning', gif: 'images/71.gif' }
+                ],
+                avancado: [
+                    { codigo: 'POA061', nome: 'Levantamento Terra', gif: 'images/_terra.gif' },
+                    { codigo: 'POA062', nome: 'Stiff Unilateral', gif: 'images/115.gif' },
+                    { codigo: 'POA063', nome: 'Hip Thrust', gif: 'images/_hip_thrust.gif' }
+                ]
+            },
+            panturrilha: {
+                iniciante: [
+                    { codigo: 'PAI064', nome: 'Panturrilha Sentado', gif: 'images/81.gif' },
+                    { codigo: 'PAI065', nome: 'Panturrilha em Pé', gif: 'images/80.gif' }
+                ],
+                intermediario: [
+                    { codigo: 'PAE066', nome: 'Panturrilha Sentado', gif: 'images/81.gif' },
+                    { codigo: 'PAE067', nome: 'Panturrilha Leg Press', gif: 'images/72.gif' }
+                ],
+                avancado: [
+                    { codigo: 'PAA068', nome: 'Panturrilha Unilateral', gif: 'images/80.gif' },
+                    { codigo: 'PAA069', nome: 'Panturrilha com Pausa', gif: 'images/80.gif' }
+                ]
+            }
+        };
     }
 
     // =============================================================================
@@ -1571,13 +1708,30 @@ class JSFitStudentApp {
                             
                             ${exercicio.descanso && exercicio.descanso !== '0' ? `
                             <div class="spec-item">
-                                <div class="spec-icon">⏱️</div>
+                                <div class="spec-icon">ⱱ️</div>
                                 <div class="spec-content">
                                     <div class="spec-label">Descanso</div>
                                     <div class="spec-value">${exercicio.descanso}</div>
                                 </div>
                             </div>
                             ` : ''}
+                            
+                            <!-- NOVO: BOTÃO VER EXERCÍCIO -->
+                            <div class="spec-item view-exercise-item">
+                                <button onclick="app.showExerciseGif('${exercicio.nome.replace(/'/g, "\\'")}')" 
+                                        class="btn btn-view-exercise">
+                                    <div class="btn-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                    </div>
+                                    <div class="btn-text">
+                                        <div class="btn-label">Ver Exercício</div>
+                                        <div class="btn-subtitle">Demonstração</div>
+                                    </div>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     
@@ -1766,6 +1920,117 @@ class JSFitStudentApp {
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
         };
+    }
+
+    // =============================================================================
+    // EXERCISE GIF MANAGEMENT (NOVO)
+    // =============================================================================
+
+    // NOVA FUNÇÃO: Buscar GIF do exercício na base de dados
+    findExerciseGif(exerciseName) {
+        // Normalizar nome do exercício para busca
+        const normalizedName = exerciseName.trim().toLowerCase();
+        
+        // Buscar em todos os grupos musculares e níveis
+        for (const muscleGroup in this.exerciseDatabase) {
+            for (const level in this.exerciseDatabase[muscleGroup]) {
+                const exercises = this.exerciseDatabase[muscleGroup][level];
+                
+                for (const exercise of exercises) {
+                    if (exercise.nome.toLowerCase() === normalizedName) {
+                        return exercise.gif;
+                    }
+                }
+            }
+        }
+        
+        // Retornar null se não encontrou
+        return null;
+    }
+
+    // NOVA FUNÇÃO: Mostrar modal com GIF do exercício
+    showExerciseGif(exerciseName) {
+        const gifPath = this.findExerciseGif(exerciseName);
+        
+        // Criar modal se não existir
+        let modal = document.getElementById('exerciseGifModal');
+        if (!modal) {
+            modal = this.createExerciseGifModal();
+            document.body.appendChild(modal);
+        }
+        
+        // Atualizar conteúdo do modal
+        const exerciseNameEl = modal.querySelector('#exerciseGifName');
+        const exerciseImageEl = modal.querySelector('#exerciseGifImage');
+        const notFoundEl = modal.querySelector('#exerciseNotFound');
+        
+        exerciseNameEl.textContent = exerciseName;
+        
+        if (gifPath) {
+            exerciseImageEl.src = gifPath;
+            exerciseImageEl.style.display = 'block';
+            notFoundEl.style.display = 'none';
+            exerciseImageEl.onerror = () => {
+                exerciseImageEl.style.display = 'none';
+                notFoundEl.style.display = 'block';
+            };
+        } else {
+            exerciseImageEl.style.display = 'none';
+            notFoundEl.style.display = 'block';
+        }
+        
+        // Mostrar modal
+        modal.classList.remove('hidden');
+    }
+
+    // NOVA FUNÇÃO: Criar modal do GIF
+    createExerciseGifModal() {
+        const modal = document.createElement('div');
+        modal.id = 'exerciseGifModal';
+        modal.className = 'modal hidden';
+        modal.innerHTML = `
+            <div class="modal-overlay" onclick="app.hideExerciseGif()"></div>
+            <div class="modal-content exercise-gif-modal">
+                <div class="modal-header">
+                    <h3 id="exerciseGifName" class="modal-title">Nome do Exercício</h3>
+                    <button class="modal-close" onclick="app.hideExerciseGif()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m18 6-12 12"/>
+                            <path d="m6 6 12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="exercise-gif-container">
+                        <img id="exerciseGifImage" 
+                             class="exercise-gif" 
+                             alt="Demonstração do exercício"
+                             style="display: none;">
+                        <div id="exerciseNotFound" class="exercise-not-found" style="display: none;">
+                            <div class="not-found-icon">🚫</div>
+                            <div class="not-found-text">Exemplo não cadastrado</div>
+                            <div class="not-found-subtitle">
+                                A demonstração visual deste exercício não está disponível em nossa base de dados.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="app.hideExerciseGif()" class="btn btn-secondary">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        `;
+        return modal;
+    }
+
+    // NOVA FUNÇÃO: Esconder modal do GIF
+    hideExerciseGif() {
+        const modal = document.getElementById('exerciseGifModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
     }
 
     // =============================================================================
