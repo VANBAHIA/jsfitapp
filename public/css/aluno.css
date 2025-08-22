@@ -314,6 +314,96 @@ body {
     border: 0;
 }
 
+.app-branding {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    margin: var(--space-1);
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.app-branding::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(180deg); }
+}
+/* =============================================================================
+   TOPO FORMATAÇÃO
+   ============================================================================= */
+
+.app-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    position: relative;
+    z-index: 1;
+}
+
+.app-subtitle {
+    font-size: 16px;
+    margin: 0 0 16px 0;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+}
+
+.developer-info {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 12px 16px;
+    border: 1px solid rgba(255,255,255,0.2);
+    position: relative;
+    z-index: 1;
+}
+
+.developer-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.developer-contact {
+    font-size: 13px;
+    margin: 0;
+    opacity: 0.9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.developer-icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.8;
+}
+
+.phone-icon {
+    width: 14px;
+    height: 14px;
+    opacity: 0.8;
+}
+
 /* =============================================================================
    LAYOUT CONTAINERS
    ============================================================================= */
@@ -480,7 +570,7 @@ body {
     border-radius: var(--radius-3xl);
     padding: var(--space-8);
     box-shadow: var(--shadow-lg);
-    margin-bottom: var(--space-6);
+    margin-bottom: var(--space-2);
     border: 1px solid var(--border-light);
     position: relative;
     overflow: hidden;
@@ -728,7 +818,7 @@ body {
 .card-content {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+/*    gap: var(--space-4);*/
 }
 
 /* Card States */
@@ -756,7 +846,7 @@ body {
     color: var(--text-inverse);
     border-radius: var(--radius-2xl);
     padding: var(--space-1);
-    margin-bottom: var(--space-6);
+    margin-bottom: var(--space-2);
     box-shadow: var(--shadow-xl);
     position: relative;
     overflow: hidden;
@@ -861,7 +951,7 @@ body {
     background: var(--bg-secondary);
     border-radius: var(--radius-2xl);
     padding: var(--space-1);
-    margin-bottom: var(--space-6);
+  /*  margin-bottom: var(--space-6);*/
     border: 2px solid var(--border-light);
     box-shadow: var(--shadow-lg);
     transition: all var(--transition-base);
@@ -969,7 +1059,7 @@ body {
     color: var(--text-inverse);
     padding: var(--space-8);
     border-radius: var(--radius-2xl);
-    margin-bottom: var(--space-6);
+    margin-bottom: var(--space-2);
     text-align: center;
     box-shadow: var(--shadow-xl);
     position: relative;
@@ -1460,7 +1550,7 @@ body {
 .import-by-id-card {
     background: var(--gradient-success);
     color: var(--text-inverse);
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-2);
     box-shadow: var(--shadow-xl);
     position: relative;
     overflow: hidden;
