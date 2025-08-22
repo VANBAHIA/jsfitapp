@@ -1,3848 +1,2290 @@
-/* =============================================
-   JS FIT APP - CSS UNIFICADO MODERNO
-   Sistema de Design Elegante e Funcional
-   ============================================= */
+// aluno.js - JS Fit Student App - Complete with JSON File Upload
+// Sistema modernizado compatível com PostgreSQL e Netlify Functions
 
-/* =============================================================================
-   RESET E CONFIGURAÇÕES BASE
-   ============================================================================= */
+class JSFitStudentApp {
+    constructor() {
+        // API Configuration
+        this.config = {
+            apiBase: window.location.hostname === 'localhost' ? 
+                'http://localhost:8888/api' : 
+                'https://jsfitapp.netlify.app/api',
+            timeout: 10000,
+            retries: 3,
+            syncInterval: 30000
+        };
 
-*,
-*::before,
-*::after {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+        // App State
+        this.state = {
+            workoutPlans: [],
+            currentPlan: null,
+            currentWorkout: null,
+            activeWorkoutSessions: new Map(),
+            editingWeights: new Set(),
+            connectionStatus: 'unknown',
+            isOnline: navigator.onLine,
+            user: null,
+            token: null,
+            selectedFile: null
+        };
 
-/* =============================================================================
-   VARIÁVEIS CSS - DESIGN SYSTEM
-   ============================================================================= */
+        // Initialize app
+        this.init();
 
-:root {
-    /* ===== CORES PRIMÁRIAS ===== */
-    --primary-50: #f0f9ff;
-    --primary-100: #e0f2fe;
-    --primary-200: #bae6fd;
-    --primary-300: #7dd3fc;
-    --primary-400: #38bdf8;
-    --primary-500: #0ea5e9;
-    --primary-600: #0284c7;
-    --primary-700: #0369a1;
-    --primary-800: #075985;
-    --primary-900: #0c4a6e;
-    --primary: var(--primary-600);
-    --primary-color: var(--primary-600);
-    
-    /* ===== CORES DE ESTADO ===== */
-    --success: #10b981;
-    --success-50: #f0fdf4;
-    --success-100: #dcfce7;
-    --success-200: #bbf7d0;
-    --success-300: #86efac;
-    --success-400: #4ade80;
-    --success-500: #22c55e;
-    --success-600: #16a34a;
-    --success-700: #15803d;
-    --success-800: #166534;
-    --success-900: #14532d;
-    --success-bg: #f0fdf4;
-    --success-color: #059669;
-    --success-border: #bbf7d0;
-    
-    --warning: #f59e0b;
-    --warning-50: #fffbeb;
-    --warning-100: #fef3c7;
-    --warning-200: #fde68a;
-    --warning-300: #fcd34d;
-    --warning-400: #fbbf24;
-    --warning-500: #f59e0b;
-    --warning-600: #d97706;
-    --warning-700: #b45309;
-    --warning-800: #92400e;
-    --warning-900: #78350f;
-    
-    --error: #ef4444;
-    --error-50: #fef2f2;
-    --error-100: #fee2e2;
-    --error-200: #fecaca;
-    --error-300: #fca5a5;
-    --error-400: #f87171;
-    --error-500: #ef4444;
-    --error-600: #dc2626;
-    --error-700: #b91c1c;
-    --error-800: #991b1b;
-    --error-900: #7f1d1d;
-    --error-bg: #fef2f2;
-    --error-color: #dc2626;
-    --error-border: #fecaca;
-    
-    --info: #3b82f6;
-    --info-50: #eff6ff;
-    --info-100: #dbeafe;
-    --info-200: #bfdbfe;
-    --info-300: #93c5fd;
-    --info-400: #60a5fa;
-    --info-500: #3b82f6;
-    --info-600: #2563eb;
-    --info-700: #1d4ed8;
-    --info-800: #1e40af;
-    --info-900: #1e3a8a;
-    --info-bg: #eff6ff;
-    --info-color: #2563eb;
-    --info-border: #bfdbfe;
-    
-    /* ===== CORES SECUNDÁRIAS ===== */
-    --secondary-50: #f0fdf4;
-    --secondary-100: #dcfce7;
-    --secondary-200: #bbf7d0;
-    --secondary-300: #86efac;
-    --secondary-400: #4ade80;
-    --secondary-500: #22c55e;
-    --secondary-600: #16a34a;
-    --secondary-700: #15803d;
-    --secondary-800: #166534;
-    --secondary-900: #14532d;
-    --secondary: var(--secondary-600);
-    
-    /* ===== CORES NEUTRAS ===== */
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-300: #d1d5db;
-    --gray-400: #9ca3af;
-    --gray-500: #6b7280;
-    --gray-600: #4b5563;
-    --gray-700: #374151;
-    --gray-800: #1f2937;
-    --gray-900: #111827;
-    
-    /* ===== TEMA CLARO ===== */
-    --bg-primary: var(--gray-50);
-    --bg-secondary: #ffffff;
-    --bg-tertiary: var(--gray-100);
-    --bg-accent: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
-    
-    --text-primary: var(--gray-900);
-    --text-secondary: var(--gray-600);
-    --text-tertiary: var(--gray-500);
-    --text-inverse: #ffffff;
-    
-    --border-light: var(--gray-200);
-    --border-medium: var(--gray-300);
-    --border-strong: var(--gray-400);
-    --border-color: var(--gray-300);
-    
-    /* ===== GRADIENTES ===== */
-    --gradient-primary: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
-    --gradient-secondary: linear-gradient(135deg, var(--secondary-500) 0%, var(--secondary-700) 100%);
-    --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    --gradient-error: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    --gradient-ai: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-    --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.05) 100%);
-    
-    /* ===== SOMBRAS ===== */
-    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.4);
-    
-    /* ===== BORDER RADIUS ===== */
-    --radius-xs: 0.125rem; /* 2px */
-    --radius-sm: 0.25rem;  /* 4px */
-    --radius-md: 0.375rem; /* 6px */
-    --radius-lg: 0.5rem;   /* 8px */
-    --radius-xl: 0.75rem;  /* 12px */
-    --radius-2xl: 1rem;    /* 16px */
-    --radius-3xl: 1.5rem;  /* 24px */
-    --radius-full: 9999px;
-    
-    /* ===== ESPAÇAMENTOS ===== */
-    --space-0: 0;
-    --space-1: 0.25rem; /* 4px */
-    --space-2: 0.5rem;  /* 8px */
-    --space-3: 0.75rem; /* 12px */
-    --space-4: 1rem;    /* 16px */
-    --space-5: 1.25rem; /* 20px */
-    --space-6: 1.5rem;  /* 24px */
-    --space-8: 2rem;    /* 32px */
-    --space-10: 2.5rem; /* 40px */
-    --space-12: 3rem;   /* 48px */
-    --space-16: 4rem;   /* 64px */
-    --space-20: 5rem;   /* 80px */
-    --space-24: 6rem;   /* 96px */
-    
-    /* ===== TIPOGRAFIA ===== */
-    --font-family-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-    --font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-    
-    --font-size-xs: 0.75rem;   /* 12px */
-    --font-size-sm: 0.875rem;  /* 14px */
-    --font-size-base: 1rem;    /* 16px */
-    --font-size-lg: 1.125rem;  /* 18px */
-    --font-size-xl: 1.25rem;   /* 20px */
-    --font-size-2xl: 1.5rem;   /* 24px */
-    --font-size-3xl: 1.875rem; /* 30px */
-    --font-size-4xl: 2.25rem;  /* 36px */
-    --font-size-5xl: 3rem;     /* 48px */
-    
-    --font-weight-light: 300;
-    --font-weight-normal: 400;
-    --font-weight-medium: 500;
-    --font-weight-semibold: 600;
-    --font-weight-bold: 700;
-    --font-weight-extrabold: 800;
-    --font-weight-black: 900;
-    
-    --line-height-tight: 1.25;
-    --line-height-snug: 1.375;
-    --line-height-normal: 1.5;
-    --line-height-relaxed: 1.625;
-    --line-height-loose: 2;
-    
-    /* ===== TRANSIÇÕES ===== */
-    --transition-fast: 0.15s ease-out;
-    --transition-base: 0.25s ease-out;
-    --transition-slow: 0.4s ease-out;
-    --transition-bounce: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    
-    /* ===== Z-INDEX ===== */
-    --z-dropdown: 1000;
-    --z-sticky: 1020;
-    --z-fixed: 1030;
-    --z-modal-backdrop: 1040;
-    --z-modal: 1050;
-    --z-popover: 1060;
-    --z-tooltip: 1070;
-    --z-toast: 1080;
-    
-    /* ===== BREAKPOINTS ===== */
-    --breakpoint-sm: 640px;
-    --breakpoint-md: 768px;
-    --breakpoint-lg: 1024px;
-    --breakpoint-xl: 1280px;
-    --breakpoint-2xl: 1536px;
-    
-    /* ===== PWA ESPECÍFICO ===== */
-    --safe-area-inset-top: env(safe-area-inset-top, 0px);
-    --safe-area-inset-right: env(safe-area-inset-right, 0px);
-    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
-    --safe-area-inset-left: env(safe-area-inset-left, 0px);
-    
-    --vh: 1vh;
-    
-    /* ===== ALPHA COLORS ===== */
-    --primary-color-alpha: rgba(37, 99, 235, 0.1);
-}
+        // NOVA: Base de dados de exercícios integrada
+        this.exerciseDatabase = {
+            peito: {
+                iniciante: [
+                    { codigo: 'PEI001', nome: 'Flexão de Braços', gif: 'images/56.gif' },
+                    { codigo: 'PEI002', nome: 'Supino com Halteres', gif: 'images/104.gif' },
+                    { codigo: 'PEI003', nome: 'Crucifixo com Halteres', gif: 'images/38.gif' }
+                ],
+                intermediario: [
+                    { codigo: 'PEE004', nome: 'Supino Reto com Barra', gif: 'images/106.gif' },
+                    { codigo: 'PEE005', nome: 'Supino Inclinado', gif: 'images/107.gif' },
+                    { codigo: 'PEE006', nome: 'Crossover', gif: 'images/34.gif' }
+                ],
+                avancado: [
+                    { codigo: 'PEA007', nome: 'Supino Reto com Barra', gif: 'images/106.gif' },
+                    { codigo: 'PEA008', nome: 'Supino Inclinado com Halteres', gif: 'images/105.gif' },
+                    { codigo: 'PEA009', nome: 'Mergulho em Paralelas', gif: 'images/161.gif' }
+                ]
+            },
+            costas: {
+                iniciante: [
+                    { codigo: 'COI010', nome: 'Puxada Frontal', gif: 'images/85.gif' },
+                    { codigo: 'COI011', nome: 'Remada Baixa', gif: 'images/251.gif' },
+                    { codigo: 'COI012', nome: 'Remada com Halter', gif: 'images/97.gif' }
+                ],
+                intermediario: [
+                    { codigo: 'COE013', nome: 'Puxada Frontal', gif: 'images/85.gif' },
+                    { codigo: 'COE014', nome: 'Remada Curvada', gif: 'images/93.gif' },
+                    { codigo: 'COE015', nome: 'Pullover', gif: 'images/86.gif' }
+                ],
+                avancado: [
+                    { codigo: 'COA016', nome: 'Barra Fixa', gif: 'images/29.gif' },
+                    { codigo: 'COA017', nome: 'Remada T-Bar', gif: 'images/93.gif' },
+                    { codigo: 'COA018', nome: 'Levantamento Terra', gif: 'images/_terra.gif' }
+                ]
+            },
+            ombros: {
+                iniciante: [
+                    { codigo: 'OMI019', nome: 'Desenvolvimento com Halteres', gif: 'images/42.gif' },
+                    { codigo: 'OMI020', nome: 'Elevação Lateral', gif: 'images/52.gif' },
+                    { codigo: 'OMI021', nome: 'Elevação Frontal', gif: 'images/51.gif' }
+                ],
+                intermediario: [
+                    { codigo: 'OME022', nome: 'Desenvolvimento com Barra', gif: 'images/40.gif' },
+                    { codigo: 'OME023', nome: 'Elevação Lateral', gif: 'images/52.gif' },
+                    { codigo: 'OME024', nome: 'Elevação Posterior', gif: 'images/36.gif' }
+                ],
+                avancado: [
+                    { codigo: 'OMA025', nome: 'Desenvolvimento Arnold', gif: 'images/42.gif' },
+                    { codigo: 'OMA026', nome: 'Elevação Lateral 21', gif: 'images/52.gif' },
+                    { codigo: 'OMA027', nome: 'Face Pull', gif: 'images/36.gif' }
+                ]
+            },
+            biceps: {
+                iniciante: [
+                    { codigo: 'BII028', nome: 'Rosca Direta', gif: 'images/102.gif' },
+                    { codigo: 'BII029', nome: 'Rosca Alternada', gif: 'images/98.gif' },
+                    { codigo: 'BII030', nome: 'Rosca Martelo', gif: 'images/99.gif' }
+                ],
+                intermediario: [
+                    { codigo: 'BIE031', nome: 'Rosca Direta', gif: 'images/102.gif' },
+                    { codigo: 'BIE032', nome: 'Rosca Scott', gif: 'images/103.gif' },
+                    { codigo: 'BIE033', nome: 'Rosca 21', gif: 'images/102.gif' }
+                ],
+                avancado: [
+                    { codigo: 'BIA034', nome: 'Rosca Direta Pegada Fechada', gif: 'images/102.gif' },
+                    { codigo: 'BIA035', nome: 'Rosca Spider', gif: 'images/103.gif' },
+                    { codigo: 'BIA036', nome: 'Rosca Drag Curl', gif: 'images/102.gif' }
+                ]
+            },
+            triceps: {
+                iniciante: [
+                    { codigo: 'TRI037', nome: 'Tríceps Testa', gif: 'images/121.gif' },
+                    { codigo: 'TRI038', nome: 'Tríceps Pulley', gif: 'images/118.gif' },
+                    { codigo: 'TRI039', nome: 'Mergulho no Banco', gif: 'images/161.gif' }
+                ],
+                intermediario: [
+                    { codigo: 'TRE040', nome: 'Tríceps Francês', gif: 'images/113.gif' },
+                    { codigo: 'TRE041', nome: 'Tríceps Corda', gif: 'images/126.gif' },
+                    { codigo: 'TRE042', nome: 'Supino Fechado', gif: 'images/118.gif' }
+                ],
+                avancado: [
+                    { codigo: 'TRA043', nome: 'Tríceps Francês com Halter', gif: 'images/119.gif' },
+                    { codigo: 'TRA044', nome: 'Mergulho em Paralelas', gif: 'images/161.gif' },
+                    { codigo: 'TRA045', nome: 'JM Press', gif: 'images/161.gif' }
+                ]
+            },
+            quadriceps: {
+                iniciante: [
+                    { codigo: 'QUI046', nome: 'Agachamento Livre', gif: 'images/9.gif' },
+                    { codigo: 'QUI047', nome: 'Leg Press', gif: 'images/72.gif' },
+                    { codigo: 'QUI048', nome: 'Extensão de Pernas', gif: 'images/54.gif' }
+                ],
+                intermediario: [
+                    { codigo: 'QUE049', nome: 'Agachamento Livre', gif: 'images/9.gif' },
+                    { codigo: 'QUE050', nome: 'Leg Press 45°', gif: 'images/72.gif' },
+                    { codigo: 'QUE051', nome: 'Afundo', gif: 'images/6.gif' }
+                ],
+                avancado: [
+                    { codigo: 'QUA052', nome: 'Agachamento Livre', gif: 'images/9.gif' },
+                    { codigo: 'QUA053', nome: 'Agachamento Frontal', gif: 'images/10.gif' },
+                    { codigo: 'QUA054', nome: 'Agachamento Búlgaro', gif: 'images/8.gif' }
+                ]
+            },
+            posterior: {
+                iniciante: [
+                    { codigo: 'POI055', nome: 'Stiff', gif: 'images/115.gif' },
+                    { codigo: 'POI056', nome: 'Flexão de Pernas', gif: 'images/57.gif' },
+                    { codigo: 'POI057', nome: 'Elevação Pélvica', gif: 'images/_elevacao_pelvica.gif' }
+                ],
+                intermediario: [
+                    { codigo: 'POE058', nome: 'Stiff com Barra', gif: 'images/115.gif' },
+                    { codigo: 'POE059', nome: 'Mesa Flexora', gif: 'images/57.gif' },
+                    { codigo: 'POE060', nome: 'Good Morning', gif: 'images/71.gif' }
+                ],
+                avancado: [
+                    { codigo: 'POA061', nome: 'Levantamento Terra', gif: 'images/_terra.gif' },
+                    { codigo: 'POA062', nome: 'Stiff Unilateral', gif: 'images/115.gif' },
+                    { codigo: 'POA063', nome: 'Hip Thrust', gif: 'images/_hip_thrust.gif' }
+                ]
+            },
+            panturrilha: {
+                iniciante: [
+                    { codigo: 'PAI064', nome: 'Panturrilha Sentado', gif: 'images/81.gif' },
+                    { codigo: 'PAI065', nome: 'Panturrilha em Pé', gif: 'images/80.gif' }
+                ],
+                intermediario: [
+                    { codigo: 'PAE066', nome: 'Panturrilha Sentado', gif: 'images/81.gif' },
+                    { codigo: 'PAE067', nome: 'Panturrilha Leg Press', gif: 'images/72.gif' }
+                ],
+                avancado: [
+                    { codigo: 'PAA068', nome: 'Panturrilha Unilateral', gif: 'images/80.gif' },
+                    { codigo: 'PAA069', nome: 'Panturrilha com Pausa', gif: 'images/80.gif' }
+                ]
+            }
+        };
+    }
 
-/* =============================================================================
-   DARK MODE
-   ============================================================================= */
+    // =============================================================================
+    // INITIALIZATION & SETUP
+    // =============================================================================
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg-primary: var(--gray-900);
-        --bg-secondary: var(--gray-800);
-        --bg-tertiary: var(--gray-700);
+    async init() {
+        console.log('🚀 Initializing JS Fit Student App - Backend Compatible');
         
-        --text-primary: var(--gray-100);
-        --text-secondary: var(--gray-300);
-        --text-tertiary: var(--gray-400);
+        try {
+            this.setupEventListeners();
+            this.setupPWAFeatures();
+            await this.loadFromStorage();
+            await this.checkServerConnection();
+            this.startPeriodicSync();
+            this.renderHome();
+            
+            console.log('✅ App initialized successfully');
+        } catch (error) {
+            console.error('❌ Initialization failed:', error);
+            this.showNotification('Erro ao inicializar aplicativo', 'error');
+        }
+    }
+
+    setupEventListeners() {
+        // Handle network status changes
+        window.addEventListener('online', () => {
+            this.state.isOnline = true;
+            this.checkServerConnection();
+            this.showNotification('Conexão restaurada', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            this.state.isOnline = false;
+            this.updateConnectionStatus('offline');
+            this.showNotification('Modo offline ativo', 'warning');
+        });
+
+        // Handle app lifecycle
+        window.addEventListener('beforeunload', () => {
+            this.saveToStorage();
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.saveToStorage();
+            } else {
+                this.checkServerConnection();
+            }
+        });
+
+        // Setup file upload listeners
+        this.setupFileUploadListeners();
+    }
+
+    setupFileUploadListeners() {
+        // Set up file input listeners when the modal is shown
+        document.addEventListener('change', (e) => {
+            if (e.target.id === 'fileInput') {
+                this.handleFileSelection(e.target.files[0]);
+            }
+        });
+
+        // Set up drag and drop listeners
+        document.addEventListener('dragover', (e) => {
+            if (e.target.closest('#fileUploadArea')) {
+                e.preventDefault();
+                e.target.closest('#fileUploadArea').classList.add('drag-over');
+            }
+        });
+
+        document.addEventListener('dragleave', (e) => {
+            if (e.target.closest('#fileUploadArea')) {
+                e.target.closest('#fileUploadArea').classList.remove('drag-over');
+            }
+        });
+
+        document.addEventListener('drop', (e) => {
+            const uploadArea = e.target.closest('#fileUploadArea');
+            if (uploadArea) {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.handleFileSelection(files[0]);
+                }
+            }
+        });
+
+        // Click to select file
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#fileUploadArea')) {
+                const fileInput = document.getElementById('fileInput');
+                if (fileInput) {
+                    fileInput.click();
+                }
+            }
+        });
+    }
+
+    setupPWAFeatures() {
+        // iOS viewport handling
+        const setViewportHeight = () => {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        };
+
+        setViewportHeight();
+        window.addEventListener('resize', this.debounce(setViewportHeight, 150));
+        window.addEventListener('orientationchange', () => {
+            setTimeout(setViewportHeight, 500);
+        });
+
+        // Service Worker registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('SW registered:', reg))
+                .catch(err => console.log('SW registration failed:', err));
+        }
+    }
+
+    // =============================================================================
+    // SERVER COMMUNICATION
+    // =============================================================================
+
+    async makeRequest(endpoint, options = {}) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
+
+        try {
+            const response = await fetch(`${this.config.apiBase}${endpoint}`, {
+                ...options,
+                signal: controller.signal,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(this.state.token && { 'Authorization': `Bearer ${this.state.token}` }),
+                    ...options.headers
+                }
+            });
+
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            clearTimeout(timeoutId);
+            
+            if (error.name === 'AbortError') {
+                throw new Error('Request timeout');
+            }
+            
+            throw error;
+        }
+    }
+
+    async checkServerConnection() {
+        try {
+            this.updateConnectionStatus('loading');
+            const response = await this.makeRequest('/health');
+            
+            if (response.success !== false) {
+                this.updateConnectionStatus('online');
+                return true;
+            } else {
+                throw new Error('Health check failed');
+            }
+        } catch (error) {
+            console.warn('Server connection failed:', error);
+            this.updateConnectionStatus('offline');
+            return false;
+        }
+    }
+
+    async importPlanById(shareId) {
+        // Validate share ID
+        if (!shareId || shareId.length !== 6) {
+            throw new Error('ID deve ter 6 caracteres');
+        }
+
+        const normalizedId = shareId.toUpperCase();
+
+        // Check if already imported
+        const existing = this.state.workoutPlans.find(p => p.originalShareId === normalizedId);
+        if (existing) {
+            throw new Error('Este plano já foi importado');
+        }
+
+        try {
+            // Try server first
+            const serverData = await this.fetchFromServer(normalizedId);
+            
+            // Process and save the plan
+            const processedPlan = this.processPlanData(serverData, normalizedId, 'server');
+            
+            return processedPlan;
+        } catch (serverError) {
+            console.warn('Server fetch failed, trying cache:', serverError);
+            
+            // Fallback to cache
+            const cacheData = this.getPlanFromCache(normalizedId);
+            if (!cacheData) {
+                throw new Error('Plano não encontrado nem no servidor nem no cache');
+            }
+            
+            const processedPlan = this.processPlanData(cacheData, normalizedId, 'cache');
+            return processedPlan;
+        }
+    }
+
+    async fetchFromServer(shareId) {
+        try {
+            const response = await this.makeRequest(`/share/${shareId}`);
+            
+            if (response.success && response.plan) {
+                return response.plan;
+            } else {
+                throw new Error(response.error || 'Plano não encontrado no servidor');
+            }
+        } catch (error) {
+            throw new Error(`Erro ao buscar do servidor: ${error.message}`);
+        }
+    }
+
+    processPlanData(planData, shareId, source) {
+        // Convert backend format to frontend format
+        const processedPlan = {
+            id: this.generateId(),
+            nome: planData.nome || planData.name || 'Plano Importado',
+            originalShareId: shareId,
+            importedAt: new Date().toISOString(),
+            importedFrom: source,
+            execucoesPlanCompleto: 0,
+            
+            // Student data
+            aluno: {
+                nome: planData.aluno?.nome || planData.student?.name || '',
+                dataNascimento: planData.aluno?.dataNascimento || planData.student?.birth_date || '',
+                idade: planData.aluno?.idade || planData.student?.age || null,
+                altura: planData.aluno?.altura || planData.student?.height || '',
+                peso: planData.aluno?.peso || planData.student?.weight || '',
+                cpf: planData.aluno?.cpf || planData.student?.cpf || ''
+            },
+            
+            // Plan metadata
+            dias: planData.dias || planData.frequency_per_week || 3,
+            dataInicio: planData.dataInicio || planData.start_date || new Date().toISOString().split('T')[0],
+            dataFim: planData.dataFim || planData.end_date || '',
+            
+            // Profile and objectives
+            perfil: {
+                objetivo: planData.perfil?.objetivo || planData.objective || 'Condicionamento geral',
+                altura: planData.aluno?.altura || planData.student?.height || '',
+                peso: planData.aluno?.peso || planData.student?.weight || '',
+                idade: planData.aluno?.idade || planData.student?.age || null
+            },
+            
+            // Convert workouts
+            treinos: this.convertWorkoutsToFrontendFormat(planData.treinos || planData.workouts || []),
+            
+            // Observations
+            observacoes: planData.observacoes || planData.observations || {}
+        };
+
+        return { plan: processedPlan, source };
+    }
+
+    convertWorkoutsToFrontendFormat(workouts) {
+        return workouts.map((workout, index) => ({
+            id: workout.id || String.fromCharCode(65 + index),
+            nome: workout.nome || workout.name || `Treino ${String.fromCharCode(65 + index)}`,
+            foco: workout.foco || workout.focus_area || 'Treino geral',
+            concluido: false,
+            execucoes: 0,
+            exercicios: this.convertExercisesToFrontendFormat(workout.exercicios || workout.exercises || [])
+        }));
+    }
+
+    convertExercisesToFrontendFormat(exercises) {
+        return exercises.map((exercise, index) => ({
+            id: exercise.id || this.generateId(),
+            nome: exercise.nome || exercise.name || 'Exercício',
+            descricao: exercise.descricao || exercise.description || '',
+            series: exercise.series || exercise.sets || 3,
+            repeticoes: exercise.repeticoes || exercise.reps || '10-12',
+            carga: exercise.carga || exercise.weight || 'A definir',
+            currentCarga: exercise.currentCarga || exercise.current_weight || exercise.carga || exercise.weight || 'A definir',
+            descanso: exercise.descanso || exercise.rest_time || '90 segundos',
+            observacoesEspeciais: exercise.observacoesEspeciais || exercise.special_instructions || '',
+            tecnica: exercise.tecnica || '', // NOVO CAMPO
+            concluido: false
+        }));
+    }
+
+    // =============================================================================
+    // FILE UPLOAD MANAGEMENT
+    // =============================================================================
+
+    showFileUploadModal() {
+        const modal = document.getElementById('fileUploadModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            this.resetFileUploadModal();
+        }
+    }
+
+    hideFileUploadModal() {
+        const modal = document.getElementById('fileUploadModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            this.resetFileUploadModal();
+        }
+    }
+
+    resetFileUploadModal() {
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileError = document.getElementById('fileError');
+        const importBtn = document.getElementById('importFileBtn');
         
-        --border-light: var(--gray-700);
-        --border-medium: var(--gray-600);
-        --border-strong: var(--gray-500);
-        --border-color: var(--gray-600);
+        if (fileInput) fileInput.value = '';
+        if (fileInfo) fileInfo.classList.add('hidden');
+        if (fileError) fileError.classList.add('hidden');
+        if (importBtn) importBtn.disabled = true;
         
-        --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+        this.state.selectedFile = null;
+    }
+
+    handleFileSelection(file) {
+        const fileInfo = document.getElementById('fileInfo');
+        const fileError = document.getElementById('fileError');
+        const importBtn = document.getElementById('importFileBtn');
         
-        /* Dark mode adjustments for upload */
-        --primary-color-alpha: rgba(59, 130, 246, 0.15);
+        if (!file) {
+            this.resetFileUploadModal();
+            return;
+        }
+
+        // Validate file type
+        if (!file.name.toLowerCase().endsWith('.json')) {
+            this.showFileError('Apenas arquivos JSON são aceitos');
+            return;
+        }
+
+        // Validate file size (max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            this.showFileError('Arquivo muito grande. Máximo 10MB');
+            return;
+        }
+
+        // Show file info
+        if (fileInfo) {
+            const fileName = fileInfo.querySelector('.file-name');
+            const fileSize = fileInfo.querySelector('.file-size');
+            
+            if (fileName) fileName.textContent = file.name;
+            if (fileSize) fileSize.textContent = this.formatFileSize(file.size);
+            
+            fileInfo.classList.remove('hidden');
+        }
+
+        // Hide error and enable import button
+        if (fileError) fileError.classList.add('hidden');
+        if (importBtn) importBtn.disabled = false;
+
+        // Store selected file
+        this.state.selectedFile = file;
     }
-}
 
-/* =============================================================================
-   BASE STYLES
-   ============================================================================= */
-
-html {
-    scroll-behavior: smooth;
-    -webkit-tap-highlight-color: transparent;
-}
-
-body {
-    font-family: var(--font-family-sans);
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-normal);
-    line-height: var(--line-height-normal);
-    color: var(--text-primary);
-    background: var(--bg-primary);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-text-size-adjust: 100%;
-    overflow-x: hidden;
-    min-height: 100vh;
-    min-height: calc(var(--vh, 1vh) * 100);
-}
-
-/* ===============================================================================
-   ESTILOS PARA O BOTÃO VER EXERCÍCIO E MODAL DE DEMONSTRAÇÃO
-   =============================================================================== */
-
-/* Botão Ver Exercício na grade de especificações */
-.view-exercise-item {
-    grid-column: span 2; /* Ocupa duas colunas na grade */
-    margin-top: 12px;
-}
-
-.btn-view-exercise {
-    width: 100%;
-    padding: 12px 16px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: all 0.3s ease;
-    font-family: inherit;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.btn-view-exercise:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-}
-
-.btn-view-exercise:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
-}
-
-.btn-view-exercise .btn-icon {
-    flex-shrink: 0;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-}
-
-.btn-view-exercise .btn-text {
-    flex: 1;
-    text-align: left;
-}
-
-.btn-view-exercise .btn-label {
-    font-weight: 600;
-    font-size: 14px;
-    line-height: 1.2;
-}
-
-.btn-view-exercise .btn-subtitle {
-    font-size: 12px;
-    opacity: 0.9;
-    line-height: 1.2;
-    margin-top: 2px;
-}
-
-/* Modal de exercício */
-.exercise-gif-modal {
-    max-width: 420px;
-    width: 90vw;
-}
-
-.exercise-gif-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 320px;
-    background: #f8fafc;
-    border-radius: 12px;
-    border: 2px dashed #e2e8f0;
-    position: relative;
-    overflow: hidden;
-}
-
-/* GIF do exercício - EXATAMENTE 300x300px */
-.exercise-gif {
-    width: 300px !important;
-    height: 300px !important;
-    object-fit: cover;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    background: #ffffff;
-}
-
-/* Estado "não encontrado" */
-.exercise-not-found {
-    text-align: center;
-    padding: 40px 20px;
-    color: #64748b;
-}
-
-.not-found-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-    opacity: 0.7;
-}
-
-.not-found-text {
-    font-size: 18px;
-    font-weight: 600;
-    color: #475569;
-    margin-bottom: 8px;
-}
-
-.not-found-subtitle {
-    font-size: 14px;
-    line-height: 1.5;
-    color: #64748b;
-    max-width: 280px;
-    margin: 0 auto;
-}
-
-/* Responsividade para dispositivos móveis */
-@media (max-width: 768px) {
-    .exercise-gif-modal {
-        max-width: 95vw;
-        margin: 20px auto;
-    }
-    
-    .exercise-gif-container {
-        min-height: 280px;
-    }
-    
-    .exercise-gif {
-        width: 260px !important;
-        height: 260px !important;
-    }
-    
-    .view-exercise-item {
-        grid-column: span 1; /* Uma coluna em mobile */
-    }
-    
-    .btn-view-exercise {
-        padding: 10px 12px;
-        gap: 8px;
-    }
-    
-    .btn-view-exercise .btn-label {
-        font-size: 13px;
-    }
-    
-    .btn-view-exercise .btn-subtitle {
-        font-size: 11px;
-    }
-}
-
-/* Ajustes para telas muito pequenas */
-@media (max-width: 480px) {
-    .exercise-gif {
-        width: 220px !important;
-        height: 220px !important;
-    }
-    
-    .exercise-gif-container {
-        min-height: 240px;
-    }
-}
-
-/* Estados de carregamento para o GIF */
-.exercise-gif-container.loading::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 40px;
-    height: 40px;
-    border: 3px solid #e2e8f0;
-    border-top: 3px solid #667eea;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    z-index: 1;
-}
-
-@keyframes spin {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-/* Melhorias nos modais existentes */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.modal:not(.hidden) {
-    opacity: 1;
-    visibility: visible;
-}
-
-.modal-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-}
-
-.modal-content {
-    position: relative;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    max-height: 90vh;
-    overflow-y: auto;
-    z-index: 1001;
-    transform: scale(0.9);
-    transition: transform 0.3s ease;
-}
-
-.modal:not(.hidden) .modal-content {
-    transform: scale(1);
-}
-
-.modal-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.modal-title {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #1e293b;
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 6px;
-    color: #64748b;
-    transition: all 0.2s ease;
-}
-
-.modal-close:hover {
-    background: #f1f5f9;
-    color: #475569;
-}
-
-.modal-body {
-    padding: 24px;
-}
-
-.modal-footer {
-    padding: 16px 24px;
-    border-top: 1px solid #e2e8f0;
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-}
-
-/* Ajustes na grade de especificações para acomodar o novo botão */
-.specs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    align-items: start;
-}
-
-@media (max-width: 768px) {
-    .specs-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-@media (max-width: 480px) {
-    .specs-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* =============================================================================
-   FOCUS MANAGEMENT E ACESSIBILIDADE
-   ============================================================================= */
-
-*:focus {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-*:focus:not(:focus-visible) {
-    outline: none;
-}
-
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-}
-
-.app-branding {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px;
-    margin: var(--space-1);
-    border-radius: 16px;
-    text-align: center;
-    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-    position: relative;
-    overflow: hidden;
-}
-
-.app-branding::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-    animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-10px) rotate(180deg); }
-}
-/* =============================================================================
-   TOPO FORMATAÇÃO
-   ============================================================================= */
-
-.app-title {
-    font-size: 24px;
-    font-weight: 700;
-    margin: 0 0 8px 0;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    position: relative;
-    z-index: 1;
-}
-
-.app-subtitle {
-    font-size: 16px;
-    margin: 0 0 16px 0;
-    opacity: 0.9;
-    position: relative;
-    z-index: 1;
-}
-
-.developer-info {
-    background: rgba(255,255,255,0.15);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    padding: 12px 16px;
-    border: 1px solid rgba(255,255,255,0.2);
-    position: relative;
-    z-index: 1;
-}
-
-.developer-name {
-    font-size: 14px;
-    font-weight: 600;
-    margin: 0 0 4px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.developer-contact {
-    font-size: 13px;
-    margin: 0;
-    opacity: 0.9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-
-.developer-icon {
-    width: 16px;
-    height: 16px;
-    opacity: 0.8;
-}
-
-.phone-icon {
-    width: 14px;
-    height: 14px;
-    opacity: 0.8;
-}
-
-/* =============================================================================
-   LAYOUT CONTAINERS
-   ============================================================================= */
-
-.app {
-    max-width: 430px;
-    margin: 0 auto;
-    background: var(--bg-primary);
-    min-height: 100vh;
-    min-height: calc(var(--vh, 1vh) * 100);
-    position: relative;
-    overflow-x: hidden;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: var(--space-1);
-    min-height: 100vh;
-}
-
-/* =============================================================================
-   VIEWS E NAVEGAÇÃO
-   ============================================================================= */
-
-.view {
-    min-height: 100vh;
-    min-height: calc(var(--vh, 1vh) * 100);
-    display: flex;
-    flex-direction: column;
-    transition: transform var(--transition-slow);
-    will-change: transform;
-}
-
-.view.hidden {
-    display: none;
-}
-
-/* =============================================================================
-   HEADER COMPONENTS
-   ============================================================================= */
-
-.header {
-    background: var(--bg-secondary);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-light);
-    position: sticky;
-    top: 0;
-    z-index: var(--z-sticky);
-    padding-top: var(--safe-area-inset-top);
-}
-
-.header-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-4) var(--space-6);
-    gap: var(--space-4);
-    min-height: 60px;
-}
-
-/* Personal Trainer Header */
-.container .header {
-    text-align: center;
-    margin-bottom: var(--space-12);
-    padding: var(--space-12);
-    background: var(--gradient-glass);
-    backdrop-filter: blur(20px);
-    border-radius: var(--radius-3xl);
-    border: 1px solid var(--border-light);
-    box-shadow: var(--shadow-xl);
-    position: relative;
-    overflow: hidden;
-}
-
-.container .header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: var(--gradient-primary);
-    opacity: 0.05;
-    z-index: -1;
-}
-
-.container .header h1 {
-    font-size: var(--font-size-4xl);
-    font-weight: var(--font-weight-bold);
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: var(--space-3);
-    letter-spacing: -0.025em;
-}
-
-.container .header p {
-    font-size: var(--font-size-lg);
-    color: var(--text-secondary);
-    margin-bottom: var(--space-8);
-    font-weight: var(--font-weight-medium);
-}
-
-.back-btn {
-    background: var(--bg-tertiary);
-    border: none;
-    border-radius: var(--radius-2xl);
-    padding: var(--space-3);
-    color: var(--primary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--transition-base);
-    min-width: 44px;
-    min-height: 44px;
-    box-shadow: var(--shadow-sm);
-}
-
-.back-btn:hover {
-    background: var(--primary);
-    color: var(--text-inverse);
-    transform: translateX(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.back-btn:active {
-    transform: translateX(-2px) scale(0.95);
-}
-
-.title {
-    font-size: var(--font-size-2xl);
-    font-weight: var(--font-weight-bold);
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    letter-spacing: -0.025em;
-    flex: 1;
-}
-
-.subtitle {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    margin-top: var(--space-1);
-    font-weight: var(--font-weight-medium);
-}
-
-/* =============================================================================
-   CONTENT AREAS
-   ============================================================================= */
-
-.content {
-    flex: 1;
-    padding: var(--space-1);
-    padding-bottom: calc(var(--space-6) + var(--safe-area-inset-bottom));
-}
-
-.content-card {
-    background: var(--bg-secondary);
-    backdrop-filter: blur(10px);
-    border-radius: var(--radius-3xl);
-    padding: var(--space-8);
-    box-shadow: var(--shadow-lg);
-    margin-bottom: var(--space-2);
-    border: 1px solid var(--border-light);
-    position: relative;
-    overflow: hidden;
-}
-
-.content-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--gradient-primary);
-}
-
-/* =============================================================================
-   BUTTONS - SISTEMA COMPLETO
-   ============================================================================= */
-
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-6);
-    border: none;
-    border-radius: var(--radius-xl);
-    font-family: inherit;
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
-    line-height: 1;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all var(--transition-base);
-    position: relative;
-    overflow: hidden;
-    min-height: 44px;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.btn:disabled,
-.btn-disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-.btn:active {
-    transform: scale(0.98);
-}
-
-/* Primary Button */
-.btn-primary {
-    background: var(--gradient-primary);
-    color: var(--text-inverse);
-    box-shadow: var(--shadow-md);
-}
-
-.btn-primary:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-1px);
-}
-
-.btn-primary:active {
-    transform: translateY(-1px) scale(0.98);
-}
-
-/* Secondary Button */
-.btn-secondary {
-    background: var(--gradient-secondary);
-    color: var(--text-inverse);
-    box-shadow: var(--shadow-md);
-}
-
-.btn-secondary:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-1px);
-}
-
-/* AI Button */
-.btn-ai {
-    background: var(--gradient-ai);
-    color: var(--text-inverse);
-    box-shadow: var(--shadow-md);
-    position: relative;
-}
-
-.btn-ai::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left var(--transition-slow);
-}
-
-.btn-ai:hover::before {
-    left: 100%;
-}
-
-.btn-ai:hover {
-    box-shadow: var(--shadow-glow);
-    transform: translateY(-1px);
-}
-
-/* Success Button */
-.btn-success {
-    background: var(--gradient-success);
-    color: var(--text-inverse);
-    box-shadow: var(--shadow-md);
-}
-
-.btn-success:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-1px);
-}
-
-/* Warning Button */
-.btn-warning {
-    background: var(--gradient-warning);
-    color: var(--text-inverse);
-    box-shadow: var(--shadow-md);
-}
-
-.btn-warning:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-1px);
-}
-
-/* Danger Button */
-.btn-danger {
-    background: var(--gradient-error);
-    color: var(--text-inverse);
-    box-shadow: var(--shadow-md);
-}
-
-.btn-danger:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-1px);
-}
-
-/* Outline Button */
-.btn-outline {
-    background: transparent;
-    color: var(--text-primary);
-    border: 2px solid var(--border-medium);
-    backdrop-filter: blur(10px);
-}
-
-.btn-outline:hover {
-    background: var(--bg-tertiary);
-    border-color: var(--primary);
-    color: var(--primary);
-    transform: translateY(-1px);
-}
-
-/* Ghost Button */
-.btn-ghost {
-    background: transparent;
-    color: var(--text-secondary);
-    border: none;
-}
-
-.btn-ghost:hover {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-}
-
-/* Button Sizes */
-.btn-sm {
-    padding: var(--space-2) var(--space-4);
-    font-size: var(--font-size-sm);
-    min-height: 36px;
-    border-radius: var(--radius-lg);
-}
-
-.btn-lg {
-    padding: var(--space-4) var(--space-8);
-    font-size: var(--font-size-lg);
-    min-height: 52px;
-    border-radius: var(--radius-2xl);
-}
-
-.btn-small {
-    padding: var(--space-2) var(--space-3);
-    font-size: var(--font-size-sm);
-    min-height: 32px;
-    border-radius: var(--radius-lg);
-}
-
-/* Button Groups */
-.btn-group {
-    display: flex;
-    gap: var(--space-3);
-}
-
-.btn-group-vertical {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-}
-
-/* Loading Button */
-.btn-loading {
-    pointer-events: none;
-    opacity: 0.8;
-    cursor: not-allowed;
-}
-
-/* =============================================================================
-   MAIN ACTIONS GRID
-   ============================================================================= */
-
-.main-actions {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: var(--space-4);
-    margin-bottom: var(--space-8);
-}
-
-/* =============================================================================
-   CARDS SYSTEM
-   ============================================================================= */
-
-.card {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-2xl);
-    padding: var(--space-1);
-    border: 1px solid var(--border-light);
-    box-shadow: var(--shadow-sm);
-    transition: all var(--transition-base);
-    position: relative;
-    overflow: hidden;
-}
-
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--primary);
-}
-
-.card-content {
-    display: flex;
-    flex-direction: column;
-/*    gap: var(--space-4);*/
-}
-
-/* Card States */
-.card.completed {
-    background: linear-gradient(135deg, var(--secondary-50) 0%, var(--secondary-100) 100%);
-    border-color: var(--secondary);
-}
-
-.card.active {
-    border-color: var(--primary);
-    box-shadow: var(--shadow-glow);
-}
-
-.card.disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-/* =============================================================================
-   STUDENT INFO CARDS
-   ============================================================================= */
-
-.student-info-card {
-    background: var(--gradient-primary);
-    color: var(--text-inverse);
-    border-radius: var(--radius-2xl);
-    padding: var(--space-1);
-    margin-bottom: var(--space-2);
-    box-shadow: var(--shadow-xl);
-    position: relative;
-    overflow: hidden;
-}
-
-.student-info-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    transform: rotate(-45deg);
-    animation: shimmer 3s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-    0%, 100% { transform: translateX(-100%) rotate(-45deg); }
-    50% { transform: translateX(100%) rotate(-45deg); }
-}
-
-.student-info-header {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    margin-bottom: var(--space-4);
-}
-
-.student-avatar {
-    width: 60px;
-    height: 60px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: var(--font-size-2xl);
-    font-weight: var(--font-weight-bold);
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-}
-
-.student-name {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    margin: 0;
-    line-height: var(--line-height-tight);
-}
-
-.student-age {
-    font-size: var(--font-size-sm);
-    opacity: 0.9;
-    margin-top: var(--space-1);
-}
-
-.student-details {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: var(--space-3);
-}
-
-.detail-item {
-    background: rgba(255, 255, 255, 0.1);
-    padding: var(--space-3);
-    border-radius: var(--radius-lg);
-    text-align: center;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all var(--transition-base);
-}
-
-.detail-item:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateY(-2px);
-}
-
-.detail-label {
-    font-size: var(--font-size-xs);
-    opacity: 0.8;
-    margin-bottom: var(--space-1);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: var(--font-weight-semibold);
-}
-
-.detail-value {
-    font-weight: var(--font-weight-semibold);
-    font-size: var(--font-size-sm);
-}
-
-.objective-text {
-    font-size: var(--font-size-sm);
-    line-height: var(--line-height-relaxed);
-}
-
-/* =============================================================================
-   PLAN INFO E STATS
-   ============================================================================= */
-
-.plan-info-card {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-2xl);
-    padding: var(--space-1);
-  /*  margin-bottom: var(--space-6);*/
-    border: 2px solid var(--border-light);
-    box-shadow: var(--shadow-lg);
-    transition: all var(--transition-base);
-}
-
-.plan-info-card:hover {
-    border-color: var(--primary);
-    box-shadow: var(--shadow-xl);
-}
-
-.plan-header {
-    margin-bottom: var(--space-4);
-}
-
-.plan-title {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-1);
-    line-height: var(--line-height-tight);
-}
-
-.plan-period {
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    margin-bottom: var(--space-3);
-    font-weight: var(--font-weight-medium);
-}
-
-.plan-badges {
-    display: flex;
-    gap: var(--space-2);
-    flex-wrap: wrap;
-    margin-top: var(--space-3);
-}
-
-.badge {
-    display: inline-flex;
-    align-items: center;
-    padding: var(--space-1) var(--space-3);
-    border-radius: var(--radius-full);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border: 1px solid;
-}
-
-.badge-id {
-    background: var(--info-bg);
-    color: var(--info-color);
-    border-color: var(--info-border);
-}
-
-.badge-source {
-    background: var(--success-bg);
-    color: var(--success-color);
-    border-color: var(--success-border);
-}
-
-.plan-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: var(--space-3);
-    margin-top: var(--space-4);
-}
-
-.stat-card {
-    background: var(--bg-tertiary);
-    padding: var(--space-4);
-    border-radius: var(--radius-lg);
-    text-align: center;
-    border: 1px solid var(--border-light);
-    transition: all var(--transition-base);
-}
-
-.stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    background: var(--primary-50);
-}
-
-.stat-number {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--primary);
-    line-height: 1;
-    margin-bottom: var(--space-1);
-}
-
-.stat-label {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: var(--font-weight-semibold);
-}
-
-/* =============================================================================
-   PLAN CYCLE INFO
-   ============================================================================= */
-
-.plan-cycle-info {
-    background: var(--gradient-primary);
-    color: var(--text-inverse);
-    padding: var(--space-8);
-    border-radius: var(--radius-2xl);
-    margin-bottom: var(--space-2);
-    text-align: center;
-    box-shadow: var(--shadow-xl);
-    position: relative;
-    overflow: hidden;
-}
-
-.plan-cycle-info::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    pointer-events: none;
-}
-
-.cycle-counter {
-    font-size: var(--font-size-5xl);
-    font-weight: var(--font-weight-black);
-    margin-bottom: var(--space-3);
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    line-height: 1;
-}
-
-.cycle-label {
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
-    margin-bottom: var(--space-4);
-    opacity: 0.9;
-}
-
-.cycle-progress {
-    background: rgba(255, 255, 255, 0.2);
-    height: 8px;
-    border-radius: var(--radius-full);
-    overflow: hidden;
-    margin-bottom: var(--space-4);
-    backdrop-filter: blur(10px);
-}
-
-.cycle-progress-fill {
-    background: var(--text-inverse);
-    height: 100%;
-    border-radius: var(--radius-full);
-    transition: width var(--transition-slow);
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-}
-
-.cycle-status {
-    font-size: var(--font-size-sm);
-    opacity: 0.9;
-    line-height: var(--line-height-relaxed);
-}
-
-.total-executions {
-    margin-top: var(--space-4);
-    font-size: var(--font-size-sm);
-    opacity: 0.8;
-    font-weight: var(--font-weight-medium);
-}
-
-/* =============================================================================
-   WORKOUT GRID E ITEMS
-   ============================================================================= */
-
-.workout-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: var(--space-4);
-    margin-top: var(--space-4);
-}
-
-.workout-item {
-    background: var(--bg-tertiary);
-    border-radius: var(--radius-xl);
-    padding: var(--space-4);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    border: 1px solid var(--border-light);
-    transition: all var(--transition-base);
-    position: relative;
-    overflow: hidden;
-}
-
-.workout-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: var(--gray-300);
-    transition: all var(--transition-base);
-}
-
-.workout-item:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.workout-item:hover::before {
-    background: var(--primary);
-    width: 8px;
-}
-
-.workout-item.completed::before {
-    background: var(--success);
-    width: 8px;
-}
-
-.workout-item.completed {
-    background: linear-gradient(135deg, var(--secondary-50) 0%, var(--secondary-100) 100%);
-    border-color: var(--secondary);
-}
-
-.workout-name {
-    font-weight: var(--font-weight-semibold);
-    font-size: var(--font-size-sm);
-    color: var(--text-primary);
-    line-height: var(--line-height-tight);
-}
-
-.workout-details {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--space-2);
-}
-
-.execution-count {
-    background: var(--border-medium);
-    color: var(--text-secondary);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-full);
-    white-space: nowrap;
-    font-family: var(--font-family-mono);
-}
-
-.execution-count.completed {
-    background: var(--success);
-    color: var(--text-inverse);
-}
-
-.workout-status {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-full);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.workout-status.completed {
-    background: var(--secondary-100);
-    color: var(--secondary-800);
-}
-
-.workout-status.in-progress {
-    background: var(--warning-100);
-    color: var(--warning-800);
-}
-
-.workout-status.not-started {
-    background: var(--gray-100);
-    color: var(--gray-600);
-}
-
-/* =============================================================================
-   PROGRESS BARS
-   ============================================================================= */
-
-.progress-bar {
-    background: var(--border-light);
-    height: 6px;
-    border-radius: var(--radius-full);
-    overflow: hidden;
-    flex: 1;
-    position: relative;
-}
-
-.progress-fill {
-    background: var(--gradient-primary);
-    height: 100%;
-    border-radius: var(--radius-full);
-    transition: width var(--transition-slow);
-    position: relative;
-}
-
-.progress-fill::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%);
-    background-size: 10px 10px;
-    animation: progress-animation 1s linear infinite;
-}
-
-@keyframes progress-animation {
-    0% { background-position: 0 0; }
-    100% { background-position: 10px 0; }
-}
-
-.workout-progress {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    margin-top: var(--space-3);
-}
-
-.progress-text {
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-secondary);
-    white-space: nowrap;
-    font-family: var(--font-family-mono);
-}
-
-/* =============================================================================
-   EXERCISE CARDS
-   ============================================================================= */
-
-.exercise-card {
-    border-left: 4px solid var(--border-light);
-    transition: all var(--transition-base);
-    background: var(--bg-secondary);
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-}
-
-.exercise-card.pending {
-    border-left-color: var(--warning);
-    background: linear-gradient(135deg, var(--warning-50) 0%, transparent 100%);
-}
-
-.exercise-card.completed {
-    border-left-color: var(--success);
-    background: linear-gradient(135deg, var(--secondary-50) 0%, transparent 100%);
-}
-
-.exercise-card.disabled {
-    border-left-color: var(--border-medium);
-    background: var(--bg-tertiary);
-    opacity: 0.6;
-}
-
-.exercise-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: var(--space-4);
-    gap: var(--space-4);
-}
-
-.exercise-main {
-    flex: 1;
-}
-
-.exercise-number {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-1);
-    line-height: var(--line-height-tight);
-}
-
-.exercise-name {
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
-    font-size: var(--font-size-base);
-    margin-bottom: var(--space-1);
-}
-
-.exercise-description {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    line-height: var(--line-height-relaxed);
-}
-
-.exercise-specs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-    gap: var(--space-3);
-    margin: var(--space-4) 0;
-}
-
-.spec-badge {
-    background: var(--bg-tertiary);
-    padding: var(--space-3);
-    border-radius: var(--radius-lg);
-    text-align: center;
-    border: 1px solid var(--border-light);
-    transition: all var(--transition-base);
-    min-height: 60px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.spec-badge::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--gradient-primary);
-    transform: scaleX(0);
-    transition: transform var(--transition-base);
-}
-
-.spec-badge:hover {
-    background: var(--primary-50);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
-}
-
-.spec-badge:hover::before {
-    transform: scaleX(1);
-}
-
-.spec-label {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    font-weight: var(--font-weight-semibold);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: var(--space-1);
-}
-
-.spec-value {
-    font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
-    font-size: var(--font-size-sm);
-}
-
-.exercise-notes {
-    background: linear-gradient(135deg, var(--warning-50) 0%, var(--warning-100) 100%);
-    border: 1px solid var(--warning-200);
-    border-radius: var(--radius-lg);
-    padding: var(--space-3) var(--space-4);
-    margin-top: var(--space-3);
-    font-size: var(--font-size-xs);
-    color: var(--warning-800);
-    font-weight: var(--font-weight-semibold);
-    position: relative;
-}
-
-.exercise-notes::before {
-    content: '⚠️';
-    margin-right: var(--space-2);
-}
-
-.check-icon {
-    background: var(--success);
-    color: var(--text-inverse);
-    border-radius: var(--radius-full);
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    box-shadow: var(--shadow-md);
-    animation: checkBounce 0.5s ease-out;
-}
-
-@keyframes checkBounce {
-    0% { transform: scale(0); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-}
-
-.current-weight {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    text-align: center;
-    margin-top: var(--space-3);
-    padding: var(--space-3);
-    background: var(--bg-tertiary);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-light);
-}
-
-/* =============================================================================
-   WEIGHT EDITING
-   ============================================================================= */
-
-.weight-edit {
-    display: flex;
-    gap: var(--space-3);
-    align-items: center;
-    justify-content: center;
-    margin-top: var(--space-4);
-    padding: var(--space-4);
-    background: var(--bg-tertiary);
-    border-radius: var(--radius-xl);
-    border: 1px solid var(--border-light);
-}
-
-.weight-input {
-    border: 2px solid var(--border-medium);
-    border-radius: var(--radius-lg);
-    padding: var(--space-3) var(--space-4);
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
-    text-align: center;
-    width: 120px;
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    transition: all var(--transition-base);
-    font-family: var(--font-family-mono);
-}
-
-.weight-input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    transform: translateY(-1px);
-}
-
-.weight-edit-actions {
-    display: flex;
-    gap: var(--space-2);
-}
-
-/* =============================================================================
-   ACTION BUTTONS
-   ============================================================================= */
-
-.plan-actions,
-.workout-actions,
-.exercise-actions {
-    display: flex;
-    gap: var(--space-3);
-    margin-top: var(--space-4);
-    flex-wrap: wrap;
-}
-
-.plan-actions .btn,
-.workout-actions .btn,
-.exercise-actions .btn {
-    flex: 1;
-    min-width: 120px;
-}
-
-.delete-btn {
-    flex: 0 0 auto !important;
-    min-width: 44px !important;
-    padding: var(--space-3) !important;
-}
-
-.workout-title-wrapper {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    margin-bottom: var(--space-3);
-}
-
-.workout-title {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-2);
-}
-
-.workout-subtitle {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    margin-bottom: var(--space-4);
-}
-
-/* =============================================================================
-   IMPORT SECTION - CARDS E FORMS
-   ============================================================================= */
-
-.import-by-id-card {
-    background: var(--gradient-success);
-    color: var(--text-inverse);
-    margin-bottom: var(--space-2);
-    box-shadow: var(--shadow-xl);
-    position: relative;
-    overflow: hidden;
-}
-
-.import-by-id-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M20 20c0-11.046-8.954-20-20-20v20h20z'/%3E%3C/g%3E%3C/svg%3E");
-    pointer-events: none;
-}
-
-.import-title {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
-    margin-bottom: var(--space-4);
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-}
-
-/* Import Sections */
-.import-section {
-    margin-bottom: var(--space-6);
-}
-
-.import-section:last-child {
-    margin-bottom: 0;
-}
-
-.import-method-title {
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
-    color: rgba(255, 255, 255, 0.9);
-    margin-bottom: var(--space-3);
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-}
-
-.import-divider {
-    display: flex;
-    align-items: center;
-    margin: var(--space-6) 0;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
-}
-
-.import-divider::before,
-.import-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.import-divider span {
-    padding: 0 var(--space-4);
-    background: transparent;
-}
-
-.import-form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-}
-
-.import-input {
-    background: rgba(255, 255, 255, 0.15);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: var(--radius-xl);
-    padding: var(--space-4);
-    color: var(--text-inverse);
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
-    text-align: center;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    font-family: var(--font-family-mono);
-    backdrop-filter: blur(10px);
-    transition: all var(--transition-base);
-}
-
-.import-input::placeholder {
-    color: rgba(255, 255, 255, 0.7);
-    font-weight: var(--font-weight-normal);
-    letter-spacing: 1px;
-}
-
-.import-input:focus {
-    outline: none;
-    border-color: rgba(255, 255, 255, 0.6);
-    background: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-    transform: scale(1.02);
-}
-
-.import-btn {
-    background: rgba(255, 255, 255, 0.2);
-    color: var(--text-inverse);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
-}
-
-.import-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
-
-.import-file-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    margin-bottom: var(--space-2);
-    background: rgba(255, 255, 255, 0.2);
-    color: var(--text-inverse);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
-    transition: all var(--transition-base);
-}
-
-.import-file-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: translateY(-1px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-}
-
-.import-file-hint {
-    font-size: var(--font-size-xs);
-    color: rgba(255, 255, 255, 0.8);
-    text-align: center;
-    line-height: var(--line-height-relaxed);
-    font-weight: var(--font-weight-medium);
-}
-
-.import-status {
-    font-size: var(--font-size-sm);
-    text-align: center;
-    margin-top: var(--space-4);
-    opacity: 0.9;
-    min-height: 20px;
-    font-weight: var(--font-weight-medium);
-    transition: all var(--transition-base);
-}
-
-.import-status.success {
-    color: rgba(255, 255, 255, 0.9);
-}
-
-.import-status.error {
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.import-status.loading {
-    color: rgba(255, 255, 255, 0.9);
-}
-
-.import-status.info {
-    color: rgba(255, 255, 255, 0.85);
-}
-
-/* =============================================================================
-   FILE UPLOAD MODAL E COMPONENTS
-   ============================================================================= */
-
-/* Modal Base */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: var(--z-modal);
-    opacity: 0;
-    visibility: hidden;
-    transition: all var(--transition-base);
-    padding: var(--space-4);
-}
-
-.modal-overlay:not(.hidden) {
-    opacity: 1;
-    visibility: visible;
-}
-
-.modal {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-3xl);
-    padding: var(--space-8);
-    max-width: 500px;
-    width: 90vw;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow-2xl);
-    transform: scale(0.9) translateY(20px);
-    transition: all var(--transition-base);
-    border: 1px solid var(--border-light);
-    position: relative;
-}
-
-.modal-overlay:not(.hidden) .modal {
-    transform: scale(1) translateY(0);
-}
-
-.modal-title {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-4);
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-}
-
-.modal-content {
-    margin: var(--space-4) 0;
-}
-
-.modal-message {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    line-height: var(--line-height-relaxed);
-    margin-bottom: var(--space-6);
-    text-align: center;
-    font-weight: var(--font-weight-medium);
-}
-
-.modal-actions {
-    display: flex;
-    gap: var(--space-3);
-    justify-content: flex-end;
-    margin-top: var(--space-6);
-}
-
-/* File Upload Area */
-.file-upload-area {
-    border: 2px dashed var(--border-color);
-    border-radius: var(--radius-xl);
-    padding: var(--space-10) var(--space-6);
-    text-align: center;
-    cursor: pointer;
-    transition: all var(--transition-base);
-    position: relative;
-    background: var(--bg-tertiary);
-    min-height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.file-upload-area:hover {
-    border-color: var(--primary-color);
-    background: var(--bg-secondary);
-    transform: translateY(-2px);
-}
-
-.file-upload-area.drag-over {
-    border-color: var(--primary-color);
-    background: var(--primary-color-alpha);
-    transform: scale(1.02);
-    box-shadow: var(--shadow-lg);
-}
-
-.file-input {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-}
-
-.file-upload-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-4);
-}
-
-.file-upload-content svg {
-    color: var(--text-secondary);
-    opacity: 0.7;
-    transition: all var(--transition-base);
-}
-
-.file-upload-area:hover .file-upload-content svg {
-    color: var(--primary-color);
-    opacity: 1;
-    transform: scale(1.1);
-}
-
-.file-upload-text {
-    font-size: var(--font-size-base);
-    color: var(--text-primary);
-    font-weight: var(--font-weight-medium);
-}
-
-.file-upload-text strong {
-    color: var(--primary-color);
-    font-weight: var(--font-weight-semibold);
-}
-
-.file-upload-hint {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    font-weight: var(--font-weight-medium);
-}
-
-/* File Info Display */
-.file-info {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: var(--space-4);
-    margin-top: var(--space-4);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-}
-
-.file-name {
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
-    word-break: break-all;
-    font-size: var(--font-size-sm);
-}
-
-.file-size {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    font-family: var(--font-family-mono);
-}
-
-/* File Error Display */
-.file-error {
-    background: var(--error-bg);
-    color: var(--error-color);
-    border: 1px solid var(--error-border);
-    border-radius: var(--radius-lg);
-    padding: var(--space-3) var(--space-4);
-    margin-top: var(--space-4);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-}
-
-.file-error::before {
-    content: '⚠️';
-    font-size: var(--font-size-base);
-    flex-shrink: 0;
-}
-
-/* =============================================================================
-   SERVER STATUS
-   ============================================================================= */
-
-.server-status {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-lg);
-    padding: var(--space-2) var(--space-4);
-    margin-bottom: var(--space-4);
-    font-size: var(--font-size-xs);
-    text-align: center;
-    font-weight: var(--font-weight-semibold);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-}
-
-.server-status.online {
-    color: rgba(255, 255, 255, 0.9);
-}
-
-.server-status.offline {
-    color: rgba(255, 255, 255, 0.8);
-}
-
-/* =============================================================================
-   CONNECTION STATUS
-   ============================================================================= */
-
-.connection-status {
-    position: absolute;
-    top: var(--space-3);
-    right: var(--space-3);
-    width: 10px;
-    height: 10px;
-    border-radius: var(--radius-full);
-    background: var(--success);
-    box-shadow: 0 0 0 3px var(--bg-secondary), 0 0 10px rgba(16, 185, 129, 0.5);
-    z-index: var(--z-tooltip);
-    transition: all var(--transition-base);
-}
-
-.connection-status.offline {
-    background: var(--error);
-    box-shadow: 0 0 0 3px var(--bg-secondary), 0 0 10px rgba(239, 68, 68, 0.5);
-}
-
-.connection-status.loading {
-    background: var(--warning);
-    box-shadow: 0 0 0 3px var(--bg-secondary), 0 0 10px rgba(245, 158, 11, 0.5);
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { 
-        opacity: 1; 
-        transform: scale(1);
-    }
-    50% { 
-        opacity: 0.6;
-        transform: scale(1.2);
-    }
-}
-
-/* =============================================================================
-   ALERTS
-   ============================================================================= */
-
-.alert {
-    background: var(--gradient-warning);
-    color: var(--text-inverse);
-    padding: var(--space-4);
-    border-radius: var(--radius-xl);
-    margin-bottom: var(--space-4);
-    text-align: center;
-    font-weight: var(--font-weight-semibold);
-    font-size: var(--font-size-sm);
-    box-shadow: var(--shadow-lg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.alert-warning {
-    background: var(--gradient-warning);
-}
-
-.alert-icon {
-    font-size: var(--font-size-base);
-}
-
-/* =============================================================================
-   ACTIVE WORKOUT
-   ============================================================================= */
-
-.active-workout {
-    background: var(--gradient-warning);
-    color: var(--text-inverse);
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-full);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
-    margin-top: var(--space-3);
-    text-align: center;
-    animation: pulseGlow 2s ease-in-out infinite;
-    box-shadow: var(--shadow-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-1);
-}
-
-@keyframes pulseGlow {
-    0%, 100% { 
-        box-shadow: var(--shadow-md);
-        transform: scale(1);
-    }
-    50% { 
-        box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
-        transform: scale(1.02);
-    }
-}
-
-/* =============================================================================
-   EMPTY STATES
-   ============================================================================= */
-
-.empty-state {
-    text-align: center;
-    padding: var(--space-20) var(--space-6);
-}
-
-.empty-icon {
-    font-size: var(--font-size-5xl);
-    margin-bottom: var(--space-6);
-    opacity: 0.5;
-    filter: grayscale(1);
-}
-
-.empty-title {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-3);
-    letter-spacing: -0.025em;
-}
-
-.empty-description {
-    color: var(--text-secondary);
-    line-height: var(--line-height-relaxed);
-    font-size: var(--font-size-sm);
-    max-width: 300px;
-    margin: 0 auto var(--space-8);
-}
-
-.empty-actions {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    align-items: center;
-}
-
-/* =============================================================================
-   COMPLETION CARD
-   ============================================================================= */
-
-.completion-card {
-    background: var(--gradient-primary);
-    color: var(--text-inverse);
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.completion-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
-    animation: shimmer 2s ease-in-out infinite;
-}
-
-.completion-title {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-    margin-bottom: var(--space-3);
-}
-
-.completion-subtitle {
-    opacity: 0.9;
-    margin-bottom: var(--space-4);
-    font-weight: var(--font-weight-medium);
-}
-
-/* =============================================================================
-   PLAN OBSERVATIONS
-   ============================================================================= */
-
-.plan-observations {
-    background: var(--bg-tertiary);
-    border-radius: var(--radius-xl);
-    padding: var(--space-1);
-    margin-top: var(--space-6);
-    border: 1px solid var(--border-light);
-    position: relative;
-}
-
-.plan-observations::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--gradient-secondary);
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-}
-
-.observations-title {
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-4);
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-}
-
-.observation-item {
-    margin-bottom: var(--space-3);
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    line-height: var(--line-height-relaxed);
-    padding: var(--space-3);
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-light);
-}
-
-.observation-label {
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
-}
-
-/* =============================================================================
-   FORMS E INPUTS
-   ============================================================================= */
-
-.form-section {
-    margin-bottom: var(--space-8);
-}
-
-.form-section h2 {
-    font-size: var(--font-size-2xl);
-    margin-bottom: var(--space-6);
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    font-weight: var(--font-weight-bold);
-    letter-spacing: -0.025em;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--space-6);
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-label {
-    font-weight: var(--font-weight-semibold);
-    margin-bottom: var(--space-2);
-    color: var(--text-primary);
-    font-size: var(--font-size-sm);
-}
-
-.form-input, 
-.form-select, 
-.form-textarea {
-    padding: var(--space-4);
-    border: 2px solid var(--border-light);
-    border-radius: var(--radius-xl);
-    font-size: var(--font-size-base);
-    transition: all var(--transition-base);
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    font-family: inherit;
-    font-weight: var(--font-weight-medium);
-}
-
-.form-input:focus, 
-.form-select:focus, 
-.form-textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-    transform: translateY(-1px);
-}
-
-.form-textarea {
-    resize: vertical;
-    min-height: 120px;
-    line-height: var(--line-height-relaxed);
-}
-
-/* =============================================================================
-   LOADING STATES
-   ============================================================================= */
-
-.loading-spinner {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border: 2px solid currentColor;
-    border-radius: var(--radius-full);
-    border-top-color: transparent;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.loading-spinner.dark {
-    border-color: rgba(0, 0, 0, 0.2);
-    border-top-color: var(--primary);
-}
-
-/* =============================================================================
-   NOTIFICATIONS/MESSAGES
-   ============================================================================= */
-
-.notification {
-    position: fixed;
-    top: calc(var(--safe-area-inset-top) + var(--space-6));
-    left: var(--space-4);
-    right: var(--space-4);
-    z-index: var(--z-toast);
-    transform: translateY(-100px);
-    opacity: 0;
-    transition: all var(--transition-base);
-    max-width: 400px;
-    margin: 0 auto;
-}
-
-.notification.show {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-.notification-content {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-xl);
-    padding: var(--space-4);
-    box-shadow: var(--shadow-xl);
-    border: 1px solid var(--border-light);
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    backdrop-filter: blur(20px);
-}
-
-.notification-success .notification-content {
-    border-left: 4px solid var(--success);
-    background: linear-gradient(135deg, var(--secondary-50) 0%, var(--bg-secondary) 100%);
-}
-
-.notification-error .notification-content {
-    border-left: 4px solid var(--error);
-    background: linear-gradient(135deg, #fef2f2 0%, var(--bg-secondary) 100%);
-}
-
-.notification-warning .notification-content {
-    border-left: 4px solid var(--warning);
-    background: linear-gradient(135deg, #fffbeb 0%, var(--bg-secondary) 100%);
-}
-
-.notification-info .notification-content {
-    border-left: 4px solid var(--primary);
-    background: linear-gradient(135deg, var(--primary-50) 0%, var(--bg-secondary) 100%);
-}
-
-.notification-icon {
-    font-size: var(--font-size-base);
-    flex-shrink: 0;
-}
-
-.notification-message {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--text-primary);
-    line-height: var(--line-height-relaxed);
-}
-
-.notification-close {
-    background: none;
-    border: none;
-    font-size: var(--font-size-lg);
-    color: var(--text-secondary);
-    cursor: pointer;
-    padding: var(--space-1);
-    line-height: 1;
-    transition: color var(--transition-fast);
-}
-
-.notification-close:hover {
-    color: var(--text-primary);
-}
-
-/* =============================================================================
-   PLAN CARDS
-   ============================================================================= */
-
-.plan-card {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-2xl);
-    padding: var(--space-1);
-    border: 2px solid var(--border-light);
-    position: relative;
-    margin-bottom: var(--space-6);
-    transition: all var(--transition-base);
-    overflow: hidden;
-}
-
-.plan-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--gradient-primary);
-    transform: scaleX(0);
-    transition: transform var(--transition-base);
-}
-
-.plan-card:hover {
-    border-color: var(--primary);
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
-}
-
-.plan-card:hover::before {
-    transform: scaleX(1);
-}
-
-.plan-card h3 {
-    margin-bottom: var(--space-3);
-    color: var(--text-primary);
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    line-height: var(--line-height-tight);
-}
-
-.plan-card p {
-    color: var(--text-secondary);
-    margin-bottom: var(--space-2);
-    line-height: var(--line-height-relaxed);
-    font-weight: var(--font-weight-medium);
-}
-
-/* =============================================================================
-   RESPONSIVE DESIGN
-   ============================================================================= */
-
-@media (max-width: 640px) {
-    .container {
-        padding: var(--space-4);
-    }
-    
-    .container .header {
-        padding: var(--space-8);
-        margin-bottom: var(--space-8);
-    }
-    
-    .container .header h1 {
-        font-size: var(--font-size-3xl);
-    }
-    
-    .container .header p {
-        font-size: var(--font-size-base);
-    }
-    
-    .main-actions {
-        grid-template-columns: 1fr;
-        gap: var(--space-3);
-    }
-    
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .modal {
-        width: 95vw;
-        max-width: none;
-        padding: var(--space-1);
-    }
-    
-    .file-upload-area {
-        padding: var(--space-1) var(--space-4);
-        min-height: 160px;
-    }
-    
-    .file-upload-content svg {
-        width: 40px;
-        height: 40px;
-    }
-    
-    .import-divider {
-        margin: var(--space-4) 0;
-    }
-    
-    .student-details {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .plan-stats {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .exercise-specs-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .workout-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .plan-actions,
-    .workout-actions,
-    .exercise-actions {
-        flex-direction: column;
-    }
-    
-    .plan-actions .btn,
-    .workout-actions .btn,
-    .exercise-actions .btn {
-        min-width: auto;
-    }
-    
-    .modal-actions {
-        flex-direction: column;
-    }
-}
-
-@media (max-width: 480px) {
-    :root {
-        --space-1: 0.125rem; /* 2px */
-        --space-2: 0.25rem;  /* 4px */
-        --space-3: 0.5rem;   /* 8px */
-        --space-4: 0.75rem;  /* 12px */
-        --space-5: 1rem;     /* 16px */
-        --space-6: 1.25rem;  /* 20px */
-        --space-8: 1.5rem;   /* 24px */
-        --space-10: 2rem;    /* 32px */
-        --space-12: 2.5rem;  /* 40px */
-        --space-16: 3rem;    /* 48px */
-        --space-20: 4rem;    /* 64px */
-        --space-24: 5rem;    /* 80px */
+    showFileError(message) {
+        const fileError = document.getElementById('fileError');
+        const fileInfo = document.getElementById('fileInfo');
+        const importBtn = document.getElementById('importFileBtn');
         
-        --font-size-xs: 0.625rem;  /* 10px */
-        --font-size-sm: 0.75rem;   /* 12px */
-        --font-size-base: 0.875rem; /* 14px */
-        --font-size-lg: 1rem;      /* 16px */
-        --font-size-xl: 1.125rem;  /* 18px */
-        --font-size-2xl: 1.25rem;  /* 20px */
-        --font-size-3xl: 1.5rem;   /* 24px */
-        --font-size-4xl: 1.875rem; /* 30px */
-        --font-size-5xl: 2.25rem;  /* 36px */
-    }
-
-    .container {
-        padding: var(--space-3);
-    }
-    
-    .container .header {
-        padding: var(--space-1);
-        margin-bottom: var(--space-6);
-    }
-    
-    .content {
-        padding: var(--space-4);
-    }
-    
-    .modal {
-        padding: var(--space-4);
-    }
-    
-    .file-upload-area {
-        padding: var(--space-4);
-        min-height: 140px;
-    }
-    
-    .btn {
-        padding: var(--space-3) var(--space-4);
-        font-size: var(--font-size-sm);
-        min-height: 40px;
-    }
-    
-    .btn-sm {
-        padding: var(--space-2) var(--space-3);
-        font-size: var(--font-size-xs);
-        min-height: 32px;
-    }
-    
-    .student-details {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .plan-stats {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .exercise-specs-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .header-content {
-        padding: var(--space-3) var(--space-4);
-    }
-    
-    .title {
-        font-size: var(--font-size-xl);
-    }
-    
-    .notification {
-        left: var(--space-2);
-        right: var(--space-2);
-    }
-}
-
-@media (max-width: 375px) {
-    .content {
-        padding: var(--space-3);
-    }
-    
-    .card {
-        padding: var(--space-4);
-    }
-    
-    .student-details {
-        grid-template-columns: 1fr;
-    }
-    
-    .plan-stats {
-        grid-template-columns: 1fr 1fr;
-    }
-    
-    .exercise-specs-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .workout-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .file-upload-area {
-        padding: var(--space-3);
-        min-height: 120px;
-    }
-}
-
-/* =============================================================================
-   DARK MODE ADJUSTMENTS FOR UPLOAD
-   ============================================================================= */
-
-@media (prefers-color-scheme: dark) {
-    .file-upload-area {
-        background: rgba(255, 255, 255, 0.02);
-        border-color: var(--border-color);
-    }
-    
-    .file-upload-area:hover {
-        background: rgba(255, 255, 255, 0.05);
-    }
-    
-    .file-upload-area.drag-over {
-        background: var(--primary-color-alpha);
-    }
-    
-    .modal {
-        background: var(--bg-secondary);
-        border-color: var(--border-light);
-    }
-    
-    .file-info {
-        background: var(--bg-tertiary);
-        border-color: var(--border-color);
-    }
-}
-
-/* =============================================================================
-   TOUCH TARGET IMPROVEMENTS
-   ============================================================================= */
-
-@media (pointer: coarse) {
-    .btn,
-    .back-btn {
-        min-height: 44px;
-        min-width: 44px;
-    }
-    
-    .import-input,
-    .form-input,
-    .form-select,
-    .form-textarea {
-        min-height: 44px;
-    }
-    
-    .spec-badge {
-        min-height: 50px;
-    }
-    
-    .file-upload-area {
-        min-height: 180px;
-    }
-}
-
-/* =============================================================================
-   REDUCED MOTION
-   ============================================================================= */
-
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
-    
-    .student-info-card::before,
-    .progress-fill::after,
-    .completion-card::before {
-        animation: none !important;
-    }
-}
-
-/* =============================================================================
-   HIGH CONTRAST MODE
-   ============================================================================= */
-
-@media (prefers-contrast: high) {
-    :root {
-        --border-light: #000000;
-        --border-medium: #000000;
-        --border-strong: #000000;
-        --border-color: #000000;
-    }
-    
-    .btn {
-        border: 2px solid currentColor;
-    }
-    
-    .card,
-    .modal {
-        border: 2px solid var(--border-strong);
-    }
-    
-    .file-upload-area {
-        border: 3px solid var(--border-strong);
-    }
-    
-    .form-input,
-    .form-select,
-    .form-textarea {
-        border: 2px solid var(--border-strong);
-    }
-}
-
-/* =============================================================================
-   UTILITY CLASSES
-   ============================================================================= */
-
-/* Display */
-.block { display: block; }
-.inline-block { display: inline-block; }
-.inline { display: inline; }
-.flex { display: flex; }
-.inline-flex { display: inline-flex; }
-.grid { display: grid; }
-.hidden { display: none; }
-
-/* Flexbox */
-.flex-col { flex-direction: column; }
-.flex-row { flex-direction: row; }
-.items-center { align-items: center; }
-.items-start { align-items: flex-start; }
-.items-end { align-items: flex-end; }
-.justify-center { justify-content: center; }
-.justify-between { justify-content: space-between; }
-.justify-around { justify-content: space-around; }
-.justify-start { justify-content: flex-start; }
-.justify-end { justify-content: flex-end; }
-
-/* Text */
-.text-left { text-align: left; }
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.text-justify { text-align: justify; }
-
-/* Font Weight */
-.font-light { font-weight: var(--font-weight-light); }
-.font-normal { font-weight: var(--font-weight-normal); }
-.font-medium { font-weight: var(--font-weight-medium); }
-.font-semibold { font-weight: var(--font-weight-semibold); }
-.font-bold { font-weight: var(--font-weight-bold); }
-.font-extrabold { font-weight: var(--font-weight-extrabold); }
-.font-black { font-weight: var(--font-weight-black); }
-
-/* Text Colors */
-.text-primary { color: var(--text-primary); }
-.text-secondary { color: var(--text-secondary); }
-.text-tertiary { color: var(--text-tertiary); }
-.text-inverse { color: var(--text-inverse); }
-.text-success { color: var(--success); }
-.text-warning { color: var(--warning); }
-.text-error { color: var(--error); }
-.text-info { color: var(--info); }
-
-/* Background Colors */
-.bg-primary { background: var(--bg-primary); }
-.bg-secondary { background: var(--bg-secondary); }
-.bg-tertiary { background: var(--bg-tertiary); }
-.bg-success { background: var(--success); }
-.bg-warning { background: var(--warning); }
-.bg-error { background: var(--error); }
-.bg-info { background: var(--info); }
-
-/* Spacing */
-.m-0 { margin: 0; }
-.m-1 { margin: var(--space-1); }
-.m-2 { margin: var(--space-2); }
-.m-3 { margin: var(--space-3); }
-.m-4 { margin: var(--space-4); }
-.m-5 { margin: var(--space-5); }
-.m-6 { margin: var(--space-6); }
-.m-8 { margin: var(--space-8); }
-
-.p-0 { padding: 0; }
-.p-1 { padding: var(--space-1); }
-.p-2 { padding: var(--space-2); }
-.p-3 { padding: var(--space-3); }
-.p-4 { padding: var(--space-4); }
-.p-5 { padding: var(--space-5); }
-.p-6 { padding: var(--space-1); }
-.p-8 { padding: var(--space-8); }
-
-/* Border Radius */
-.rounded-none { border-radius: 0; }
-.rounded-sm { border-radius: var(--radius-sm); }
-.rounded { border-radius: var(--radius-md); }
-.rounded-lg { border-radius: var(--radius-lg); }
-.rounded-xl { border-radius: var(--radius-xl); }
-.rounded-2xl { border-radius: var(--radius-2xl); }
-.rounded-3xl { border-radius: var(--radius-3xl); }
-.rounded-full { border-radius: var(--radius-full); }
-
-/* Shadows */
-.shadow-none { box-shadow: none; }
-.shadow-sm { box-shadow: var(--shadow-sm); }
-.shadow-md { box-shadow: var(--shadow-md); }
-.shadow-lg { box-shadow: var(--shadow-lg); }
-.shadow-xl { box-shadow: var(--shadow-xl); }
-.shadow-2xl { box-shadow: var(--shadow-2xl); }
-
-/* Transitions */
-.transition-fast { transition: all var(--transition-fast); }
-.transition-base { transition: all var(--transition-base); }
-.transition-slow { transition: all var(--transition-slow); }
-.transition-bounce { transition: all var(--transition-bounce); }
-
-/* Cursor */
-.cursor-pointer { cursor: pointer; }
-.cursor-not-allowed { cursor: not-allowed; }
-.cursor-default { cursor: default; }
-
-/* Opacity */
-.opacity-0 { opacity: 0; }
-.opacity-25 { opacity: 0.25; }
-.opacity-50 { opacity: 0.5; }
-.opacity-75 { opacity: 0.75; }
-.opacity-100 { opacity: 1; }
-
-/* Transform */
-.scale-95 { transform: scale(0.95); }
-.scale-100 { transform: scale(1); }
-.scale-105 { transform: scale(1.05); }
-.scale-110 { transform: scale(1.1); }
-
-/* Position */
-.relative { position: relative; }
-.absolute { position: absolute; }
-.fixed { position: fixed; }
-.sticky { position: sticky; }
-
-/* Overflow */
-.overflow-hidden { overflow: hidden; }
-.overflow-visible { overflow: visible; }
-.overflow-scroll { overflow: scroll; }
-.overflow-auto { overflow: auto; }
-
-/* Width */
-.w-full { width: 100%; }
-.w-auto { width: auto; }
-.w-fit { width: fit-content; }
-
-/* Height */
-.h-full { height: 100%; }
-.h-auto { height: auto; }
-.h-fit { height: fit-content; }
-
-/* =============================================================================
-   ANIMATIONS E KEYFRAMES ADICIONAIS
-   ============================================================================= */
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
-}
-
-@keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes slideDown {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes slideLeft {
-    from { transform: translateX(20px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes slideRight {
-    from { transform: translateX(-20px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes zoomIn {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes bounce {
-    0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); }
-    40%, 43% { transform: translate3d(0,-30px,0); }
-    70% { transform: translate3d(0,-15px,0); }
-    90% { transform: translate3d(0,-4px,0); }
-}
-
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
-    20%, 40%, 60%, 80% { transform: translateX(2px); }
-}
-
-@keyframes heartbeat {
-    0% { transform: scale(1); }
-    14% { transform: scale(1.05); }
-    28% { transform: scale(1); }
-    42% { transform: scale(1.05); }
-    70% { transform: scale(1); }
-}
-
-/* Animation Classes */
-.animate-fadeIn { animation: fadeIn 0.3s ease-out; }
-.animate-fadeOut { animation: fadeOut 0.3s ease-out; }
-.animate-slideUp { animation: slideUp 0.4s ease-out; }
-.animate-slideDown { animation: slideDown 0.4s ease-out; }
-.animate-slideLeft { animation: slideLeft 0.4s ease-out; }
-.animate-slideRight { animation: slideRight 0.4s ease-out; }
-.animate-zoomIn { animation: zoomIn 0.3s ease-out; }
-.animate-bounce { animation: bounce 1s ease-out; }
-.animate-shake { animation: shake 0.5s ease-out; }
-.animate-heartbeat { animation: heartbeat 1.5s ease-in-out infinite; }
-
-/* =============================================================================
-   SCROLLBAR CUSTOMIZATION
-   ============================================================================= */
-
-/* Webkit browsers */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--bg-tertiary);
-    border-radius: var(--radius-full);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--border-medium);
-    border-radius: var(--radius-full);
-    transition: background var(--transition-base);
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--primary);
-}
-
-::-webkit-scrollbar-corner {
-    background: var(--bg-tertiary);
-}
-
-/* Firefox */
-* {
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-medium) var(--bg-tertiary);
-}
-
-/* =============================================================================
-   SELECTION STYLES
-   ============================================================================= */
-
-::selection {
-    background: var(--primary-200);
-    color: var(--primary-800);
-}
-
-::-moz-selection {
-    background: var(--primary-200);
-    color: var(--primary-800);
-}
-
-/* =============================================================================
-   PLACEHOLDER STYLES
-   ============================================================================= */
-
-::placeholder {
-    color: var(--text-tertiary);
-    opacity: 1;
-}
-
-::-webkit-input-placeholder {
-    color: var(--text-tertiary);
-}
-
-::-moz-placeholder {
-    color: var(--text-tertiary);
-    opacity: 1;
-}
-
-:-ms-input-placeholder {
-    color: var(--text-tertiary);
-}
-
-/* =============================================================================
-   PRINT STYLES
-   ============================================================================= */
-
-@media print {
-    .header,
-    .main-actions,
-    .btn,
-    .modal,
-    .modal-overlay,
-    .notification,
-    .connection-status,
-    .back-btn,
-    .import-by-id-card,
-    .plan-actions,
-    .workout-actions,
-    .exercise-actions,
-    .alert,
-    .active-workout,
-    .file-upload-area,
-    .import-file-btn {
-        display: none !important;
-    }
-    
-    body {
-        background: white !important;
-        color: black !important;
-        font-size: 12pt;
-        line-height: 1.4;
-    }
-    
-    .view {
-        min-height: auto;
-    }
-    
-    .content {
-        padding: 0;
-    }
-    
-    .card,
-    .content-card {
-        box-shadow: none !important;
-        border: 1px solid #000 !important;
-        margin-bottom: var(--space-4);
-        break-inside: avoid;
-        background: white !important;
-    }
-    
-    .student-info-card,
-    .plan-cycle-info {
-        background: #f0f0f0 !important;
-        color: #000 !important;
-        border: 1px solid #000 !important;
-    }
-    
-    .plan-card {
-        background: white !important;
-        color: #000 !important;
-        border: 1px solid #000 !important;
-    }
-    
-    .exercise-card {
-        border-left: 4px solid #000 !important;
-    }
-    
-    .progress-fill {
-        background: #000 !important;
-    }
-    
-    h1, h2, h3, h4, h5, h6 {
-        color: #000 !important;
-        page-break-after: avoid;
-    }
-    
-    .page-break {
-        page-break-before: always;
-    }
-    
-    .no-print {
-        display: none !important;
-    }
-}
-
-/* =============================================================================
-   LARGE SCREENS
-   ============================================================================= */
-
-@media (min-width: 1024px) {
-    .container {
-        padding: var(--space-8);
-    }
-    
-    .main-actions {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .form-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    
-    .plan-stats {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .workout-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    
-    .exercise-specs-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .student-details {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .modal {
-        max-width: 600px;
-    }
-}
-
-/* =============================================================================
-   LANDSCAPE ORIENTATION
-   ============================================================================= */
-
-@media (orientation: landscape) and (max-height: 500px) {
-    .cycle-counter {
-        font-size: var(--font-size-3xl);
-    }
-    
-    .empty-state {
-        padding: var(--space-8) var(--space-4);
-    }
-    
-    .student-info-card {
-        padding: var(--space-4);
-    }
-    
-    .student-details {
-        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    }
-    
-    .plan-cycle-info {
-        padding: var(--space-1);
-    }
-    
-    .container .header {
-        padding: var(--space-1);
-        margin-bottom: var(--space-6);
-    }
-    
-    .file-upload-area {
-        min-height: 120px;
-        padding: var(--space-4);
-    }
-}
-
-/* =============================================================================
-   MOBILE SPECIFIC ADJUSTMENTS
-   ============================================================================= */
-
-@media (max-width: 320px) {
-    .header-content {
-        padding: var(--space-2) var(--space-3);
-    }
-    
-    .title {
-        font-size: var(--font-size-lg);
-    }
-    
-    .btn {
-        padding: var(--space-2) var(--space-3);
-        min-height: 36px;
-        font-size: var(--font-size-xs);
-    }
-    
-    .student-name {
-        font-size: var(--font-size-base);
-    }
-    
-    .cycle-counter {
-        font-size: var(--font-size-2xl);
-    }
-    
-    .plan-stats {
-        grid-template-columns: 1fr;
-    }
-    
-    .exercise-specs-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .file-upload-area {
-        padding: var(--space-2);
-        min-height: 100px;
-    }
-    
-    .modal {
-        padding: var(--space-3);
-        margin: var(--space-2);
-        width: calc(100vw - var(--space-4));
-    }
-}
-
-/* =============================================================================
-   ACCESSIBILITY IMPROVEMENTS
-   ============================================================================= */
-
-/* Focus indicators for keyboard navigation */
-.btn:focus-visible,
-.file-upload-area:focus-visible,
-.import-input:focus-visible {
-    outline: 3px solid var(--primary);
-    outline-offset: 2px;
-}
-
-/* Screen reader improvements */
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-}
-
-/* Skip links */
-.skip-link {
-    position: absolute;
-    top: -40px;
-    left: 6px;
-    background: var(--primary);
-    color: var(--text-inverse);
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    font-weight: var(--font-weight-semibold);
-    z-index: var(--z-tooltip);
-    transition: top var(--transition-fast);
-}
-
-.skip-link:focus {
-    top: 6px;
-}
-
-/* High contrast mode support */
-@media (forced-colors: active) {
-    .file-upload-area {
-        border: 2px solid ButtonText;
-    }
-    
-    .btn {
-        border: 1px solid ButtonText;
-    }
-    
-    .card {
-        border: 1px solid ButtonText;
-    }
-}
-
-/* =============================================================================
-   PERFORMANCE OPTIMIZATIONS
-   ============================================================================= */
-
-/* GPU acceleration for animations */
-.card,
-.btn,
-.modal,
-.notification {
-    will-change: transform;
-}
-
-/* Contain paint for better performance */
-.student-info-card,
-.plan-cycle-info,
-.completion-card {
-    contain: paint;
-}
-
-/* =============================================================================
-   BROWSER SPECIFIC FIXES
-   ============================================================================= */
-
-/* Safari specific fixes */
-@supports (-webkit-appearance: none) {
-    .file-input {
-        -webkit-appearance: none;
-    }
-    
-    .import-input,
-    .form-input {
-        -webkit-appearance: none;
-        border-radius: var(--radius-xl);
-    }
-}
-
-/* Firefox specific fixes */
-@-moz-document url-prefix() {
-    .file-upload-area {
-        border-style: dashed;
-    }
-}
-
-/* Edge specific fixes */
-@supports (-ms-ime-align: auto) {
-    .modal {
-        backdrop-filter: none;
-    }
-}
-
-/* =============================================================================
-   CSS CUSTOM PROPERTIES FALLBACKS
-   ============================================================================= */
-
-/* Fallbacks for older browsers */
-@supports not (backdrop-filter: blur(10px)) {
-    .header {
-        background: var(--bg-secondary);
-        border-bottom: 1px solid var(--border-light);
-    }
-    
-    .modal {
-        background: var(--bg-secondary);
-    }
-    
-    .file-upload-area {
-        background: var(--bg-tertiary);
-    }
-}
-
-/* ADICIONAR ESTE CSS NO ARQUIVO styles.css */
-
-/* Título do exercício */
-.exercise-title-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
-}
-
-.exercise-number {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #1F2937;
-    line-height: 1.3;
-}
-
-/* Descrição detalhada */
-.exercise-description {
-    margin: 12px 0;
-    padding: 12px;
-    background: #F9FAFB;
-    border-radius: 8px;
-    border-left: 4px solid #3B82F6;
-}
-
-.description-label {
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 6px;
-    font-size: 14px;
-}
-
-.description-text {
-    color: #6B7280;
-    line-height: 1.5;
-    font-size: 14px;
-}
-
-/* Técnica aplicada */
-.exercise-technique {
-    margin: 12px 0;
-    padding: 12px;
-    background: #FEF3C7;
-    border-radius: 8px;
-    border-left: 4px solid #F59E0B;
-}
-
-.technique-header {
-    margin-bottom: 8px;
-}
-
-.technique-badge {
-    display: inline-block;
-    background: #4F46E5;
-    color: white;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* Badges específicas por técnica */
-.technique-badge[data-technique="tempo-controlado"] { background: #DC2626; }
-.technique-badge[data-technique="bi-set"] { background: #7C3AED; }
-.technique-badge[data-technique="pre-exaustao"] { background: #059669; }
-.technique-badge[data-technique="pos-exaustao"] { background: #D97706; }
-
-.technique-description {
-    font-size: 13px;
-    color: #92400E;
-    line-height: 1.5;
-    margin-top: 8px;
-}
-
-/* Observações especiais */
-.exercise-notes {
-    margin: 12px 0;
-    padding: 12px;
-    background: #FEF2F2;
-    border-radius: 8px;
-    border-left: 4px solid #EF4444;
-    display: flex;
-    gap: 10px;
-}
-
-.notes-icon {
-    font-size: 16px;
-    flex-shrink: 0;
-}
-
-.notes-content {
-    flex: 1;
-}
-
-.notes-label {
-    font-weight: 600;
-    color: #B91C1C;
-    margin-bottom: 4px;
-    font-size: 14px;
+        if (fileError) {
+            fileError.textContent = message;
+            fileError.classList.remove('hidden');
+        }
+        
+        if (fileInfo) fileInfo.classList.add('hidden');
+        if (importBtn) importBtn.disabled = true;
+        
+        this.state.selectedFile = null;
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    async handleFileImport() {
+        if (!this.state.selectedFile) {
+            this.showFileError('Nenhum arquivo selecionado');
+            return;
+        }
+
+        const importBtn = document.getElementById('importFileBtn');
+        const originalText = importBtn?.innerHTML;
+        
+        try {
+            // Update UI for loading state
+            if (importBtn) {
+                importBtn.innerHTML = '<span class="loading-spinner"></span> Importando...';
+                importBtn.disabled = true;
+            }
+
+            // Read and parse file
+            const fileContent = await this.readFileContent(this.state.selectedFile);
+            const planData = await this.parseJSONFile(fileContent);
+            
+            // Validate and process plan data
+            const processedPlan = await this.processFileData(planData);
+            
+            // Check if plan already exists
+            const existing = this.state.workoutPlans.find(p => 
+                p.nome === processedPlan.nome && 
+                p.aluno?.nome === processedPlan.aluno?.nome
+            );
+            
+            if (existing) {
+                const confirmed = confirm(
+                    `Um plano com nome "${processedPlan.nome}" já existe.\n\nDeseja importar mesmo assim?`
+                );
+                if (!confirmed) {
+                    return;
+                }
+            }
+
+            // Add to plans and save
+            this.state.workoutPlans.push(processedPlan);
+            await this.saveToStorage();
+
+            // Success feedback
+            this.showNotification(`✅ Plano "${processedPlan.nome}" importado com sucesso!`, 'success');
+            this.hideFileUploadModal();
+            this.renderHome();
+
+        } catch (error) {
+            console.error('File import error:', error);
+            this.showFileError(`Erro ao importar: ${error.message}`);
+        } finally {
+            // Reset button
+            if (importBtn && originalText) {
+                importBtn.innerHTML = originalText;
+                importBtn.disabled = false;
+            }
+        }
+    }
+
+    async readFileContent(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                resolve(e.target.result);
+            };
+            
+            reader.onerror = () => {
+                reject(new Error('Erro ao ler o arquivo'));
+            };
+            
+            reader.readAsText(file, 'UTF-8');
+        });
+    }
+
+    async parseJSONFile(content) {
+        try {
+            const data = JSON.parse(content);
+            
+            if (!data || typeof data !== 'object') {
+                throw new Error('Arquivo JSON inválido');
+            }
+            
+            // NOVA VALIDAÇÃO: verificar se tem array planos
+            if (!data.planos || !Array.isArray(data.planos) || data.planos.length === 0) {
+                throw new Error('Formato JSON inválido: deve conter array "planos" com pelo menos um plano');
+            }
+            
+            // Retornar o primeiro plano do array
+            return data.planos[0];
+        } catch (error) {
+            if (error instanceof SyntaxError) {
+                throw new Error('Formato JSON inválido');
+            }
+            throw error;
+        }
+    }
+
+    async processFileData(data) {
+        // Validate required fields
+        if (!data.nome && !data.name) {
+            throw new Error('Nome do plano não encontrado no arquivo');
+        }
+    
+        if (!data.treinos && !data.workouts) {
+            throw new Error('Treinos não encontrados no arquivo');
+        }
+    
+        // Generate unique ID for imported plan
+        const processedPlan = {
+            id: this.generateId(),
+            nome: data.nome || data.name || 'Plano Importado',
+            importedAt: new Date().toISOString(),
+            importedFrom: 'file',
+            execucoesPlanCompleto: 0,
+            
+            // Student data
+            aluno: {
+                nome: data.aluno?.nome || data.student?.name || '',
+                dataNascimento: data.aluno?.dataNascimento || data.student?.birth_date || '',
+                idade: data.aluno?.idade || data.student?.age || null,
+                altura: data.aluno?.altura || data.student?.height || '',
+                peso: data.aluno?.peso || data.student?.weight || '',
+                cpf: data.aluno?.cpf || data.student?.cpf || ''
+            },
+            
+            // Plan metadata
+            dias: data.dias || data.frequency_per_week || 3,
+            dataInicio: data.dataInicio || data.start_date || new Date().toISOString().split('T')[0],
+            dataFim: data.dataFim || data.end_date || '',
+            
+            // Profile and objectives
+            perfil: {
+                objetivo: data.perfil?.objetivo || data.objective || 'Condicionamento geral',
+                altura: data.aluno?.altura || data.student?.height || '',
+                peso: data.aluno?.peso || data.student?.weight || '',
+                idade: data.aluno?.idade || data.student?.age || null,
+                porte: data.perfil?.porte || '' // NOVO CAMPO
+            },
+            
+            // Convert workouts
+            treinos: this.convertWorkoutsToFrontendFormat(data.treinos || data.workouts || []),
+            
+            // Observations
+            observacoes: data.observacoes || data.observations || {},
+            
+            // NOVO: Técnicas aplicadas
+            tecnicasAplicadas: data.tecnicas_aplicadas || {}
+        };
+    
+        // Validate processed plan
+        if (processedPlan.treinos.length === 0) {
+            throw new Error('Nenhum treino válido encontrado no arquivo');
+        }
+    
+        return processedPlan;
+    }
+
+    // =============================================================================
+    // WORKOUT MANAGEMENT
+    // =============================================================================
+
+    startWorkout(planId, workoutId) {
+        const sessionKey = `${planId}-${workoutId}`;
+        
+        if (this.state.activeWorkoutSessions.has(sessionKey)) {
+            this.showNotification('Este treino já está em andamento', 'warning');
+            return;
+        }
+
+        const plan = this.findPlan(planId);
+        const workout = plan?.treinos.find(t => t.id === workoutId);
+        
+        if (!workout) {
+            this.showNotification('Treino não encontrado', 'error');
+            return;
+        }
+
+        this.state.activeWorkoutSessions.set(sessionKey, {
+            startTime: new Date(),
+            planId,
+            workoutId,
+            completedExercises: 0
+        });
+
+        // Reset workout state
+        workout.exercicios.forEach(ex => ex.concluido = false);
+        workout.concluido = false;
+
+        this.saveToStorage();
+        this.renderCurrentView();
+        this.showNotification('Treino iniciado! 💪', 'success');
+    }
+
+    completeExercise(planId, workoutId, exerciseId) {
+        const sessionKey = `${planId}-${workoutId}`;
+        const session = this.state.activeWorkoutSessions.get(sessionKey);
+        
+        if (!session) {
+            this.showNotification('Inicie o treino primeiro', 'warning');
+            return;
+        }
+
+        const plan = this.findPlan(planId);
+        const workout = plan?.treinos.find(t => t.id === workoutId);
+        const exercise = workout?.exercicios.find(e => e.id === exerciseId);
+
+        if (!exercise) {
+            this.showNotification('Exercício não encontrado', 'error');
+            return;
+        }
+
+        if (exercise.concluido) {
+            this.showNotification('Exercício já foi concluído', 'info');
+            return;
+        }
+
+        exercise.concluido = true;
+        session.completedExercises++;
+
+        this.saveToStorage();
+        this.renderCurrentView();
+        this.showNotification(`✅ ${exercise.nome} concluído!`, 'success');
+
+        // Check if all exercises are completed
+        const allCompleted = workout.exercicios.every(ex => ex.concluido);
+        if (allCompleted) {
+            setTimeout(() => {
+                this.showNotification('Todos os exercícios concluídos! Finalize o treino.', 'info', 6000);
+            }, 1000);
+        }
+    }
+
+    completeWorkout(planId, workoutId) {
+        const sessionKey = `${planId}-${workoutId}`;
+        const plan = this.findPlan(planId);
+        const workout = plan?.treinos.find(t => t.id === workoutId);
+
+        if (!workout) return;
+
+        // Validate completion
+        const incompleteExercises = workout.exercicios.filter(ex => !ex.concluido);
+        if (incompleteExercises.length > 0) {
+            this.showNotification(
+                `Complete os exercícios restantes: ${incompleteExercises.map(ex => ex.nome).join(', ')}`, 
+                'warning'
+            );
+            return;
+        }
+
+        // Complete workout
+        workout.concluido = true;
+        workout.execucoes += 1;
+        
+        // Remove active session
+        this.state.activeWorkoutSessions.delete(sessionKey);
+
+        // Check if plan cycle is complete
+        this.checkPlanCycleCompletion(plan);
+
+        this.saveToStorage();
+        this.showNotification('🎉 Treino concluído com sucesso!', 'success');
+        
+        setTimeout(() => {
+            this.showPlan(planId);
+        }, 1500);
+    }
+
+    checkPlanCycleCompletion(plan) {
+        const allWorkoutsCompleted = plan.treinos.every(t => t.concluido);
+        
+        if (allWorkoutsCompleted) {
+            plan.execucoesPlanCompleto = (plan.execucoesPlanCompleto || 0) + 1;
+            
+            // Reset for next cycle
+            plan.treinos.forEach(t => {
+                t.concluido = false;
+                t.exercicios.forEach(e => e.concluido = false);
+            });
+
+            setTimeout(() => {
+                this.showNotification(
+                    `🎊 Parabéns! Você completou o ciclo ${plan.execucoesPlanCompleto} do plano "${plan.nome}"!\n\nTodos os treinos foram resetados para o próximo ciclo.`,
+                    'success',
+                    8000
+                );
+            }, 2000);
+        }
+    }
+
+    // =============================================================================
+    // WEIGHT MANAGEMENT
+    // =============================================================================
+
+    startEditingWeight(exerciseId) {
+        this.state.editingWeights.add(exerciseId);
+        this.renderCurrentView();
+    }
+
+    cancelEditingWeight(exerciseId) {
+        this.state.editingWeights.delete(exerciseId);
+        this.renderCurrentView();
+    }
+
+    saveWeight(planId, workoutId, exerciseId, newWeight) {
+        if (!newWeight?.trim()) {
+            this.showNotification('Digite uma carga válida', 'warning');
+            return;
+        }
+
+        const plan = this.findPlan(planId);
+        const workout = plan?.treinos.find(t => t.id === workoutId);
+        const exercise = workout?.exercicios.find(e => e.id === exerciseId);
+
+        if (!exercise) {
+            this.showNotification('Exercício não encontrado', 'error');
+            return;
+        }
+
+        exercise.currentCarga = newWeight.trim();
+        this.state.editingWeights.delete(exerciseId);
+
+        this.saveToStorage();
+        this.renderCurrentView();
+        this.showNotification('Carga atualizada!', 'success');
+    }
+
+    // =============================================================================
+    // DATA MANAGEMENT
+    // =============================================================================
+
+    generateId() {
+        return Date.now() + Math.random();
+    }
+
+    findPlan(planId) {
+        return this.state.workoutPlans.find(p => p.id === planId);
+    }
+
+    async saveToStorage() {
+        try {
+            const data = {
+                workoutPlans: this.state.workoutPlans,
+                activeWorkoutSessions: Array.from(this.state.activeWorkoutSessions.entries()),
+                lastSaved: new Date().toISOString(),
+                version: '3.1.0'
+            };
+            
+            localStorage.setItem('jsfitapp_student_data', JSON.stringify(data));
+        } catch (error) {
+            console.error('Storage save failed:', error);
+            this.showNotification('Erro ao salvar dados', 'error');
+        }
+    }
+
+    async loadFromStorage() {
+        try {
+            const stored = localStorage.getItem('jsfitapp_student_data');
+            if (!stored) return;
+
+            const data = JSON.parse(stored);
+            this.state.workoutPlans = data.workoutPlans || [];
+            
+            // Restore active sessions
+            if (data.activeWorkoutSessions) {
+                this.state.activeWorkoutSessions = new Map(data.activeWorkoutSessions);
+            }
+
+            // Migrate legacy data
+            this.migrateLegacyData();
+        } catch (error) {
+            console.error('Storage load failed:', error);
+            this.state.workoutPlans = [];
+        }
+    }
+
+    migrateLegacyData() {
+        // Migrate old localStorage key
+        const oldData = localStorage.getItem('studentWorkoutPlans');
+        if (oldData) {
+            try {
+                const plans = JSON.parse(oldData);
+                plans.forEach(plan => {
+                    // Convert old format to new format
+                    if (!plan.aluno && plan.perfil) {
+                        plan.aluno = {
+                            nome: '',
+                            dataNascimento: '',
+                            idade: plan.perfil.idade || null,
+                            altura: plan.perfil.altura || '',
+                            peso: plan.perfil.peso || '',
+                            cpf: ''
+                        };
+                    }
+                    
+                    // Add importedFrom if missing
+                    if (!plan.importedFrom) {
+                        plan.importedFrom = 'legacy';
+                    }
+                });
+                
+                this.state.workoutPlans = [...this.state.workoutPlans, ...plans];
+                localStorage.removeItem('studentWorkoutPlans');
+                this.saveToStorage();
+            } catch (error) {
+                console.warn('Legacy data migration failed:', error);
+            }
+        }
+
+        // Ensure all exercises have IDs and proper structure
+        this.state.workoutPlans.forEach(plan => {
+            plan.treinos?.forEach(treino => {
+                treino.exercicios?.forEach(ex => {
+                    if (!ex.id) ex.id = this.generateId();
+                    if (!ex.currentCarga) ex.currentCarga = ex.carga || '';
+                });
+            });
+        });
+    }
+
+    savePlanToCache(shareId, planData) {
+        try {
+            const cache = this.getSharedPlansCache();
+            cache[shareId] = planData;
+            localStorage.setItem('jsfitapp_shared_cache', JSON.stringify(cache));
+        } catch (error) {
+            console.warn('Cache save failed:', error);
+        }
+    }
+
+    getPlanFromCache(shareId) {
+        try {
+            const cache = this.getSharedPlansCache();
+            return cache[shareId] || null;
+        } catch (error) {
+            console.warn('Cache read failed:', error);
+            return null;
+        }
+    }
+
+    getSharedPlansCache() {
+        try {
+            const stored = localStorage.getItem('jsfitapp_shared_cache');
+            return stored ? JSON.parse(stored) : {};
+        } catch (error) {
+            return {};
+        }
+    }
+
+    deletePlan(planId) {
+        const plan = this.findPlan(planId);
+        if (!plan) return;
+
+        const activeWorkouts = Array.from(this.state.activeWorkoutSessions.keys())
+            .filter(key => key.startsWith(`${planId}-`));
+
+        let message = `Confirma a exclusão do plano "${plan.nome}"?`;
+        if (activeWorkouts.length > 0) {
+            message += '\n\n⚠️ Este plano possui treinos em andamento que serão perdidos.';
+        }
+        message += '\n\nEsta ação não pode ser desfeita.';
+
+        if (!confirm(message)) return;
+
+        // Remove active sessions
+        activeWorkouts.forEach(key => this.state.activeWorkoutSessions.delete(key));
+        
+        // Remove plan
+        this.state.workoutPlans = this.state.workoutPlans.filter(p => p.id !== planId);
+        
+        // Navigation
+        if (this.state.currentPlan?.id === planId) {
+            this.state.currentPlan = null;
+            this.showHome();
+        } else {
+            this.renderHome();
+        }
+
+        this.saveToStorage();
+        this.showNotification('Plano excluído!', 'success');
+    }
+
+    startPeriodicSync() {
+        setInterval(() => {
+            if (this.state.isOnline && !document.hidden) {
+                this.checkServerConnection();
+            }
+        }, this.config.syncInterval);
+    }
+
+    // =============================================================================
+    // UI MANAGEMENT
+    // =============================================================================
+
+    updateConnectionStatus(status) {
+        const indicator = document.getElementById('connectionStatus');
+        if (!indicator) return;
+
+        this.state.connectionStatus = status;
+        indicator.className = `connection-status ${status}`;
+        
+        const statusMap = {
+            online: 'Conectado ao servidor',
+            offline: 'Offline - usando cache local',
+            loading: 'Verificando conexão...'
+        };
+        
+        indicator.title = statusMap[status] || 'Status desconhecido';
+    }
+
+    showNotification(message, type = 'info', duration = 4000) {
+        // Remove existing notifications
+        document.querySelectorAll('.notification').forEach(n => n.remove());
+
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        
+        const icons = {
+            success: '✅',
+            error: '❌',
+            warning: '⚠️',
+            info: 'ℹ️'
+        };
+        
+        notification.innerHTML = `
+            <div class="notification-content">
+                <span class="notification-icon">${icons[type] || icons.info}</span>
+                <span class="notification-message">${message}</span>
+                <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Animate in
+        requestAnimationFrame(() => {
+            notification.classList.add('show');
+        });
+        
+        // Auto remove
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, duration);
+    }
+
+    // =============================================================================
+    // NAVIGATION
+    // =============================================================================
+
+    showView(viewId) {
+        document.querySelectorAll('.view').forEach(view => {
+            view.classList.add('hidden');
+        });
+        
+        const targetView = document.getElementById(viewId);
+        if (targetView) {
+            targetView.classList.remove('hidden');
+        }
+    }
+
+    showHome() {
+        this.state.currentPlan = null;
+        this.state.currentWorkout = null;
+        this.showView('homeView');
+        this.renderHome();
+    }
+
+    showPlan(planId) {
+        const plan = this.findPlan(planId);
+        if (!plan) {
+            this.showHome();
+            return;
+        }
+        
+        this.state.currentPlan = plan;
+        this.state.currentWorkout = null;
+        this.showView('planView');
+        this.renderPlan();
+    }
+
+    showWorkout(workoutId) {
+        if (!this.state.currentPlan) {
+            this.showHome();
+            return;
+        }
+
+        const workout = this.state.currentPlan.treinos.find(t => t.id === workoutId);
+        if (!workout) {
+            this.showPlan(this.state.currentPlan.id);
+            return;
+        }
+
+        this.state.currentWorkout = workout;
+        this.showView('workoutView');
+        this.renderWorkout();
+    }
+
+    renderCurrentView() {
+        if (this.state.currentWorkout) {
+            this.renderWorkout();
+        } else if (this.state.currentPlan) {
+            this.renderPlan();
+        } else {
+            this.renderHome();
+        }
+    }
+
+    // =============================================================================
+    // RENDERING METHODS
+    // =============================================================================
+
+    renderHome() {
+        const content = document.getElementById('homeContent');
+        if (!content) return;
+
+        let html = this.renderImportCard();
+        
+        if (this.state.workoutPlans.length === 0) {
+            html += this.renderEmptyState();
+        } else {
+            html += this.state.workoutPlans.map(plan => this.renderPlanCard(plan)).join('');
+        }
+        
+        content.innerHTML = html;
+    }
+
+    renderImportCard() {
+        const isOnline = this.state.connectionStatus === 'online';
+        
+        return `
+            <div class="card import-by-id-card">
+                <div class="card-content">
+                    <h3 class="import-title">
+                        🔗 Importar Treino
+                    </h3>
+                    
+                    <!-- Import by ID section -->
+                    <div class="import-section1">
+                        <div class="server-status ${isOnline ? 'online' : 'offline'}">
+                            ${isOnline ? 
+                                '🟢 Servidor online - Buscará do servidor' : 
+                                '🟡 Servidor offline - Usando cache local'
+                            }
+                        </div>
+                            <h4 class="import-method-title">Por ID do Servidor</h4>
+                        <div class="import-form">
+                            <input type="text" id="importIdInput" class="import-input" 
+                                   placeholder="Digite o ID (6 caracteres)" 
+                                   maxlength="6" 
+                                   autocomplete="off"
+                                   oninput="this.value = this.value.toUpperCase()"
+                                   onkeypress="if(event.key==='Enter') app.handleImportById()">
+                            <button id="importIdButton" class="btn import-btn" onclick="app.handleImportById()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7,10 12,15 17,10"/>
+                                    <line x1="12" x2="12" y1="15" y2="3"/>
+                                </svg>
+                                Importar por ID
+                            </button>
+                        </div>
+                        <div id="importStatus" class="import-status">
+                            Peça o ID do seu personal trainer
+                        </div>
+                    </div>
+
+                    <!-- Import by file section -->
+                    <div class="import-section">
+                        <div class="import-divider">
+                            <span>OU</span>
+                        </div>
+                        <button class="btn btn-secondary import-file-btn" onclick="app.showFileUploadModal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                            </svg>
+                            Selecionar Arquivo JSON
+                        </button>
+                        <div class="import-file-hint">
+                            Importe diretamente o arquivo JSON fornecido pelo seu personal trainer
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderEmptyState() {
+        return `
+            <div class="card">
+                <div class="card-content empty-state">
+                    <div class="empty-icon">🏋️</div>
+                    <h3 class="empty-title">Nenhum plano importado</h3>
+                    <p class="empty-description">
+                        Use o ID fornecido pelo seu personal trainer para importar seu plano de treino, ou selecione um arquivo JSON
+                    </p>
+                    <div class="empty-actions">
+                        <button onclick="app.loadExampleData()" class="btn btn-secondary">
+                            📋 Carregar Exemplo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderPlanCard(plan) {
+        const student = plan.aluno || {};
+        const age = this.calculateAge(student.dataNascimento) || student.idade;
+        const completedWorkouts = plan.treinos.filter(t => t.concluido).length;
+        const totalWorkouts = plan.treinos.length;
+        const totalExecutions = plan.treinos.reduce((sum, t) => sum + t.execucoes, 0);
+
+        return `
+            <div class="card plan-card">
+                <div class="card-content">
+                    ${student.nome ? this.renderStudentInfo(student, age, plan.perfil) : ''}
+                    ${this.renderPlanInfo(plan, completedWorkouts, totalWorkouts, totalExecutions)}
+                    ${this.renderWorkoutGrid(plan.treinos)}
+                    ${this.renderPlanActions(plan.id)}
+                </div>
+            </div>
+        `;
+    }
+
+    renderStudentInfo(student, age, perfil) {
+        return `
+            <div class="student-info-card">
+                <div class="student-info-header">
+                    <div class="student-avatar">
+                        ${student.nome.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                        <h2 class="student-name">${student.nome}</h2>
+                        ${age ? `<div class="student-age">${age} anos</div>` : ''}
+                    </div>
+                </div>
+                <div class="student-details">
+                    ${this.renderDetailItem('Altura', student.altura)}
+                    ${this.renderDetailItem('Peso', student.peso)}
+                    ${this.renderDetailItem('Objetivo', perfil?.objetivo, 'objective-text')}
+                    ${this.renderDetailItem('Nascimento', this.formatDate(student.dataNascimento))}
+                </div>
+            </div>
+        `;
+    }
+
+    renderDetailItem(label, value, className = '') {
+        if (!value) return '';
+        return `
+            <div class="detail-item">
+                <div class="detail-label">${label}</div>
+                <div class="detail-value ${className}">${value}</div>
+            </div>
+        `;
+    }
+
+    renderPlanInfo(plan, completedWorkouts, totalWorkouts, totalExecutions) {
+        return `
+            <div class="plan-info-card">
+                <div class="plan-header">
+                    <h3 class="plan-title">${plan.nome}</h3>
+                    <div class="plan-period">
+                        ${this.formatDate(plan.dataInicio)} - ${this.formatDate(plan.dataFim)}
+                    </div>
+                    ${plan.originalShareId || plan.importedFrom ? `
+                        <div class="plan-badges">
+                            ${plan.originalShareId ? `<span class="badge badge-id">ID: ${plan.originalShareId}</span>` : ''}
+                            ${plan.importedFrom ? `
+                                <span class="badge badge-source">
+                                    ${plan.importedFrom === 'server' ? '🌐 Servidor' : 
+                                      plan.importedFrom === 'file' ? '📁 Arquivo' : 
+                                      plan.importedFrom === 'example' ? '📋 Exemplo' : 
+                                      plan.importedFrom === 'legacy' ? '📜 Legado' : '💾 Cache'}
+                                </span>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="plan-stats">
+                    <div class="stat-card">
+                        <div class="stat-number">${plan.execucoesPlanCompleto || 0}</div>
+                        <div class="stat-label">Ciclos Completos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${completedWorkouts}/${totalWorkouts}</div>
+                        <div class="stat-label">Treinos no Ciclo</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${totalExecutions}</div>
+                        <div class="stat-label">Total de Treinos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${plan.dias || 3}</div>
+                        <div class="stat-label">Dias/Semana</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderWorkoutGrid(treinos) {
+        return `
+            <div class="workout-grid">
+                ${treinos.map(treino => this.renderWorkoutItem(treino)).join('')}
+            </div>
+        `;
+    }
+
+    renderWorkoutItem(treino) {
+        const progress = treino.exercicios.length > 0 ? 
+            (treino.exercicios.filter(ex => ex.concluido).length / treino.exercicios.length) * 100 : 0;
+        
+        return `
+            <div class="workout-item ${treino.concluido ? 'completed' : ''}">
+                <div class="workout-name">${treino.nome}</div>
+                <div class="workout-details">
+                    <span class="execution-count ${treino.concluido ? 'completed' : ''}">${treino.execucoes}x</span>
+                    <div class="workout-status ${this.getWorkoutStatusClass(treino.concluido, progress)}">
+                        ${this.getWorkoutStatusText(treino.concluido, progress)}
+                    </div>
+                </div>
+                ${progress > 0 && !treino.concluido ? this.renderProgressBar(progress) : ''}
+            </div>
+        `;
+    }
+
+    renderProgressBar(progress) {
+        return `
+            <div class="workout-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progress}%;"></div>
+                </div>
+                <span class="progress-text">${Math.round(progress)}%</span>
+            </div>
+        `;
+    }
+
+    renderPlanActions(planId) {
+        return `
+            <div class="plan-actions">
+                <button onclick="app.showPlan(${planId})" class="btn btn-primary">
+                    Ver Plano Completo
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+                </button>
+                <button onclick="app.deletePlan(${planId})" class="btn btn-danger delete-btn" title="Excluir Plano">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m3 6 18 0"/>
+                        <path d="m19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                        <path d="m8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                    </svg>
+                </button>
+            </div>
+        `;
+    }
+
+    renderPlan() {
+        if (!this.state.currentPlan) return;
+
+        const planTitle = document.getElementById('planTitle');
+        const planSubtitle = document.getElementById('planSubtitle');
+        
+        if (planTitle) planTitle.textContent = this.state.currentPlan.nome;
+        if (planSubtitle) {
+            planSubtitle.textContent = `${this.formatDate(this.state.currentPlan.dataInicio)} - ${this.formatDate(this.state.currentPlan.dataFim)}`;
+        }
+
+        const content = document.getElementById('planContent');
+        if (!content) return;
+
+        const plan = this.state.currentPlan;
+        const completedWorkouts = plan.treinos.filter(t => t.concluido).length;
+        const totalWorkouts = plan.treinos.length;
+        const cycleProgress = totalWorkouts > 0 ? (completedWorkouts / totalWorkouts) * 100 : 0;
+        const totalExecutions = plan.treinos.reduce((sum, t) => sum + t.execucoes, 0);
+
+        let html = '';
+
+        // Student info (if available)
+        if (plan.aluno?.nome) {
+            const age = this.calculateAge(plan.aluno.dataNascimento) || plan.aluno.idade;
+            html += this.renderStudentInfo(plan.aluno, age, plan.perfil);
+        }
+
+        // Plan cycle information
+        html += `
+            <div class="plan-cycle-info">
+                <div class="cycle-counter">${plan.execucoesPlanCompleto || 0}</div>
+                <div class="cycle-label">Ciclos Completos do Plano</div>
+                <div class="cycle-progress">
+                    <div class="cycle-progress-fill" style="width: ${cycleProgress}%;"></div>
+                </div>
+                <div class="cycle-status">
+                    ${completedWorkouts === totalWorkouts 
+                        ? '🎉 Ciclo atual completo! Próximo treino iniciará um novo ciclo.'
+                        : `Progresso do ciclo atual: ${completedWorkouts}/${totalWorkouts} treinos (${Math.round(cycleProgress)}%)`
+                    }
+                </div>
+                <div class="total-executions">
+                    Total de treinos executados: ${totalExecutions}
+                </div>
+            </div>
+        `;
+
+        // Workout cards
+        html += plan.treinos.map(treino => this.renderWorkoutCard(treino, plan.id)).join('');
+
+        // Plan observations
+        if (plan.observacoes && Object.keys(plan.observacoes).length > 0) {
+            html += this.renderPlanObservations(plan.observacoes);
+        }
+
+        content.innerHTML = html;
+    }
+
+    renderWorkoutCard(treino, planId) {
+        const sessionKey = `${planId}-${treino.id}`;
+        const isActive = this.state.activeWorkoutSessions.has(sessionKey);
+        const completedExercises = treino.exercicios.filter(ex => ex.concluido).length;
+        const totalExercises = treino.exercicios.length;
+        const workoutProgress = totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0;
+        const isCompleted = treino.concluido;
+        
+        return `
+            <div class="card workout-card ${isCompleted ? 'completed' : ''}">
+                <div class="card-content">
+                    <div class="workout-header">
+                        <div>
+                            <div class="workout-title-wrapper">
+                                <h3 class="workout-title">${treino.nome}</h3>
+                                ${isCompleted ? `
+                                    <div class="check-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="m9 12 2 2 4-4"/>
+                                        </svg>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <p class="workout-subtitle">
+                                ${treino.foco} • ${totalExercises} exercícios • Executado ${treino.execucoes}x
+                            </p>
+                            ${isActive ? '<div class="active-workout">Treino em andamento</div>' : ''}
+                            
+                            ${workoutProgress > 0 && !isCompleted ? this.renderProgressBar(workoutProgress) : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="workout-actions">
+                        <button onclick="app.showWorkout('${treino.id}')" class="btn btn-secondary">
+                            Ver Exercícios
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </button>
+                        ${this.renderWorkoutActionButton(treino, planId, isActive, completedExercises, totalExercises)}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderWorkoutActionButton(treino, planId, isActive, completedExercises, totalExercises) {
+        if (!isActive) {
+            return `
+                <button onclick="app.startWorkout(${planId}, '${treino.id}')" class="btn ${treino.concluido ? 'btn-warning' : 'btn-success'}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="6,3 20,12 6,21"/>
+                    </svg>
+                    ${treino.concluido ? 'Repetir' : 'Iniciar'}
+                </button>
+            `;
+        } else {
+            const allCompleted = completedExercises >= totalExercises;
+            return `
+                <button onclick="app.completeWorkout(${planId}, '${treino.id}')" 
+                        class="${allCompleted ? 'btn btn-warning' : 'btn btn-disabled'}" 
+                        ${!allCompleted ? 'disabled' : ''}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                    ${allCompleted ? 'Concluir' : `Faltam ${totalExercises - completedExercises}`}
+                </button>
+            `;
+        }
+    }
+
+    renderPlanObservations(observacoes) {
+        return `
+            <div class="plan-observations">
+                <div class="observations-title">
+                    📝 Observações do Plano
+                </div>
+                ${Object.entries(observacoes).map(([key, value]) => {
+                    if (!value) return '';
+                    const label = this.getObservationLabel(key);
+                    return `<div class="observation-item">
+                        <span class="observation-label">${label}:</span> ${value}
+                    </div>`;
+                }).join('')}
+            </div>
+        `;
+    }
+
+    renderWorkout() {
+        if (!this.state.currentWorkout || !this.state.currentPlan) return;
+
+        const workoutTitle = document.getElementById('workoutTitle');
+        const workoutSubtitle = document.getElementById('workoutSubtitle');
+        
+        if (workoutTitle) workoutTitle.textContent = this.state.currentWorkout.nome;
+        if (workoutSubtitle) {
+            workoutSubtitle.textContent = `${this.state.currentWorkout.exercicios.length} exercícios • ${this.state.currentWorkout.foco}`;
+        }
+
+        const content = document.getElementById('workoutContent');
+        if (!content) return;
+
+        const sessionKey = `${this.state.currentPlan.id}-${this.state.currentWorkout.id}`;
+        const isWorkoutActive = this.state.activeWorkoutSessions.has(sessionKey);
+
+        let html = '';
+
+        // Warning if workout is not active
+        if (!isWorkoutActive) {
+            html += `
+                <div class="alert alert-warning">
+                    <span class="alert-icon">⚠️</span>
+                    Para realizar os exercícios, você precisa iniciar o treino na tela anterior
+                </div>
+            `;
+        }
+
+        // Exercise cards
+        html += this.state.currentWorkout.exercicios.map((exercicio, index) => 
+            this.renderExerciseCard(exercicio, index, isWorkoutActive)
+        ).join('');
+
+        // Completion card if workout is active
+        if (isWorkoutActive) {
+            html += this.renderWorkoutCompletionCard();
+        }
+
+        content.innerHTML = html;
+    }
+
+    renderExerciseCard(exercicio, index, isWorkoutActive) {
+        const isEditing = this.state.editingWeights.has(exercicio.id);
+        const cardClass = isWorkoutActive 
+            ? (exercicio.concluido ? 'completed' : 'pending')
+            : 'disabled';
+        
+        // Buscar descrição da técnica se houver
+        const tecnicaDescricao = exercicio.tecnica && this.state.currentPlan?.tecnicasAplicadas
+            ? this.state.currentPlan.tecnicasAplicadas[exercicio.tecnica]
+            : '';
+        
+        return `
+            <div class="card exercise-card ${cardClass}">
+                <div class="card-content">
+                    <!-- CABEÇALHO DO EXERCÍCIO -->
+                    <div class="exercise-header">
+                        <div class="exercise-main">
+                            <div class="exercise-title-row">
+                                <h3 class="exercise-number">${index + 1}. ${exercicio.nome}</h3>
+                                ${exercicio.concluido && isWorkoutActive ? `
+                                    <div class="check-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="m9 12 2 2 4-4"/>
+                                        </svg>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            
+                            <!-- DESCRIÇÃO COMPLETA -->
+                            ${exercicio.descricao ? `
+                                <div class="exercise-description">
+                                    <div class="description-label">📝 Descrição:</div>
+                                    <div class="description-text">${exercicio.descricao}</div>
+                                </div>
+                            ` : ''}
+                            
+                            <!-- TÉCNICA APLICADA -->
+                            ${exercicio.tecnica ? `
+                                <div class="exercise-technique">
+                                    <div class="technique-header">
+                                        <span class="technique-badge" data-technique="${exercicio.tecnica}">
+                                            ${this.formatTechniqueName(exercicio.tecnica)}
+                                        </span>
+                                    </div>
+                                    ${tecnicaDescricao ? `
+                                        <div class="technique-description">
+                                            <strong>Como executar:</strong> ${tecnicaDescricao}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            ` : ''}
+                            
+                            <!-- OBSERVAÇÕES ESPECIAIS -->
+                            ${exercicio.observacoesEspeciais ? `
+                                <div class="exercise-notes">
+                                    <div class="notes-icon">💡</div>
+                                    <div class="notes-content">
+                                        <div class="notes-label">Observações Especiais:</div>
+                                        <div class="notes-text">${exercicio.observacoesEspeciais}</div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <!-- ESPECIFICAÇÕES DETALHADAS -->
+                    <div class="exercise-specs-detailed">
+                        <div class="specs-grid">
+                            <div class="spec-item">
+                                <div class="spec-icon">🔢</div>
+                                <div class="spec-content">
+                                    <div class="spec-label">Séries</div>
+                                    <div class="spec-value">${exercicio.series}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="spec-item">
+                                <div class="spec-icon">🔄</div>
+                                <div class="spec-content">
+                                    <div class="spec-label">Repetições</div>
+                                    <div class="spec-value">${exercicio.repeticoes}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="spec-item">
+                                <div class="spec-icon">⚖️</div>
+                                <div class="spec-content">
+                                    <div class="spec-label">Carga Atual</div>
+                                    <div class="spec-value highlight">${exercicio.currentCarga}</div>
+                                    ${exercicio.currentCarga !== exercicio.carga ? `
+                                        <div class="spec-original">Original: ${exercicio.carga}</div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            
+                            ${exercicio.descanso && exercicio.descanso !== '0' ? `
+                            <div class="spec-item">
+                                <div class="spec-icon">ⱱ️</div>
+                                <div class="spec-content">
+                                    <div class="spec-label">Descanso</div>
+                                    <div class="spec-value">${exercicio.descanso}</div>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            <!-- NOVO: BOTÃO VER EXERCÍCIO -->
+                            <div class="spec-item view-exercise-item">
+                                <button onclick="app.showExerciseGif('${exercicio.nome.replace(/'/g, "\\'")}')" 
+                                        class="btn btn-view-exercise">
+                                    <div class="btn-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                    </div>
+                                    <div class="btn-text">
+                                        <div class="btn-label">Ver Exercício</div>
+                                        <div class="btn-subtitle">Demonstração</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- HISTÓRICO DE CARGA (se disponível) -->
+                    ${this.renderWeightHistory(exercicio)}
+                    
+                    <!-- AÇÕES DO EXERCÍCIO -->
+                    ${isEditing ? this.renderWeightEditForm(exercicio) : this.renderExerciseActions(exercicio, isWorkoutActive)}
+                </div>
+            </div>
+        `;
+    }
+    
+    // =============================================================================
+    // FUNÇÕES AUXILIARES NOVAS
+    // =============================================================================
+    
+    // Formatar nome da técnica para exibição
+    formatTechniqueName(tecnica) {
+        const nomes = {
+            'tempo-controlado': 'Tempo Controlado',
+            'bi-set': 'Bi-Set',
+            'pre-exaustao': 'Pré-Exaustão',
+            'pos-exaustao': 'Pós-Exaustão',
+            'drop-set': 'Drop Set',
+            'rest-pause': 'Rest-Pause',
+            'superset': 'Superset',
+            'cluster': 'Cluster Set'
+        };
+        return nomes[tecnica] || tecnica.charAt(0).toUpperCase() + tecnica.slice(1);
+    }
+    
+    // Renderizar histórico de mudanças de carga (futuro)
+    renderWeightHistory(exercicio) {
+        // Se no futuro quiser mostrar histórico de cargas
+        if (exercicio.historicoCargas && exercicio.historicoCargas.length > 0) {
+            return `
+                <div class="weight-history">
+                    <div class="history-label">📈 Histórico de Cargas:</div>
+                    <div class="history-items">
+                        ${exercicio.historicoCargas.slice(-3).map(item => `
+                            <span class="history-item">${item.data}: ${item.carga}</span>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        return '';
+    }
+
+    renderWeightEditForm(exercicio) {
+        return `
+            <div class="weight-edit">
+                <input type="text" id="weight-input-${exercicio.id}" 
+                       class="weight-input" 
+                       value="${exercicio.currentCarga}" 
+                       placeholder="Digite a nova carga"
+                       autocomplete="off">
+                <div class="weight-edit-actions">
+                    <button onclick="app.handleSaveWeight(${exercicio.id})" class="btn btn-success btn-small">
+                        Salvar
+                    </button>
+                    <button onclick="app.cancelEditingWeight(${exercicio.id})" class="btn btn-secondary btn-small">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    renderExerciseActions(exercicio, isWorkoutActive) {
+        return `
+            <div class="exercise-actions">
+                <button onclick="app.startEditingWeight(${exercicio.id})" class="btn btn-secondary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Editar Carga
+                </button>
+                
+                ${isWorkoutActive ? `
+                    <button onclick="app.completeExercise(${this.state.currentPlan.id}, '${this.state.currentWorkout.id}', ${exercicio.id})" 
+                            ${exercicio.concluido ? 'disabled' : ''} 
+                            class="${exercicio.concluido ? 'btn btn-disabled' : 'btn btn-success'}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m9 12 2 2 4-4"/>
+                        </svg>
+                        ${exercicio.concluido ? 'Concluído' : 'Concluir'}
+                    </button>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    renderWorkoutCompletionCard() {
+        const allCompleted = this.state.currentWorkout.exercicios.every(ex => ex.concluido);
+        const completedCount = this.state.currentWorkout.exercicios.filter(ex => ex.concluido).length;
+        const totalCount = this.state.currentWorkout.exercicios.length;
+        
+        return `
+            <div class="card completion-card">
+                <div class="card-content">
+                    <h3 class="completion-title">Treino em Andamento</h3>
+                    <p class="completion-subtitle">
+                        ${completedCount}/${totalCount} exercícios concluídos
+                    </p>
+                    ${this.renderProgressBar((completedCount / totalCount) * 100)}
+                    <button onclick="app.completeWorkout(${this.state.currentPlan.id}, '${this.state.currentWorkout.id}')" 
+                            ${!allCompleted ? 'disabled' : ''} 
+                            class="${!allCompleted ? 'btn btn-disabled' : 'btn btn-warning'}">
+                        ${allCompleted ? 'Finalizar Treino' : `Faltam ${totalCount - completedCount} exercícios`}
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    // =============================================================================
+    // UTILITY METHODS
+    // =============================================================================
+
+    formatDate(dateString) {
+        if (!dateString) return 'Não definido';
+        try {
+            return new Date(dateString).toLocaleDateString('pt-BR');
+        } catch (error) {
+            return 'Data inválida';
+        }
+    }
+
+    calculateAge(birthDate) {
+        if (!birthDate) return null;
+        try {
+            const today = new Date();
+            const birth = new Date(birthDate);
+            let age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+            
+            return age;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    getWorkoutStatusClass(isCompleted, progress) {
+        if (isCompleted) return 'completed';
+        if (progress > 0) return 'in-progress';
+        return 'not-started';
+    }
+
+    getWorkoutStatusText(isCompleted, progress) {
+        if (isCompleted) return '✅ Concluído';
+        if (progress > 0) return `${Math.round(progress)}% completo`;
+        return 'Não iniciado';
+    }
+
+    getObservationLabel(key) {
+        const labels = {
+            frequencia: 'Frequência',
+            progressao: 'Progressão',
+            descanso: 'Descanso',
+            hidratacao: 'Hidratação',
+            alimentacao: 'Alimentação',
+            suplementacao: 'Suplementação',
+            sono: 'Sono',
+            aquecimento: 'Aquecimento',
+            tecnica: 'Técnica',
+            periodizacao: 'Periodização',
+            consulta: 'Consulta',
+            geral: 'Observações Gerais'
+        };
+        return labels[key] || key.charAt(0).toUpperCase() + key.slice(1);
+    }
+
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // =============================================================================
+    // EXERCISE GIF MANAGEMENT (NOVO)
+    // =============================================================================
+
+    // NOVA FUNÇÃO: Buscar GIF do exercício na base de dados
+    findExerciseGif(exerciseName) {
+        // Normalizar nome do exercício para busca
+        const normalizedName = exerciseName.trim().toLowerCase();
+        
+        // Buscar em todos os grupos musculares e níveis
+        for (const muscleGroup in this.exerciseDatabase) {
+            for (const level in this.exerciseDatabase[muscleGroup]) {
+                const exercises = this.exerciseDatabase[muscleGroup][level];
+                
+                for (const exercise of exercises) {
+                    if (exercise.nome.toLowerCase() === normalizedName) {
+                        return exercise.gif;
+                    }
+                }
+            }
+        }
+        
+        // Retornar null se não encontrou
+        return null;
+    }
+
+    // NOVA FUNÇÃO: Mostrar modal com GIF do exercício
+    showExerciseGif(exerciseName) {
+        const gifPath = this.findExerciseGif(exerciseName);
+        
+        // Criar modal se não existir
+        let modal = document.getElementById('exerciseGifModal');
+        if (!modal) {
+            modal = this.createExerciseGifModal();
+            document.body.appendChild(modal);
+        }
+        
+        // Atualizar conteúdo do modal
+        const exerciseNameEl = modal.querySelector('#exerciseGifName');
+        const exerciseImageEl = modal.querySelector('#exerciseGifImage');
+        const notFoundEl = modal.querySelector('#exerciseNotFound');
+        
+        exerciseNameEl.textContent = exerciseName;
+        
+        if (gifPath) {
+            exerciseImageEl.src = gifPath;
+            exerciseImageEl.style.display = 'block';
+            notFoundEl.style.display = 'none';
+            exerciseImageEl.onerror = () => {
+                exerciseImageEl.style.display = 'none';
+                notFoundEl.style.display = 'block';
+            };
+        } else {
+            exerciseImageEl.style.display = 'none';
+            notFoundEl.style.display = 'block';
+        }
+        
+        // Mostrar modal
+        modal.classList.remove('hidden');
+    }
+
+    // NOVA FUNÇÃO: Criar modal do GIF
+    createExerciseGifModal() {
+        const modal = document.createElement('div');
+        modal.id = 'exerciseGifModal';
+        modal.className = 'modal hidden';
+        modal.innerHTML = `
+            <div class="modal-overlay" onclick="app.hideExerciseGif()"></div>
+            <div class="modal-content exercise-gif-modal">
+                <div class="modal-header">
+                    <h3 id="exerciseGifName" class="modal-title">Nome do Exercício</h3>
+                    <button class="modal-close" onclick="app.hideExerciseGif()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m18 6-12 12"/>
+                            <path d="m6 6 12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="exercise-gif-container">
+                        <img id="exerciseGifImage" 
+                             class="exercise-gif" 
+                             alt="Demonstração do exercício"
+                             style="display: none;">
+                        <div id="exerciseNotFound" class="exercise-not-found" style="display: none;">
+                            <div class="not-found-icon">🚫</div>
+                            <div class="not-found-text">Exemplo não cadastrado</div>
+                            <div class="not-found-subtitle">
+                                A demonstração visual deste exercício não está disponível em nossa base de dados.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="app.hideExerciseGif()" class="btn btn-secondary">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        `;
+        return modal;
+    }
+
+    // NOVA FUNÇÃO: Esconder modal do GIF
+    hideExerciseGif() {
+        const modal = document.getElementById('exerciseGifModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
+    // =============================================================================
+    // EVENT HANDLERS
+    // =============================================================================
+
+    async handleImportById() {
+        const input = document.getElementById('importIdInput');
+        const button = document.getElementById('importIdButton');
+        const status = document.getElementById('importStatus');
+        
+        if (!input || !button || !status) return;
+        
+        const shareId = input.value.trim();
+        
+        if (!shareId) {
+            this.updateImportStatus('Digite um ID válido', 'error');
+            return;
+        }
+        
+        if (shareId.length !== 6) {
+            this.updateImportStatus('ID deve ter 6 caracteres', 'error');
+            return;
+        }
+        
+        // Update UI for loading state
+        button.innerHTML = '<span class="loading-spinner"></span> Importando...';
+        button.classList.add('btn-loading');
+        button.disabled = true;
+        this.updateImportStatus('Buscando plano...', 'loading');
+        
+        try {
+            const result = await this.importPlanById(shareId);
+            
+            this.state.workoutPlans.push(result.plan);
+            await this.saveToStorage();
+            
+            const sourceText = result.source === 'server' ? 'servidor' : 'cache local';
+            this.updateImportStatus(`✅ Plano "${result.plan.nome}" importado do ${sourceText}!`, 'success');
+            input.value = '';
+            
+            setTimeout(() => {
+                this.renderHome();
+                this.updateImportStatus('Peça o ID do seu personal trainer', 'info');
+            }, 2000);
+            
+        } catch (error) {
+            console.error('Import error:', error);
+            this.updateImportStatus(`❌ ${error.message}`, 'error');
+        } finally {
+            // Reset button
+            button.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7,10 12,15 17,10"/>
+                    <line x1="12" x2="12" y1="15" y2="3"/>
+                </svg>
+                Importar por ID
+            `;
+            button.classList.remove('btn-loading');
+            button.disabled = false;
+        }
+    }
+
+    handleSaveWeight(exerciseId) {
+        const input = document.getElementById(`weight-input-${exerciseId}`);
+        if (!input) return;
+
+        const newWeight = input.value.trim();
+        this.saveWeight(
+            this.state.currentPlan.id, 
+            this.state.currentWorkout.id, 
+            exerciseId, 
+            newWeight
+        );
+    }
+
+    updateImportStatus(message, type) {
+        const status = document.getElementById('importStatus');
+        if (!status) return;
+        
+        status.textContent = message;
+        status.className = `import-status ${type}`;
+    }
+
+    loadExampleData() {
+        const examplePlan = {
+            id: this.generateId(),
+            nome: "Plano Exemplo - Adaptação Iniciante",
+            importedAt: new Date().toISOString(),
+            importedFrom: 'example',
+            aluno: {
+                nome: "Usuário Exemplo",
+                dataNascimento: "1990-01-01",
+                altura: "1,75m",
+                peso: "75kg"
+            },
+            dias: 3,
+            dataInicio: new Date().toISOString().split('T')[0],
+            dataFim: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            perfil: {
+                objetivo: "Condicionamento geral e adaptação"
+            },
+            treinos: [
+                {
+                    id: "A",
+                    nome: "A - Corpo Inteiro",
+                    foco: "Adaptação e condicionamento geral",
+                    exercicios: [
+                        {
+                            id: this.generateId(),
+                            nome: "Aquecimento - Esteira",
+                            series: 1,
+                            repeticoes: "10 min",
+                            carga: "Ritmo moderado",
+                            descanso: "0",
+                            descricao: "Caminhada em ritmo moderado para aquecimento geral",
+                            concluido: false,
+                            currentCarga: "Ritmo moderado"
+                        },
+                        {
+                            id: this.generateId(),
+                            nome: "Agachamento Livre",
+                            series: 3,
+                            repeticoes: "12-15",
+                            carga: "Peso corporal",
+                            descanso: "90 segundos",
+                            descricao: "Movimento básico fundamental, mantenha as costas retas",
+                            concluido: false,
+                            currentCarga: "Peso corporal"
+                        },
+                        {
+                            id: this.generateId(),
+                            nome: "Flexão de Braços",
+                            series: 3,
+                            repeticoes: "8-12",
+                            carga: "Peso corporal",
+                            descanso: "90 segundos",
+                            descricao: "Pode ser feito com joelhos apoiados se necessário",
+                            concluido: false,
+                            currentCarga: "Peso corporal"
+                        },
+                        {
+                            id: this.generateId(),
+                            nome: "Prancha",
+                            series: 3,
+                            repeticoes: "30-60 seg",
+                            carga: "Peso corporal",
+                            descanso: "60 segundos",
+                            descricao: "Mantenha o corpo alinhado, contraindo o abdômen",
+                            concluido: false,
+                            currentCarga: "Peso corporal"
+                        }
+                    ],
+                    concluido: false,
+                    execucoes: 0
+                },
+                {
+                    id: "B",
+                    nome: "B - Cardio e Core",
+                    foco: "Condicionamento cardiovascular e fortalecimento do core",
+                    exercicios: [
+                        {
+                            id: this.generateId(),
+                            nome: "Aquecimento - Bicicleta",
+                            series: 1,
+                            repeticoes: "8 min",
+                            carga: "Resistência leve",
+                            descanso: "0",
+                            descricao: "Pedalada em ritmo moderado para aquecimento",
+                            concluido: false,
+                            currentCarga: "Resistência leve"
+                        },
+                        {
+                            id: this.generateId(),
+                            nome: "Burpee",
+                            series: 3,
+                            repeticoes: "5-8",
+                            carga: "Peso corporal",
+                            descanso: "90 segundos",
+                            descricao: "Exercício completo: agachamento, prancha, flexão e salto",
+                            concluido: false,
+                            currentCarga: "Peso corporal"
+                        },
+                        {
+                            id: this.generateId(),
+                            nome: "Mountain Climber",
+                            series: 3,
+                            repeticoes: "30 seg",
+                            carga: "Peso corporal",
+                            descanso: "60 segundos",
+                            descricao: "Posição de prancha, alternando joelhos ao peito rapidamente",
+                            concluido: false,
+                            currentCarga: "Peso corporal"
+                        }
+                    ],
+                    concluido: false,
+                    execucoes: 0
+                }
+            ],
+            observacoes: {
+                frequencia: "3x por semana com 1 dia de descanso entre sessões",
+                progressao: "Aumente as repetições gradualmente antes de adicionar peso",
+                descanso: "90 segundos entre séries",
+                hidratacao: "Beba água antes, durante e após o treino"
+            },
+            execucoesPlanCompleto: 0
+        };
+
+        this.state.workoutPlans.push(examplePlan);
+        this.saveToStorage();
+        this.renderHome();
+        this.showNotification('Plano de exemplo carregado!', 'success');
+    }
+}
+
+// =============================================================================
+// GLOBAL INITIALIZATION AND NAVIGATION FUNCTIONS
+// =============================================================================
+
+let app;
+
+// Initialize app when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    app = new JSFitStudentApp();
+});
+
+// Also initialize on window load as fallback
+window.addEventListener('load', () => {
+    if (!app) {
+        app = new JSFitStudentApp();
+    }
+});
+
+// Global navigation functions for onclick handlers
+function showHome() {
+    if (app) app.showHome();
+}
+
+function showPlan() {
+    if (app && app.state.currentPlan) app.showPlan(app.state.currentPlan.id);
+}
+
+function hideConfirmation() {
+    const modal = document.getElementById('confirmationModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+function hideSuccessModal() {
+    const modal = document.getElementById('successModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+function hideErrorModal() {
+    const modal = document.getElementById('errorModal');
+    if (modal) modal.classList.add('hidden');
 }
-
-.notes-text {
-    color: #7F1D1D;
-    line-height: 1.5;
-    font-size: 14px;
-}
-
-/* Especificações detalhadas */
-.exercise-specs-detailed {
-    margin: 16px 0;
-}
-
-.specs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 12px;
-}
-
-.spec-item {
-    display:grid;
-    align-items: center;
-    gap: 8px;
-    padding: 12px;
-    background: #F3F4F6;
-    border-radius: 8px;
-    border: 1px solid #E5E7EB;
-}
-
-.spec-icon {
-    font-size: 16px;
-    flex-shrink: 0;
-}
-
-.spec-content {
-    flex: 1;
-}
-
-.spec-label {
-    font-size: 12px;
-    color: #6B7280;
-    font-weight: 500;
-    margin-bottom: 2px;
-}
-
-.spec-value {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1F2937;
-}
-
-.spec-value.highlight {
-    color: #059669;
-    font-weight: 700;
-}
-
-.spec-original {
-    font-size: 11px;
-    color: #9CA3AF;
-    margin-top: 2px;
-}
-
-/* Histórico de cargas */
-.weight-history {
-    margin: 12px 0;
-    padding: 12px;
-    background: #F0FDF4;
-    border-radius: 8px;
-    border-left: 4px solid #10B981;
-}
-
-.history-label {
-    font-weight: 600;
-    color: #065F46;
-    margin-bottom: 8px;
-    font-size: 14px;
-}
-
-.history-items {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.history-item {
-    background: #D1FAE5;
-    color: #065F46;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-    .specs-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-    
-    .spec-item {
-        padding: 10px;
-    }
-    
-    .exercise-notes {
-        flex-direction: column;
-        gap: 8px;
-    }
-}
-
-.import-section1 {
-    display: none;
-}
-.import-divider {
-    display: none;
-}
-
-/* =============================================================================
-   FIM DO ARQUIVO CSS - JS FIT APP
-   ============================================================================= */
