@@ -1833,10 +1833,9 @@ class JSFitStudentApp {
             // Adicionar informações extras se disponível
             if (exerciseData && exerciseInfoEl) {
                 exerciseInfoEl.innerHTML = `
-                    ${exerciseData.grupo ? `<div class="exercise-group">Grupo: ${exerciseData.grupo}</div>` : ''}
-                    ${exerciseData.Musculos ? `<div class="exercise-muscles">Músculos: ${exerciseData.Musculos}</div>` : ''}
-                    ${exerciseData.descricao ? `<div class="exercise-description-modal">${exerciseData.descricao}</div>` : ''}
-                `;
+                ${exerciseData.grupo ? `<div class="exercise-group">Grupo: ${exerciseData.grupo[0].toUpperCase() + exerciseData.grupo.slice(1).toLowerCase()}</div>` : ''}
+                ${exerciseData.Musculos ? `<div class="exercise-muscles">Músculos: ${exerciseData.Musculos[0].toUpperCase() + exerciseData.Musculos.slice(1).toLowerCase()}</div>` : ''}
+                ${exerciseData.descricao && exerciseData.descricao.length > 0 ? `<div class="exercise-description-modal">${exerciseData.descricao[0].toUpperCase() + exerciseData.descricao.slice(1).toLowerCase()}</div>` : ''}              `;
                 exerciseInfoEl.style.display = 'block';
             }
             
@@ -1889,13 +1888,15 @@ class JSFitStudentApp {
             if (!this.exerciseDatabase || this.exerciseDatabase.length === 0) {
                 return [];
             }
-    
-            const normalizedMuscle = muscleName.trim().toLowerCase();
-            
+        
+            // Normaliza o nome do músculo
+            const normalizedMuscle = muscleName[0].toUpperCase() + muscleName.slice(1).toLowerCase().trim();
+        
             return this.exerciseDatabase.filter(exercise => 
-                exercise.Musculos && exercise.Musculos.toLowerCase().includes(normalizedMuscle)
+                exercise.Musculos && exercise.Musculos.toLowerCase().includes(normalizedMuscle.toLowerCase())
             );
         }
+        
     
         // Obter todos os grupos disponíveis
         getAllExerciseGroups() {
