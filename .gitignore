@@ -20,7 +20,7 @@ config.local.json
 secrets.json
 
 # Credenciais de banco de dados
-database.json
+
 db-config.json
 
 # =============================================================================
