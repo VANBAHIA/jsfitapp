@@ -100,7 +100,7 @@ class JSFitStudentApp {
             console.log('🔄 Carregando base de dados de exercícios...');
             
             // Tentar carregar DATABASE.JSON
-            const response = await fetch('DATABASE.JSON');
+            const response = await fetch('db/DATABASE.JSON');
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
