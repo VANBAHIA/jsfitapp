@@ -1,4 +1,4 @@
-// aluno.js - JS Fit Student App - Complete with JSON File Upload
+// aluno.js - JS Fit Student App - Complete with Direct File Import
 // Sistema modernizado compatível com PostgreSQL e Netlify Functions
 
 class JSFitStudentApp {
@@ -23,149 +23,18 @@ class JSFitStudentApp {
             connectionStatus: 'unknown',
             isOnline: navigator.onLine,
             user: null,
-            token: null,
-            selectedFile: null
+            token: null
         };
 
         // Initialize app
         this.init();
 
         // NOVA: Base de dados de exercícios integrada
-        this.exerciseDatabase = {
-            peito: {
-                iniciante: [
-                    { codigo: 'PEI001', nome: 'Flexão de Braços', gif: 'images/56.gif' },
-                    { codigo: 'PEI002', nome: 'Supino com Halteres', gif: 'images/104.gif' },
-                    { codigo: 'PEI003', nome: 'Crucifixo com Halteres', gif: 'images/38.gif' }
-                ],
-                intermediario: [
-                    { codigo: 'PEE004', nome: 'Supino Reto com Barra', gif: 'images/106.gif' },
-                    { codigo: 'PEE005', nome: 'Supino Inclinado', gif: 'images/107.gif' },
-                    { codigo: 'PEE006', nome: 'Crossover', gif: 'images/34.gif' }
-                ],
-                avancado: [
-                    { codigo: 'PEA007', nome: 'Supino Reto com Barra', gif: 'images/106.gif' },
-                    { codigo: 'PEA008', nome: 'Supino Inclinado com Halteres', gif: 'images/105.gif' },
-                    { codigo: 'PEA009', nome: 'Mergulho em Paralelas', gif: 'images/161.gif' }
-                ]
-            },
-            costas: {
-                iniciante: [
-                    { codigo: 'COI010', nome: 'Puxada Frontal', gif: 'images/85.gif' },
-                    { codigo: 'COI011', nome: 'Remada Baixa', gif: 'images/251.gif' },
-                    { codigo: 'COI012', nome: 'Remada com Halter', gif: 'images/97.gif' }
-                ],
-                intermediario: [
-                    { codigo: 'COE013', nome: 'Puxada Frontal', gif: 'images/85.gif' },
-                    { codigo: 'COE014', nome: 'Remada Curvada', gif: 'images/93.gif' },
-                    { codigo: 'COE015', nome: 'Pullover', gif: 'images/86.gif' }
-                ],
-                avancado: [
-                    { codigo: 'COA016', nome: 'Barra Fixa', gif: 'images/29.gif' },
-                    { codigo: 'COA017', nome: 'Remada T-Bar', gif: 'images/93.gif' },
-                    { codigo: 'COA018', nome: 'Levantamento Terra', gif: 'images/_terra.gif' }
-                ]
-            },
-            ombros: {
-                iniciante: [
-                    { codigo: 'OMI019', nome: 'Desenvolvimento com Halteres', gif: 'images/42.gif' },
-                    { codigo: 'OMI020', nome: 'Elevação Lateral', gif: 'images/52.gif' },
-                    { codigo: 'OMI021', nome: 'Elevação Frontal', gif: 'images/51.gif' }
-                ],
-                intermediario: [
-                    { codigo: 'OME022', nome: 'Desenvolvimento com Barra', gif: 'images/40.gif' },
-                    { codigo: 'OME023', nome: 'Elevação Lateral', gif: 'images/52.gif' },
-                    { codigo: 'OME024', nome: 'Elevação Posterior', gif: 'images/36.gif' }
-                ],
-                avancado: [
-                    { codigo: 'OMA025', nome: 'Desenvolvimento Arnold', gif: 'images/42.gif' },
-                    { codigo: 'OMA026', nome: 'Elevação Lateral 21', gif: 'images/52.gif' },
-                    { codigo: 'OMA027', nome: 'Face Pull', gif: 'images/36.gif' }
-                ]
-            },
-            biceps: {
-                iniciante: [
-                    { codigo: 'BII028', nome: 'Rosca Direta', gif: 'images/102.gif' },
-                    { codigo: 'BII029', nome: 'Rosca Alternada', gif: 'images/98.gif' },
-                    { codigo: 'BII030', nome: 'Rosca Martelo', gif: 'images/99.gif' }
-                ],
-                intermediario: [
-                    { codigo: 'BIE031', nome: 'Rosca Direta', gif: 'images/102.gif' },
-                    { codigo: 'BIE032', nome: 'Rosca Scott', gif: 'images/103.gif' },
-                    { codigo: 'BIE033', nome: 'Rosca 21', gif: 'images/102.gif' }
-                ],
-                avancado: [
-                    { codigo: 'BIA034', nome: 'Rosca Direta Pegada Fechada', gif: 'images/102.gif' },
-                    { codigo: 'BIA035', nome: 'Rosca Spider', gif: 'images/103.gif' },
-                    { codigo: 'BIA036', nome: 'Rosca Drag Curl', gif: 'images/102.gif' }
-                ]
-            },
-            triceps: {
-                iniciante: [
-                    { codigo: 'TRI037', nome: 'Tríceps Testa', gif: 'images/121.gif' },
-                    { codigo: 'TRI038', nome: 'Tríceps Pulley', gif: 'images/118.gif' },
-                    { codigo: 'TRI039', nome: 'Mergulho no Banco', gif: 'images/161.gif' }
-                ],
-                intermediario: [
-                    { codigo: 'TRE040', nome: 'Tríceps Francês', gif: 'images/113.gif' },
-                    { codigo: 'TRE041', nome: 'Tríceps Corda', gif: 'images/126.gif' },
-                    { codigo: 'TRE042', nome: 'Supino Fechado', gif: 'images/118.gif' }
-                ],
-                avancado: [
-                    { codigo: 'TRA043', nome: 'Tríceps Francês com Halter', gif: 'images/119.gif' },
-                    { codigo: 'TRA044', nome: 'Mergulho em Paralelas', gif: 'images/161.gif' },
-                    { codigo: 'TRA045', nome: 'JM Press', gif: 'images/161.gif' }
-                ]
-            },
-            quadriceps: {
-                iniciante: [
-                    { codigo: 'QUI046', nome: 'Agachamento Livre', gif: 'images/9.gif' },
-                    { codigo: 'QUI047', nome: 'Leg Press', gif: 'images/72.gif' },
-                    { codigo: 'QUI048', nome: 'Extensão de Pernas', gif: 'images/54.gif' }
-                ],
-                intermediario: [
-                    { codigo: 'QUE049', nome: 'Agachamento Livre', gif: 'images/9.gif' },
-                    { codigo: 'QUE050', nome: 'Leg Press 45°', gif: 'images/72.gif' },
-                    { codigo: 'QUE051', nome: 'Afundo', gif: 'images/6.gif' }
-                ],
-                avancado: [
-                    { codigo: 'QUA052', nome: 'Agachamento Livre', gif: 'images/9.gif' },
-                    { codigo: 'QUA053', nome: 'Agachamento Frontal', gif: 'images/10.gif' },
-                    { codigo: 'QUA054', nome: 'Agachamento Búlgaro', gif: 'images/8.gif' }
-                ]
-            },
-            posterior: {
-                iniciante: [
-                    { codigo: 'POI055', nome: 'Stiff', gif: 'images/115.gif' },
-                    { codigo: 'POI056', nome: 'Flexão de Pernas', gif: 'images/57.gif' },
-                    { codigo: 'POI057', nome: 'Elevação Pélvica', gif: 'images/_elevacao_pelvica.gif' }
-                ],
-                intermediario: [
-                    { codigo: 'POE058', nome: 'Stiff com Barra', gif: 'images/115.gif' },
-                    { codigo: 'POE059', nome: 'Mesa Flexora', gif: 'images/57.gif' },
-                    { codigo: 'POE060', nome: 'Good Morning', gif: 'images/71.gif' }
-                ],
-                avancado: [
-                    { codigo: 'POA061', nome: 'Levantamento Terra', gif: 'images/_terra.gif' },
-                    { codigo: 'POA062', nome: 'Stiff Unilateral', gif: 'images/115.gif' },
-                    { codigo: 'POA063', nome: 'Hip Thrust', gif: 'images/_hip_thrust.gif' }
-                ]
-            },
-            panturrilha: {
-                iniciante: [
-                    { codigo: 'PAI064', nome: 'Panturrilha Sentado', gif: 'images/81.gif' },
-                    { codigo: 'PAI065', nome: 'Panturrilha em Pé', gif: 'images/80.gif' }
-                ],
-                intermediario: [
-                    { codigo: 'PAE066', nome: 'Panturrilha Sentado', gif: 'images/81.gif' },
-                    { codigo: 'PAE067', nome: 'Panturrilha Leg Press', gif: 'images/72.gif' }
-                ],
-                avancado: [
-                    { codigo: 'PAA068', nome: 'Panturrilha Unilateral', gif: 'images/80.gif' },
-                    { codigo: 'PAA069', nome: 'Panturrilha com Pausa', gif: 'images/80.gif' }
-                ]
-            }
-        };
+        this.exerciseDatabase = []; // Array simples que será carregado do DATABASE.JSON
+        this.loadExerciseDatabase(); // Novo método para carregar
+        
+         // Create hidden file input for direct import
+        this.createFileInput();
     }
 
     // =============================================================================
@@ -179,6 +48,13 @@ class JSFitStudentApp {
             this.setupEventListeners();
             this.setupPWAFeatures();
             await this.loadFromStorage();
+            
+            // Aguardar carregamento da base de exercícios
+            await this.loadExerciseDatabase();
+            
+            // Validar integridade após carregamento
+            this.validateExerciseDatabase();
+            
             await this.checkServerConnection();
             this.startPeriodicSync();
             this.renderHome();
@@ -189,6 +65,7 @@ class JSFitStudentApp {
             this.showNotification('Erro ao inicializar aplicativo', 'error');
         }
     }
+
 
     setupEventListeners() {
         // Handle network status changes
@@ -216,55 +93,271 @@ class JSFitStudentApp {
                 this.checkServerConnection();
             }
         });
-
-        // Setup file upload listeners
-        this.setupFileUploadListeners();
     }
 
-    setupFileUploadListeners() {
-        // Set up file input listeners when the modal is shown
-        document.addEventListener('change', (e) => {
-            if (e.target.id === 'fileInput') {
-                this.handleFileSelection(e.target.files[0]);
+    async loadExerciseDatabase() {
+        try {
+            console.log('🔄 Carregando base de dados de exercícios...');
+            
+            // Tentar carregar DATABASE.JSON
+            const response = await fetch('DATABASE.JSON');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            
+            // Validar estrutura do arquivo
+            if (!Array.isArray(data)) {
+                throw new Error('DATABASE.JSON deve ser um array de exercícios');
+            }
+            
+            // Validar se tem exercícios
+            if (data.length === 0) {
+                throw new Error('DATABASE.JSON está vazio');
+            }
+            
+            // Validar estrutura básica de cada exercício
+            const invalidExercises = data.filter(ex => 
+                !ex.nome || !ex.Column4 || !ex.grupo
+            );
+            
+            if (invalidExercises.length > 0) {
+                console.warn(`⚠️ ${invalidExercises.length} exercícios com dados incompletos encontrados`);
+            }
+            
+            this.exerciseDatabase = data;
+            console.log(`✅ ${data.length} exercícios carregados com sucesso`);
+            
+            // Mostrar estatísticas
+            this.logDatabaseStats();
+            
+        } catch (error) {
+            console.error('❌ Erro ao carregar DATABASE.JSON:', error);
+            
+            // Fallback: usar dados de exemplo ou array vazio
+            this.exerciseDatabase = [];
+            
+            // Mostrar notificação para o usuário
+            setTimeout(() => {
+                this.showNotification(
+                    '⚠️ Erro ao carregar base de exercícios. Demonstrações podem não funcionar.',
+                    'warning',
+                    8000
+                );
+            }, 2000);
+        }
+    }
+    
+    // PASSO 3: MÉTODO PARA MOSTRAR ESTATÍSTICAS
+    // ==========================================
+    
+    logDatabaseStats() {
+        if (this.exerciseDatabase.length === 0) return;
+        
+        // Contar exercícios por grupo
+        const groupStats = {};
+        this.exerciseDatabase.forEach(ex => {
+            const grupo = ex.grupo || 'Sem grupo';
+            groupStats[grupo] = (groupStats[grupo] || 0) + 1;
+        });
+        
+        console.log('📊 Estatísticas da base de exercícios:');
+        console.log(`   Total: ${this.exerciseDatabase.length} exercícios`);
+        console.log('   Por grupo:');
+        Object.entries(groupStats).forEach(([grupo, count]) => {
+            console.log(`     ${grupo}: ${count} exercícios`);
+        });
+    }
+
+
+    // =============================================================================
+    // DIRECT FILE IMPORT MANAGEMENT
+    // =============================================================================
+
+    createFileInput() {
+        // Create a hidden file input for direct import
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.json';
+        fileInput.style.display = 'none';
+        fileInput.id = 'hiddenFileInput';
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                this.handleDirectFileImport(file);
             }
         });
+        
+        document.body.appendChild(fileInput);
+    }
 
-        // Set up drag and drop listeners
-        document.addEventListener('dragover', (e) => {
-            if (e.target.closest('#fileUploadArea')) {
-                e.preventDefault();
-                e.target.closest('#fileUploadArea').classList.add('drag-over');
-            }
-        });
+    // NOVA FUNÇÃO: Importação direta de arquivo
+    openFileSelector() {
+        const fileInput = document.getElementById('hiddenFileInput');
+        if (fileInput) {
+            fileInput.click();
+        }
+    }
 
-        document.addEventListener('dragleave', (e) => {
-            if (e.target.closest('#fileUploadArea')) {
-                e.target.closest('#fileUploadArea').classList.remove('drag-over');
-            }
-        });
+    async handleDirectFileImport(file) {
+        // Validate file type
+        if (!file.name.toLowerCase().endsWith('.json')) {
+            this.showNotification('❌ Apenas arquivos JSON são aceitos', 'error');
+            return;
+        }
 
-        document.addEventListener('drop', (e) => {
-            const uploadArea = e.target.closest('#fileUploadArea');
-            if (uploadArea) {
-                e.preventDefault();
-                uploadArea.classList.remove('drag-over');
-                
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    this.handleFileSelection(files[0]);
+        // Validate file size (max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            this.showNotification('❌ Arquivo muito grande. Máximo 10MB', 'error');
+            return;
+        }
+
+        // Show loading notification
+        this.showNotification('📄 Importando arquivo...', 'info', 2000);
+
+        try {
+            // Read and parse file
+            const fileContent = await this.readFileContent(file);
+            const planData = await this.parseJSONFile(fileContent);
+            
+            // Validate and process plan data
+            const processedPlan = await this.processFileData(planData);
+            
+            // Check if plan already exists
+            const existing = this.state.workoutPlans.find(p => 
+                p.nome === processedPlan.nome && 
+                p.aluno?.nome === processedPlan.aluno?.nome
+            );
+            
+            if (existing) {
+                const confirmed = confirm(
+                    `Um plano com nome "${processedPlan.nome}" já existe.\n\nDeseja importar mesmo assim?`
+                );
+                if (!confirmed) {
+                    return;
                 }
             }
-        });
 
-        // Click to select file
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('#fileUploadArea')) {
-                const fileInput = document.getElementById('fileInput');
-                if (fileInput) {
-                    fileInput.click();
-                }
+            // Add to plans and save
+            this.state.workoutPlans.push(processedPlan);
+            await this.saveToStorage();
+
+            // Success feedback
+            this.showNotification(`✅ Plano "${processedPlan.nome}" importado com sucesso!`, 'success');
+            this.renderHome();
+
+        } catch (error) {
+            console.error('File import error:', error);
+            this.showNotification(`❌ Erro ao importar: ${error.message}`, 'error');
+        } finally {
+            // Reset file input
+            const fileInput = document.getElementById('hiddenFileInput');
+            if (fileInput) {
+                fileInput.value = '';
             }
+        }
+    }
+
+    async readFileContent(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                resolve(e.target.result);
+            };
+            
+            reader.onerror = () => {
+                reject(new Error('Erro ao ler o arquivo'));
+            };
+            
+            reader.readAsText(file, 'UTF-8');
         });
+    }
+
+    async parseJSONFile(content) {
+        try {
+            const data = JSON.parse(content);
+            
+            if (!data || typeof data !== 'object') {
+                throw new Error('Arquivo JSON inválido');
+            }
+            
+            // NOVA VALIDAÇÃO: verificar se tem array planos
+            if (!data.planos || !Array.isArray(data.planos) || data.planos.length === 0) {
+                throw new Error('Formato JSON inválido: deve conter array "planos" com pelo menos um plano');
+            }
+            
+            // Retornar o primeiro plano do array
+            return data.planos[0];
+        } catch (error) {
+            if (error instanceof SyntaxError) {
+                throw new Error('Formato JSON inválido');
+            }
+            throw error;
+        }
+    }
+
+    async processFileData(data) {
+        // Validate required fields
+        if (!data.nome && !data.name) {
+            throw new Error('Nome do plano não encontrado no arquivo');
+        }
+    
+        if (!data.treinos && !data.workouts) {
+            throw new Error('Treinos não encontrados no arquivo');
+        }
+    
+        // Generate unique ID for imported plan
+        const processedPlan = {
+            id: this.generateId(),
+            nome: data.nome || data.name || 'Plano Importado',
+            importedAt: new Date().toISOString(),
+            importedFrom: 'file',
+            execucoesPlanCompleto: 0,
+            
+            // Student data
+            aluno: {
+                nome: data.aluno?.nome || data.student?.name || '',
+                dataNascimento: data.aluno?.dataNascimento || data.student?.birth_date || '',
+                idade: data.aluno?.idade || data.student?.age || null,
+                altura: data.aluno?.altura || data.student?.height || '',
+                peso: data.aluno?.peso || data.student?.weight || '',
+                cpf: data.aluno?.cpf || data.student?.cpf || ''
+            },
+            
+            // Plan metadata
+            dias: data.dias || data.frequency_per_week || 3,
+            dataInicio: data.dataInicio || data.start_date || new Date().toISOString().split('T')[0],
+            dataFim: data.dataFim || data.end_date || '',
+            
+            // Profile and objectives
+            perfil: {
+                objetivo: data.perfil?.objetivo || data.objective || 'Condicionamento geral',
+                altura: data.aluno?.altura || data.student?.height || '',
+                peso: data.aluno?.peso || data.student?.weight || '',
+                idade: data.aluno?.idade || data.student?.age || null,
+                porte: data.perfil?.porte || '' // NOVO CAMPO
+            },
+            
+            // Convert workouts
+            treinos: this.convertWorkoutsToFrontendFormat(data.treinos || data.workouts || []),
+            
+            // Observations
+            observacoes: data.observacoes || data.observations || {},
+            
+            // NOVO: Técnicas aplicadas
+            tecnicasAplicadas: data.tecnicas_aplicadas || {}
+        };
+    
+        // Validate processed plan
+        if (processedPlan.treinos.length === 0) {
+            throw new Error('Nenhum treino válido encontrado no arquivo');
+        }
+    
+        return processedPlan;
     }
 
     setupPWAFeatures() {
@@ -462,263 +555,6 @@ class JSFitStudentApp {
             tecnica: exercise.tecnica || '', // NOVO CAMPO
             concluido: false
         }));
-    }
-
-    // =============================================================================
-    // FILE UPLOAD MANAGEMENT
-    // =============================================================================
-
-    showFileUploadModal() {
-        const modal = document.getElementById('fileUploadModal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            this.resetFileUploadModal();
-        }
-    }
-
-    hideFileUploadModal() {
-        const modal = document.getElementById('fileUploadModal');
-        if (modal) {
-            modal.classList.add('hidden');
-            this.resetFileUploadModal();
-        }
-    }
-
-    resetFileUploadModal() {
-        const fileInput = document.getElementById('fileInput');
-        const fileInfo = document.getElementById('fileInfo');
-        const fileError = document.getElementById('fileError');
-        const importBtn = document.getElementById('importFileBtn');
-        
-        if (fileInput) fileInput.value = '';
-        if (fileInfo) fileInfo.classList.add('hidden');
-        if (fileError) fileError.classList.add('hidden');
-        if (importBtn) importBtn.disabled = true;
-        
-        this.state.selectedFile = null;
-    }
-
-    handleFileSelection(file) {
-        const fileInfo = document.getElementById('fileInfo');
-        const fileError = document.getElementById('fileError');
-        const importBtn = document.getElementById('importFileBtn');
-        
-        if (!file) {
-            this.resetFileUploadModal();
-            return;
-        }
-
-        // Validate file type
-        if (!file.name.toLowerCase().endsWith('.json')) {
-            this.showFileError('Apenas arquivos JSON são aceitos');
-            return;
-        }
-
-        // Validate file size (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-            this.showFileError('Arquivo muito grande. Máximo 10MB');
-            return;
-        }
-
-        // Show file info
-        if (fileInfo) {
-            const fileName = fileInfo.querySelector('.file-name');
-            const fileSize = fileInfo.querySelector('.file-size');
-            
-            if (fileName) fileName.textContent = file.name;
-            if (fileSize) fileSize.textContent = this.formatFileSize(file.size);
-            
-            fileInfo.classList.remove('hidden');
-        }
-
-        // Hide error and enable import button
-        if (fileError) fileError.classList.add('hidden');
-        if (importBtn) importBtn.disabled = false;
-
-        // Store selected file
-        this.state.selectedFile = file;
-    }
-
-    showFileError(message) {
-        const fileError = document.getElementById('fileError');
-        const fileInfo = document.getElementById('fileInfo');
-        const importBtn = document.getElementById('importFileBtn');
-        
-        if (fileError) {
-            fileError.textContent = message;
-            fileError.classList.remove('hidden');
-        }
-        
-        if (fileInfo) fileInfo.classList.add('hidden');
-        if (importBtn) importBtn.disabled = true;
-        
-        this.state.selectedFile = null;
-    }
-
-    formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-
-    async handleFileImport() {
-        if (!this.state.selectedFile) {
-            this.showFileError('Nenhum arquivo selecionado');
-            return;
-        }
-
-        const importBtn = document.getElementById('importFileBtn');
-        const originalText = importBtn?.innerHTML;
-        
-        try {
-            // Update UI for loading state
-            if (importBtn) {
-                importBtn.innerHTML = '<span class="loading-spinner"></span> Importando...';
-                importBtn.disabled = true;
-            }
-
-            // Read and parse file
-            const fileContent = await this.readFileContent(this.state.selectedFile);
-            const planData = await this.parseJSONFile(fileContent);
-            
-            // Validate and process plan data
-            const processedPlan = await this.processFileData(planData);
-            
-            // Check if plan already exists
-            const existing = this.state.workoutPlans.find(p => 
-                p.nome === processedPlan.nome && 
-                p.aluno?.nome === processedPlan.aluno?.nome
-            );
-            
-            if (existing) {
-                const confirmed = confirm(
-                    `Um plano com nome "${processedPlan.nome}" já existe.\n\nDeseja importar mesmo assim?`
-                );
-                if (!confirmed) {
-                    return;
-                }
-            }
-
-            // Add to plans and save
-            this.state.workoutPlans.push(processedPlan);
-            await this.saveToStorage();
-
-            // Success feedback
-            this.showNotification(`✅ Plano "${processedPlan.nome}" importado com sucesso!`, 'success');
-            this.hideFileUploadModal();
-            this.renderHome();
-
-        } catch (error) {
-            console.error('File import error:', error);
-            this.showFileError(`Erro ao importar: ${error.message}`);
-        } finally {
-            // Reset button
-            if (importBtn && originalText) {
-                importBtn.innerHTML = originalText;
-                importBtn.disabled = false;
-            }
-        }
-    }
-
-    async readFileContent(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            
-            reader.onload = (e) => {
-                resolve(e.target.result);
-            };
-            
-            reader.onerror = () => {
-                reject(new Error('Erro ao ler o arquivo'));
-            };
-            
-            reader.readAsText(file, 'UTF-8');
-        });
-    }
-
-    async parseJSONFile(content) {
-        try {
-            const data = JSON.parse(content);
-            
-            if (!data || typeof data !== 'object') {
-                throw new Error('Arquivo JSON inválido');
-            }
-            
-            // NOVA VALIDAÇÃO: verificar se tem array planos
-            if (!data.planos || !Array.isArray(data.planos) || data.planos.length === 0) {
-                throw new Error('Formato JSON inválido: deve conter array "planos" com pelo menos um plano');
-            }
-            
-            // Retornar o primeiro plano do array
-            return data.planos[0];
-        } catch (error) {
-            if (error instanceof SyntaxError) {
-                throw new Error('Formato JSON inválido');
-            }
-            throw error;
-        }
-    }
-
-    async processFileData(data) {
-        // Validate required fields
-        if (!data.nome && !data.name) {
-            throw new Error('Nome do plano não encontrado no arquivo');
-        }
-    
-        if (!data.treinos && !data.workouts) {
-            throw new Error('Treinos não encontrados no arquivo');
-        }
-    
-        // Generate unique ID for imported plan
-        const processedPlan = {
-            id: this.generateId(),
-            nome: data.nome || data.name || 'Plano Importado',
-            importedAt: new Date().toISOString(),
-            importedFrom: 'file',
-            execucoesPlanCompleto: 0,
-            
-            // Student data
-            aluno: {
-                nome: data.aluno?.nome || data.student?.name || '',
-                dataNascimento: data.aluno?.dataNascimento || data.student?.birth_date || '',
-                idade: data.aluno?.idade || data.student?.age || null,
-                altura: data.aluno?.altura || data.student?.height || '',
-                peso: data.aluno?.peso || data.student?.weight || '',
-                cpf: data.aluno?.cpf || data.student?.cpf || ''
-            },
-            
-            // Plan metadata
-            dias: data.dias || data.frequency_per_week || 3,
-            dataInicio: data.dataInicio || data.start_date || new Date().toISOString().split('T')[0],
-            dataFim: data.dataFim || data.end_date || '',
-            
-            // Profile and objectives
-            perfil: {
-                objetivo: data.perfil?.objetivo || data.objective || 'Condicionamento geral',
-                altura: data.aluno?.altura || data.student?.height || '',
-                peso: data.aluno?.peso || data.student?.weight || '',
-                idade: data.aluno?.idade || data.student?.age || null,
-                porte: data.perfil?.porte || '' // NOVO CAMPO
-            },
-            
-            // Convert workouts
-            treinos: this.convertWorkoutsToFrontendFormat(data.treinos || data.workouts || []),
-            
-            // Observations
-            observacoes: data.observacoes || data.observations || {},
-            
-            // NOVO: Técnicas aplicadas
-            tecnicasAplicadas: data.tecnicas_aplicadas || {}
-        };
-    
-        // Validate processed plan
-        if (processedPlan.treinos.length === 0) {
-            throw new Error('Nenhum treino válido encontrado no arquivo');
-        }
-    
-        return processedPlan;
     }
 
     // =============================================================================
@@ -1235,14 +1071,14 @@ class JSFitStudentApp {
                         <div class="import-divider">
                             <span>OU</span>
                         </div>
-                        <button class="btn btn-secondary import-file-btn" onclick="app.showFileUploadModal()">
+                        <button class="btn btn-secondary import-file-btn" onclick="app.openFileSelector()">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
                             </svg>
-                            Selecionar Arquivo JSON
+                            Importar Arquivo JSON
                         </button>
                         <div class="import-file-hint">
-                            Importe diretamente o arquivo JSON fornecido pelo seu personal trainer
+                            Selecione o arquivo JSON fornecido pelo seu personal trainer
                         </div>
                     </div>
                 </div>
@@ -1708,7 +1544,7 @@ class JSFitStudentApp {
                             
                             ${exercicio.descanso && exercicio.descanso !== '0' ? `
                             <div class="spec-item">
-                                <div class="spec-icon">ⱱ️</div>
+                                <div class="spec-icon">⏱️</div>
                                 <div class="spec-content">
                                     <div class="spec-label">Descanso</div>
                                     <div class="spec-value">${exercicio.descanso}</div>
@@ -1927,30 +1763,52 @@ class JSFitStudentApp {
     // =============================================================================
 
     // NOVA FUNÇÃO: Buscar GIF do exercício na base de dados
+
     findExerciseGif(exerciseName) {
-        // Normalizar nome do exercício para busca
+        // Aguardar carregamento da base se necessário
+        if (!this.exerciseDatabase || this.exerciseDatabase.length === 0) {
+            console.warn('⚠️ Base de exercícios ainda não carregada');
+            return null;
+        }
+
         const normalizedName = exerciseName.trim().toLowerCase();
         
-        // Buscar em todos os grupos musculares e níveis
-        for (const muscleGroup in this.exerciseDatabase) {
-            for (const level in this.exerciseDatabase[muscleGroup]) {
-                const exercises = this.exerciseDatabase[muscleGroup][level];
-                
-                for (const exercise of exercises) {
-                    if (exercise.nome.toLowerCase() === normalizedName) {
-                        return exercise.gif;
-                    }
-                }
-            }
+        // Busca exata primeiro
+        const exactMatch = this.exerciseDatabase.find(exercise => 
+            exercise.nome.toLowerCase() === normalizedName
+        );
+        
+        if (exactMatch) {
+            return exactMatch.Column4;
         }
         
-        // Retornar null se não encontrou
+        // Busca parcial como fallback
+        const partialMatch = this.exerciseDatabase.find(exercise => 
+            exercise.nome.toLowerCase().includes(normalizedName) ||
+            normalizedName.includes(exercise.nome.toLowerCase())
+        );
+        
+        if (partialMatch) {
+            console.log(`🔍 Busca parcial: "${exerciseName}" → "${partialMatch.nome}"`);
+            return partialMatch.Column4;
+        }
+        
+        // Log para debug
+        console.warn(`❌ Exercício não encontrado: "${exerciseName}"`);
         return null;
     }
 
+
     // NOVA FUNÇÃO: Mostrar modal com GIF do exercício
     showExerciseGif(exerciseName) {
+        // Verificar se a base está carregada
+        if (!this.exerciseDatabase || this.exerciseDatabase.length === 0) {
+            this.showNotification('⚠️ Base de exercícios ainda não carregada. Aguarde...', 'warning');
+            return;
+        }
+
         const gifPath = this.findExerciseGif(exerciseName);
+        const exerciseData = this.findExerciseByName(exerciseName);
         
         // Criar modal se não existir
         let modal = document.getElementById('exerciseGifModal');
@@ -1963,6 +1821,7 @@ class JSFitStudentApp {
         const exerciseNameEl = modal.querySelector('#exerciseGifName');
         const exerciseImageEl = modal.querySelector('#exerciseGifImage');
         const notFoundEl = modal.querySelector('#exerciseNotFound');
+        const exerciseInfoEl = modal.querySelector('#exerciseInfo');
         
         exerciseNameEl.textContent = exerciseName;
         
@@ -1970,20 +1829,98 @@ class JSFitStudentApp {
             exerciseImageEl.src = gifPath;
             exerciseImageEl.style.display = 'block';
             notFoundEl.style.display = 'none';
+            
+            // Adicionar informações extras se disponível
+            if (exerciseData && exerciseInfoEl) {
+                exerciseInfoEl.innerHTML = `
+                    ${exerciseData.grupo ? `<div class="exercise-group">Grupo: ${exerciseData.grupo}</div>` : ''}
+                    ${exerciseData.Musculos ? `<div class="exercise-muscles">Músculos: ${exerciseData.Musculos}</div>` : ''}
+                    ${exerciseData.descricao ? `<div class="exercise-description-modal">${exerciseData.descricao}</div>` : ''}
+                `;
+                exerciseInfoEl.style.display = 'block';
+            }
+            
+            // Tratamento de erro de carregamento da imagem
             exerciseImageEl.onerror = () => {
+                console.error(`❌ Erro ao carregar imagem: ${gifPath}`);
                 exerciseImageEl.style.display = 'none';
                 notFoundEl.style.display = 'block';
+                notFoundEl.querySelector('.not-found-subtitle').textContent = 
+                    'Erro ao carregar a demonstração visual deste exercício.';
             };
         } else {
             exerciseImageEl.style.display = 'none';
             notFoundEl.style.display = 'block';
+            if (exerciseInfoEl) exerciseInfoEl.style.display = 'none';
         }
         
         // Mostrar modal
         modal.classList.remove('hidden');
     }
 
+        // Buscar exercício completo por nome
+        findExerciseByName(exerciseName) {
+            if (!this.exerciseDatabase || this.exerciseDatabase.length === 0) {
+                return null;
+            }
+    
+            const normalizedName = exerciseName.trim().toLowerCase();
+            
+            return this.exerciseDatabase.find(exercise => 
+                exercise.nome.toLowerCase() === normalizedName
+            );
+        }
+    
+        // Buscar exercícios por grupo
+        findExercisesByGroup(groupName) {
+            if (!this.exerciseDatabase || this.exerciseDatabase.length === 0) {
+                return [];
+            }
+    
+            const normalizedGroup = groupName.trim().toLowerCase();
+            
+            return this.exerciseDatabase.filter(exercise => 
+                exercise.grupo.toLowerCase() === normalizedGroup
+            );
+        }
+    
+        // Buscar exercícios por músculos
+        findExercisesByMuscle(muscleName) {
+            if (!this.exerciseDatabase || this.exerciseDatabase.length === 0) {
+                return [];
+            }
+    
+            const normalizedMuscle = muscleName.trim().toLowerCase();
+            
+            return this.exerciseDatabase.filter(exercise => 
+                exercise.Musculos && exercise.Musculos.toLowerCase().includes(normalizedMuscle)
+            );
+        }
+    
+        // Obter todos os grupos disponíveis
+        getAllExerciseGroups() {
+            if (!this.exerciseDatabase || this.exerciseDatabase.length === 0) {
+                return [];
+            }
+    
+            const groups = new Set();
+            this.exerciseDatabase.forEach(exercise => {
+                if (exercise.grupo) {
+                    groups.add(exercise.grupo);
+                }
+            });
+            
+            return Array.from(groups).sort();
+        }
+    
+        // Validar se um exercício existe
+        exerciseExists(exerciseName) {
+            return this.findExerciseByName(exerciseName) !== null;
+        }
+
+
     // NOVA FUNÇÃO: Criar modal do GIF
+
     createExerciseGifModal() {
         const modal = document.createElement('div');
         modal.id = 'exerciseGifModal';
@@ -2001,6 +1938,9 @@ class JSFitStudentApp {
                     </button>
                 </div>
                 <div class="modal-body">
+                    <!-- Informações do exercício -->
+                    <div id="exerciseInfo" class="exercise-info-modal" style="display: none;"></div>
+                    
                     <div class="exercise-gif-container">
                         <img id="exerciseGifImage" 
                              class="exercise-gif" 
@@ -2008,7 +1948,7 @@ class JSFitStudentApp {
                              style="display: none;">
                         <div id="exerciseNotFound" class="exercise-not-found" style="display: none;">
                             <div class="not-found-icon">🚫</div>
-                            <div class="not-found-text">Exemplo não cadastrado</div>
+                            <div class="not-found-text">Demonstração não disponível</div>
                             <div class="not-found-subtitle">
                                 A demonstração visual deste exercício não está disponível em nossa base de dados.
                             </div>
@@ -2024,6 +1964,97 @@ class JSFitStudentApp {
         `;
         return modal;
     }
+
+    // PASSO 8: MÉTODO DE DEBUG E MANUTENÇÃO
+    // =====================================
+
+    // Método para debug - verificar exercícios de um plano
+    debugPlanExercises(planId) {
+        const plan = this.findPlan(planId);
+        if (!plan) {
+            console.log('❌ Plano não encontrado');
+            return;
+        }
+
+        console.log(`🔍 Debug do plano: "${plan.nome}"`);
+        
+        plan.treinos.forEach((treino, treinoIndex) => {
+            console.log(`\n  Treino ${treino.id} - ${treino.nome}:`);
+            
+            treino.exercicios.forEach((ex, exIndex) => {
+                const gifPath = this.findExerciseGif(ex.nome);
+                const status = gifPath ? '✅' : '❌';
+                
+                console.log(`    ${status} ${exIndex + 1}. ${ex.nome}`);
+                if (gifPath) {
+                    console.log(`         GIF: ${gifPath}`);
+                } else {
+                    // Sugerir exercícios similares
+                    const similar = this.findSimilarExercises(ex.nome);
+                    if (similar.length > 0) {
+                        console.log(`         Similares: ${similar.slice(0, 3).map(s => s.nome).join(', ')}`);
+                    }
+                }
+            });
+        });
+    }
+
+    // Buscar exercícios similares
+    findSimilarExercises(exerciseName, maxResults = 5) {
+        if (!this.exerciseDatabase || this.exerciseDatabase.length === 0) {
+            return [];
+        }
+
+        const normalizedName = exerciseName.toLowerCase();
+        const words = normalizedName.split(' ').filter(w => w.length > 2);
+        
+        const matches = this.exerciseDatabase
+            .filter(ex => {
+                const exName = ex.nome.toLowerCase();
+                return words.some(word => exName.includes(word));
+            })
+            .slice(0, maxResults);
+        
+        return matches;
+    }
+
+    // PASSO 9: VALIDAÇÃO DE INTEGRIDADE
+    // ==================================
+
+    validateExerciseDatabase() {
+        if (!this.exerciseDatabase || this.exerciseDatabase.length === 0) {
+            console.warn('⚠️ Base de exercícios vazia ou não carregada');
+            return false;
+        }
+
+        let isValid = true;
+        const issues = [];
+
+        this.exerciseDatabase.forEach((ex, index) => {
+            // Verificar campos obrigatórios
+            if (!ex.nome) {
+                issues.push(`Exercício ${index + 1}: Nome ausente`);
+                isValid = false;
+            }
+            
+            if (!ex.Column4) {
+                issues.push(`Exercício ${index + 1} (${ex.nome}): Column4 (GIF) ausente`);
+                isValid = false;
+            }
+            
+            if (!ex.grupo) {
+                issues.push(`Exercício ${index + 1} (${ex.nome}): Grupo ausente`);
+            }
+        });
+
+        if (issues.length > 0) {
+            console.warn('⚠️ Problemas na base de exercícios:');
+            issues.forEach(issue => console.warn(`   ${issue}`));
+        }
+
+        return isValid;
+    }
+
 
     // NOVA FUNÇÃO: Esconder modal do GIF
     hideExerciseGif() {

@@ -2,398 +2,225 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>JS Fit App - Sistema de Treinos</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Sistema de Treinos Personalizados</title>
     <!-- PWA Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="JS Fit App">
+    <meta name="apple-mobile-web-app-title" content="Treinos Personalizados">
     <meta name="theme-color" content="#2563eb">
-    <meta name="description" content="Sistema de compartilhamento de treinos entre personal trainers e alunos">
     
-    <!-- Icons -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <!-- Apple Touch Icon -->
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9IiMyNTYzZWIiLz4KPHN2ZyB4PSI0NSIgeT0iNDUiIHdpZHRoPSI5MCIgaGVpZ2h0PSI5MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJtNi4zIDIwLjMgMi4zLTIuM2E0IDQgMCAwIDEgNS42NiAwIDQgNCAwIDAgMCA1LjY2IDBsMi4zIDIuMyIvPgo8cGF0aCBkPSJNNiAzaDEyYTMgMyAwIDAgMSAzIDN2NmEzIDMgMCAwIDEtMyAzSDZhMyAzIDAgMCAxLTMtM1Y2YTMgMyAwIDAgMSAzLTN6Ii8+Cjwvc3ZnPgo8L3N2Zz4K">
-    
-    <!-- Manifest -->
-    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" type="text/css" href="css/aluno.css">
     
     <style>
-        /* Reset e configurações básicas */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            line-height: 1.6;
-            color: #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 600px;
-            width: 100%;
-        }
-
-        .logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 30px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
-        }
-
-        .logo svg {
-            width: 40px;
-            height: 40px;
-            stroke: white;
-            stroke-width: 2;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 15px;
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            color: #666;
-            margin-bottom: 40px;
-            line-height: 1.6;
-        }
-
-        .app-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-
-        .app-card {
-            background: white;
-            border-radius: 15px;
-            padding: 30px 20px;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            border: 2px solid #f0f0f0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .app-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-
-        .app-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .app-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.2);
-            border-color: #667eea;
-        }
-
-        .app-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 15px;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .student .app-icon {
-            background: linear-gradient(135deg, #30d158, #28a745);
-        }
-
-        .trainer .app-icon {
-            background: linear-gradient(135deg, #5856d6, #af52de);
-        }
-
-        .app-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .app-description {
-            font-size: 0.95rem;
-            color: #666;
-            line-height: 1.5;
-        }
-
-        .features {
-            background: #f8fafc;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .features h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .features-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            justify-content: center;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .status {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 20px;
-            background: linear-gradient(135deg, #30d158, #28a745);
-            color: white;
-            border-radius: 25px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            border: 1px solid rgba(48, 209, 88, 0.2);
-            box-shadow: 0 4px 12px rgba(48, 209, 88, 0.2);
-        }
-
-        .status::before {
-            content: "●";
-            font-size: 0.7rem;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .version-info {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
-            color: #888;
-            font-size: 0.85rem;
-        }
-
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .container {
-                padding: 30px 20px;
-                margin: 10px;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .subtitle {
-                font-size: 1rem;
-            }
-
-            .app-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .features-list {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 25px 15px;
-            }
-
-            h1 {
-                font-size: 1.8rem;
-            }
-
-            .features-list {
-                grid-template-columns: 1fr;
-            }
-
-            .app-card {
-                padding: 25px 15px;
-            }
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="m6.3 20.3 2.3-2.3a4 4 0 0 1 5.66 0 4 4 0 0 0 5.66 0l2.3 2.3"/>
-                <path d="M6 3h12a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3z"/>
-            </svg>
-        </div>
-
-        <h1>JS Fit App</h1>
-        <p class="subtitle">
-            Sistema de compartilhamento de treinos entre personal trainers e alunos
-        </p>
-
-        <div class="app-grid">
-            <a href="/aluno.html" class="app-card student">
-                <div class="app-icon">👨‍🎓</div>
-                <div class="app-title">Aluno</div>
-                <div class="app-description">
-                    Importe treinos usando o ID do seu personal trainer
-                </div>
-            </a>
-
-            <a href="/personal.html" class="app-card trainer">
-                <div class="app-icon">👨‍🏫</div>
-                <div class="app-title">Personal</div>
-                <div class="app-description">
-                    Crie e compartilhe planos de treino com seus alunos
-                </div>
-            </a>
-        </div>
-
-        <div class="features">
-            <h3>✨ Recursos</h3>
-            <div class="features-list">
-                <div class="feature-item">
-                    📱 PWA Instalável
-                </div>
-                <div class="feature-item">
-                    🔒 Compartilhamento Seguro
-                </div>
-                <div class="feature-item">
-                    📶 Funciona Offline
-                </div>
-                <div class="feature-item">
-                    🎯 Interface Simples
-                </div>
-                <div class="feature-item">
-                    🔗 IDs Únicos
-                </div>
-                <div class="feature-item">
-                    ⚡ Sincronização Automática
+    <div id="app" class="app">
+        <div class="connection-status" id="connectionStatus"></div>
+        
+        <!-- Home View -->
+        <div id="homeView" class="view">
+            <div class="header">
+                <div class="header-content">
+                    <h1 class="title">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m6.3 20.3 2.3-2.3a4 4 0 0 1 5.66 0 4 4 0 0 0 5.66 0l2.3 2.3"/>
+                            <path d="M6 3h12a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3z"/>
+                        </svg>
+                        Meus Treinos
+                    </h1>
                 </div>
             </div>
+            
+            <!-- App Branding Section -->
+            <div class="app-branding">
+                <h2 class="app-title">Sistema de Treinos Personalizados</h2>
+                <p class="app-subtitle">Sua jornada fitness começa aqui</p>
+                <div class="developer-info">
+                    <div class="developer-name">
+                        <svg class="developer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        Desenvolvido por Javan Santana
+                    </div>
+                    <div class="developer-contact">
+                        <svg class="phone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                        (15) 99143-7433
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content" id="homeContent">
+                <!-- Content will be populated by JavaScript -->
+            </div>
         </div>
-
-        <div class="status" id="systemStatus">
-            Sistema Online
+        
+        <!-- Plan View -->
+        <div id="planView" class="view hidden">
+            <div class="header">
+                <div class="header-content">
+                    <button class="back-btn show" onclick="showHome()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m15 18-6-6 6-6"/>
+                        </svg>
+                    </button>
+                    <div>
+                        <h1 class="title" id="planTitle">Plano</h1>
+                        <p class="subtitle" id="planSubtitle">Período</p>
+                    </div>
+                </div>
+            </div>
+            <div class="content" id="planContent">
+                <!-- Content will be populated by JavaScript -->
+            </div>
         </div>
-
-        <div class="version-info">
-            JS Fit App v2.0 - Sistema de Compartilhamento<br>
-            <small>Desenvolvido para personal trainers e alunos</small>
+        
+        <!-- Workout View -->
+        <div id="workoutView" class="view hidden">
+            <div class="header">
+                <div class="header-content">
+                    <button class="back-btn show" onclick="showPlan()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m15 18-6-6 6-6"/>
+                        </svg>
+                    </button>
+                    <div>
+                        <h1 class="title" id="workoutTitle">Treino</h1>
+                        <p class="subtitle" id="workoutSubtitle">Exercícios</p>
+                    </div>
+                </div>
+            </div>
+            <div class="content" id="workoutContent">
+                <!-- Content will be populated by JavaScript -->
+            </div>
         </div>
     </div>
 
-    <script>
-        // Verificar status da API
-        async function checkSystemStatus() {
-            const statusEl = document.getElementById('systemStatus');
-            
-            try {
-                const response = await fetch('/api/health');
-                const data = await response.json();
-                
-                if (data.status === 'online') {
-                    statusEl.innerHTML = `
-                        <span>Sistema Online</span>
-                        <small>• ${data.storage?.totalWorkouts || 0} treinos disponíveis</small>
-                    `;
-                    statusEl.style.background = 'linear-gradient(135deg, #30d158, #28a745)';
-                } else {
-                    throw new Error('Sistema com problemas');
-                }
-            } catch (error) {
-                statusEl.innerHTML = `
-                    <span>Modo Offline</span>
-                    <small>• Funcionalidades locais disponíveis</small>
-                `;
-                statusEl.style.background = 'linear-gradient(135deg, #ffa726, #ff9800)';
-            }
-        }
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h3 class="modal-title">Confirmar Exclusão</h3>
+            <p class="modal-message" id="confirmationMessage">
+                Tem certeza de que deseja excluir este plano? Esta ação não pode ser desfeita.
+            </p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="hideConfirmation()">Cancelar</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">Excluir</button>
+            </div>
+        </div>
+    </div>
 
-        // Executar quando a página carregar
-        document.addEventListener('DOMContentLoaded', () => {
-            checkSystemStatus();
-            
-            // Verificar periodicamente
-            setInterval(checkSystemStatus, 60000); // A cada minuto
-        });
+    <!-- Success Modal -->
+    <div id="successModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h3 class="modal-title">✅ Sucesso!</h3>
+            <p class="modal-message" id="successMessage">
+                Operação realizada com sucesso!
+            </p>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="hideSuccessModal()">OK</button>
+            </div>
+        </div>
+    </div>
 
-        // Registrar Service Worker se disponível
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('SW registered: ', registration);
-                    })
-                    .catch(registrationError => {
-                        console.log('SW registration failed: ', registrationError);
-                    });
-            });
-        }
+    <!-- Error Modal -->
+    <div id="errorModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h3 class="modal-title">❌ Erro</h3>
+            <p class="modal-message" id="errorMessage">
+                Ocorreu um erro inesperado.
+            </p>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="hideErrorModal()">OK</button>
+            </div>
+        </div>
+    </div>
 
-        // Analytics simples
-        if (window.location.hostname !== 'localhost') {
-            // Adicionar Google Analytics ou similar aqui
-            console.log('Página inicial carregada');
-        }
-    </script>
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div style="text-align: center;">
+                <div class="loading-spinner" style="margin: 20px auto;"></div>
+                <h3 class="modal-title">Carregando...</h3>
+                <p class="modal-message" id="loadingMessage">
+                    Aguarde um momento...
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- File Upload Modal -->
+<div id="fileUploadModal" class="modal-overlay hidden">
+    <div class="modal">
+        <h3 class="modal-title">📁 Importar Arquivo JSON</h3>
+        <p class="modal-message">
+            Selecione o arquivo JSON fornecido pelo seu personal trainer
+        </p>
+        
+        <div id="fileUploadArea" class="file-upload-area" style="
+            border: 2px dashed #ccc;
+            padding: 40px 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        ">
+            <input type="file" id="fileInput" accept=".json" style="display: none;">
+            <div class="upload-icon" style="font-size: 48px; margin-bottom: 10px;">📄</div>
+            <p>Clique aqui ou arraste um arquivo JSON</p>
+            <small style="color: #666;">Máximo 10MB</small>
+        </div>
+        
+        <div id="fileInfo" class="file-info hidden" style="
+            background: #f0f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #0ea5e9;
+        ">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 20px;">📄</span>
+                <div>
+                    <div class="file-name" style="font-weight: 600;"></div>
+                    <div class="file-size" style="font-size: 14px; color: #666;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="fileError" class="file-error hidden" style="
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #fca5a5;
+        ">
+            Erro no arquivo
+        </div>
+        
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="app.hideFileUploadModal()">Cancelar</button>
+            <button id="importFileBtn" class="btn btn-primary" disabled onclick="app.handleFileImport()">
+                📥 Importar Arquivo
+            </button>
+        </div>
+    </div>
+</div>
+
+    <!-- File Upload Modal - HIDDEN -->
+    <!-- 
+    <div id="fileUploadModal" class="modal-overlay hidden" style="display: none !important;">
+        // Modal content removed for cleaner code
+    </div>
+    -->
+
+    <script src="js/aluno.js"></script> 
 </body>
 </html>
