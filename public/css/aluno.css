@@ -2629,7 +2629,10 @@ body {
 }
 
 .btn-secondary:hover {
+    background: var(--gradient-secondary);
     box-shadow: var(--shadow-lg);
+    color:#000000;
+
     transform: translateY(-1px);
 }
 
