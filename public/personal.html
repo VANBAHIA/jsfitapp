@@ -13,7 +13,58 @@
     
     <!-- CSS -->
     <link rel="stylesheet" href="css/personal.css">
+
     <style>
+        /* Estilos para o filtro de grupos */
+        #exerciseGroupFilter {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            border: 2px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        #exerciseGroupFilter:focus {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+        
+        #exerciseGroupFilter option {
+            background: white;
+            color: #333;
+            font-weight: normal;
+        }
+        
+        /* Indicador de status - VERSÃO UNIFICADA */
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-secondary, #666);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-hint.loading {
+            color: #ff9800;
+            background: rgba(255, 152, 0, 0.1);
+        }
+        
+        .form-hint.success {
+            color: #4caf50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+        
+        .form-hint.error {
+            color: #f44336;
+            background: rgba(244, 67, 54, 0.1);
+        }
+        
+        /* Estilos da marca do app */
         .app-branding {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -100,7 +151,8 @@
             height: 14px;
             opacity: 0.8;
         }
-    </style>
+        </style>
+        
 </head>
 <body>
     <div class="container">
@@ -404,180 +456,114 @@
         </div>
     </div>
 
-    <!-- Modal for Exercise Editor -->
-    <div id="exerciseModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>✏️ Editar Exercício</h2>
-                <button class="close-btn" onclick="app.closeExerciseModal()">&times;</button>
-            </div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label class="form-label">Nome do Exercício</label>
-                    <select id="exerciseName" class="form-select" onchange="app.updateExerciseDescription()">
-                        <option value="custom">Exercício Personalizado</option>
-                        <!-- Peito -->
-                        <optgroup label="Peito">
-                            <option value="Supino Reto com Barra">Supino Reto com Barra</option>
-                            <option value="Supino Inclinado com Barra">Supino Inclinado com Barra</option>
-                            <option value="Supino Declinado com Barra">Supino Declinado com Barra</option>
-                            <option value="Supino com Halteres">Supino com Halteres</option>
-                            <option value="Supino Inclinado com Halteres">Supino Inclinado com Halteres</option>
-                            <option value="Crucifixo com Halteres">Crucifixo com Halteres</option>
-                            <option value="Crucifixo Inclinado">Crucifixo Inclinado</option>
-                            <option value="Crossover">Crossover</option>
-                            <option value="Flexão de Braços">Flexão de Braços</option>
-                            <option value="Mergulho em Paralelas">Mergulho em Paralelas</option>
-                        </optgroup>
-                        <!-- Costas -->
-                        <optgroup label="Costas">
-                            <option value="Puxada Frontal">Puxada Frontal</option>
-                            <option value="Puxada Atrás da Nuca">Puxada Atrás da Nuca</option>
-                            <option value="Barra Fixa">Barra Fixa</option>
-                            <option value="Remada Baixa">Remada Baixa</option>
-                            <option value="Remada Curvada">Remada Curvada</option>
-                            <option value="Remada com Halter">Remada com Halter</option>
-                            <option value="Remada T-Bar">Remada T-Bar</option>
-                            <option value="Levantamento Terra">Levantamento Terra</option>
-                            <option value="Pullover">Pullover</option>
-                        </optgroup>
-                        <!-- Ombros -->
-                        <optgroup label="Ombros">
-                            <option value="Desenvolvimento com Barra">Desenvolvimento com Barra</option>
-                            <option value="Desenvolvimento com Halteres">Desenvolvimento com Halteres</option>
-                            <option value="Desenvolvimento Arnold">Desenvolvimento Arnold</option>
-                            <option value="Elevação Lateral">Elevação Lateral</option>
-                            <option value="Elevação Frontal">Elevação Frontal</option>
-                            <option value="Elevação Posterior">Elevação Posterior</option>
-                            <option value="Encolhimento">Encolhimento</option>
-                            <option value="Face Pull">Face Pull</option>
-                        </optgroup>
-                        <!-- Bíceps -->
-                        <optgroup label="Bíceps">
-                            <option value="Rosca Direta">Rosca Direta</option>
-                            <option value="Rosca Alternada">Rosca Alternada</option>
-                            <option value="Rosca Martelo">Rosca Martelo</option>
-                            <option value="Rosca Scott">Rosca Scott</option>
-                            <option value="Rosca Concentrada">Rosca Concentrada</option>
-                            <option value="Rosca 21">Rosca 21</option>
-                            <option value="Rosca Spider">Rosca Spider</option>
-                            <option value="Rosca no Cabo">Rosca no Cabo</option>
-                        </optgroup>
-                        <!-- Tríceps -->
-                        <optgroup label="Tríceps">
-                            <option value="Tríceps Testa">Tríceps Testa</option>
-                            <option value="Tríceps Francês">Tríceps Francês</option>
-                            <option value="Tríceps Pulley">Tríceps Pulley</option>
-                            <option value="Tríceps Corda">Tríceps Corda</option>
-                            <option value="Supino Fechado">Supino Fechado</option>
-                            <option value="Mergulho no Banco">Mergulho no Banco</option>
-                        </optgroup>
-                        <!-- Quadríceps -->
-                        <optgroup label="Quadríceps">
-                            <option value="Agachamento Livre">Agachamento Livre</option>
-                            <option value="Agachamento Frontal">Agachamento Frontal</option>
-                            <option value="Leg Press">Leg Press</option>
-                            <option value="Extensão de Pernas">Extensão de Pernas</option>
-                            <option value="Afundo">Afundo</option>
-                            <option value="Agachamento Búlgaro">Agachamento Búlgaro</option>
-                            <option value="Hack Squat">Hack Squat</option>
-                        </optgroup>
-                        <!-- Posterior -->
-                        <optgroup label="Posterior de Coxa">
-                            <option value="Stiff">Stiff</option>
-                            <option value="Flexão de Pernas">Flexão de Pernas</option>
-                            <option value="Mesa Flexora">Mesa Flexora</option>
-                            <option value="Good Morning">Good Morning</option>
-                            <option value="Hip Thrust">Hip Thrust</option>
-                            <option value="Elevação Pélvica">Elevação Pélvica</option>
-                        </optgroup>
-                        <!-- Panturrilha -->
-                        <optgroup label="Panturrilha">
-                            <option value="Panturrilha em Pé">Panturrilha em Pé</option>
-                            <option value="Panturrilha Sentado">Panturrilha Sentado</option>
-                            <option value="Panturrilha no Leg Press">Panturrilha no Leg Press</option>
-                        </optgroup>
-                        <!-- Outros -->
-                        <optgroup label="Aquecimento/Cardio">
-                            <option value="Esteira">Esteira</option>
-                            <option value="Bicicleta">Bicicleta</option>
-                            <option value="Elíptico">Elíptico</option>
-                            <option value="Aquecimento Articular">Aquecimento Articular</option>
-                            <option value="Alongamento">Alongamento</option>
-                        </optgroup>
-                    </select>
-                </div>
-                <div class="form-group" id="customExerciseGroup" style="display: none;">
-                    <label class="form-label">Nome Personalizado</label>
-                    <input type="text" id="customExerciseName" class="form-input" placeholder="Digite o nome do exercício">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Séries</label>
-                    <input type="number" id="exerciseSets" class="form-input" placeholder="4" min="1">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Repetições</label>
-                    <input type="text" id="exerciseReps" class="form-input" placeholder="8-12">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Carga</label>
-                    <input type="text" id="exerciseWeight" class="form-input" placeholder="80kg">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Descanso</label>
-                    <input type="text" id="exerciseRest" class="form-input" placeholder="90 segundos">
-                </div>
 
-                <div class="form-group">
-                    <label class="form-label">Técnica Avançada</label>
-                    <select id="exerciseTechnique" class="form-select" onchange="app.updateTechniqueDescription()">
-                        <option value="">Nenhuma</option>
-                        <optgroup label="Técnicas de Intensidade">
-                            <option value="drop-set">Drop-set</option>
-                            <option value="rest-pause">Rest-pause</option>
-                            <option value="serie-queima">Série Queima</option>
-                            <option value="clusters">Clusters</option>
-                            <option value="negativas">Negativas</option>
-                            <option value="metodo-21">Método 21</option>
-                            <option value="strip-set">Strip-set</option>
-                        </optgroup>
-                        <optgroup label="Técnicas de Pré/Pós-Exaustão">
-                            <option value="pre-exaustao">Pré-exaustão</option>
-                            <option value="pos-exaustao">Pós-exaustão</option>
-                        </optgroup>
-                        <optgroup label="Técnicas Combinadas">
-                            <option value="bi-set">Bi-set</option>
-                            <option value="tri-set">Tri-set</option>
-                        </optgroup>
-                        <optgroup label="Técnicas de Execução">
-                            <option value="tempo-controlado">Tempo Controlado</option>
-                            <option value="pausa-contracao">Pausa na Contração</option>
-                            <option value="isometrico">Isométrico</option>
-                            <option value="unilateral-alternado">Unilateral Alternado</option>
-                        </optgroup>
-                        <optgroup label="Técnicas de Progressão">
-                            <option value="piramide-crescente">Pirâmide Crescente</option>
-                            <option value="piramide-decrescente">Pirâmide Decrescente</option>
-                            <option value="onda">Onda</option>
-                        </optgroup>
-                    </select>
+<!-- Modal for Exercise Editor -->
+<!-- Modal for Exercise Editor -->
+<div id="exerciseModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>✏️ Editar Exercício</h2>
+            <button class="close-btn" onclick="app.closeExerciseModal()">&times;</button>
+        </div>
+        <div class="form-grid">
+            <!-- NOVO: Filtro por grupo muscular -->
+            <div class="form-group">
+                <label class="form-label">🎯 Filtrar por Grupo Muscular</label>
+                <select id="exerciseGroupFilter" class="form-select" onchange="app.filterExercisesByGroup()">
+                    <option value="todos">📋 Todos os Grupos</option>
+                    <option value="" disabled>Carregando grupos...</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Nome do Exercício</label>
+                <select id="exerciseName" class="form-select" onchange="app.updateExerciseDescription()">
+                    <option value="custom">✏️ Exercício Personalizado</option>
+                    <option value="" disabled>Carregando exercícios...</option>
+                </select>
+                <!-- Indicador de status -->
+                <div id="exerciseSelectStatus" class="form-hint">
+                    <span id="exerciseCount">Carregando base de exercícios...</span>
                 </div>
             </div>
 
-        <div class="form-group">
-                 <textarea id="techniqueDescription" class="form-textarea" readonly></textarea>
-                 <div class="form-group" id="techniqueDescriptionGroup" style="display: none;">
-                
-                 </div>
+            <div class="form-group" id="customExerciseGroup" style="display: none;">
+                <label class="form-label">Nome Personalizado</label>
+                <input type="text" id="customExerciseName" class="form-input" placeholder="Digite o nome do exercício">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Séries</label>
+                <input type="number" id="exerciseSets" class="form-input" placeholder="4" min="1">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Repetições</label>
+                <input type="text" id="exerciseReps" class="form-input" placeholder="8-12">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Carga</label>
+                <input type="text" id="exerciseWeight" class="form-input" placeholder="80kg">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Descanso</label>
+                <input type="text" id="exerciseRest" class="form-input" placeholder="90 segundos">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Técnica Avançada</label>
+                <select id="exerciseTechnique" class="form-select" onchange="app.updateTechniqueDescription()">
+                    <option value="">Nenhuma</option>
+                    <optgroup label="Técnicas de Intensidade">
+                        <option value="drop-set">Drop-set</option>
+                        <option value="rest-pause">Rest-pause</option>
+                        <option value="serie-queima">Série Queima</option>
+                        <option value="clusters">Clusters</option>
+                        <option value="negativas">Negativas</option>
+                        <option value="metodo-21">Método 21</option>
+                        <option value="strip-set">Strip-set</option>
+                    </optgroup>
+                    <optgroup label="Técnicas de Pré/Pós-Exaustão">
+                        <option value="pre-exaustao">Pré-exaustão</option>
+                        <option value="pos-exaustao">Pós-exaustão</option>
+                    </optgroup>
+                    <optgroup label="Técnicas Combinadas">
+                        <option value="bi-set">Bi-set</option>
+                        <option value="tri-set">Tri-set</option>
+                    </optgroup>
+                    <optgroup label="Técnicas de Execução">
+                        <option value="tempo-controlado">Tempo Controlado</option>
+                        <option value="pausa-contracao">Pausa na Contração</option>
+                        <option value="isometrico">Isométrico</option>
+                        <option value="unilateral-alternado">Unilateral Alternado</option>
+                    </optgroup>
+                    <optgroup label="Técnicas de Progressão">
+                        <option value="piramide-crescente">Pirâmide Crescente</option>
+                        <option value="piramide-decrescente">Pirâmide Decrescente</option>
+                        <option value="onda">Onda</option>
+                    </optgroup>
+                </select>
+            </div>
+            
+            <div class="form-group" id="techniqueDescriptionGroup" style="display: none;">
+                <label class="form-label">Descrição da Técnica</label>
+                <textarea id="techniqueDescription" class="form-textarea" readonly></textarea>
+            </div>
+            
+            <div class="form-group">
                 <label class="form-label">Descrição/Técnica</label>
                 <textarea id="exerciseDescription" class="form-textarea" placeholder="Instruções técnicas do exercício..."></textarea>
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn btn-primary" onclick="app.saveExercise()">💾 Salvar</button>
-                <button class="btn btn-outline" onclick="app.closeExerciseModal()">❌ Cancelar</button>
-            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="btn btn-primary" onclick="app.saveExercise()">💾 Salvar</button>
+            <button class="btn btn-outline" onclick="app.closeExerciseModal()">❌ Cancelar</button>
         </div>
     </div>
+</div>
 
     <!-- Hidden file input -->
     <input type="file" id="importFile" style="display: none;" accept=".json" onchange="app.importPlan(event)">

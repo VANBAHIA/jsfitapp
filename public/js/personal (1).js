@@ -27,179 +27,846 @@ const app = {
         lastSharedPlan: null
     },
 
-    exerciseDatabase: [], // Array que será carregado do DATABASE.JSON
-    exerciseDatabaseLoaded: false, // Flag para controlar se foi carregado
+// =============================================
+// BASE DE DADOS DE TÉCNICAS AVANÇADAS
+// =============================================
+
+tecnicasDatabase: {
+    'pre-exaustao': 'Exercício de isolamento antes do composto para pré-fadigar o músculo alvo',
+    'pos-exaustao': 'Exercício de isolamento após o composto para finalizar o músculo',
+    'bi-set': 'Dois exercícios executados em sequência sem descanso',
+    'tri-set': 'Três exercícios executados em sequência sem descanso',
+    'drop-set': 'Redução progressiva da carga na mesma série',
+    'rest-pause': 'Pause breves durante a série para completar mais repetições',
+    'serie-queima': 'Repetições parciais no final da série até a falha',
+    'tempo-controlado': 'Execução lenta e controlada (3-4 segundos na fase excêntrica)',
+    'pausa-contracao': 'Pausa de 1-2 segundos na contração máxima',
+    'unilateral-alternado': 'Execução alternada entre membros',
+    'piramide-crescente': 'Aumento progressivo da carga a cada série',
+    'piramide-decrescente': 'Diminuição progressiva da carga a cada série',
+    'clusters': 'Séries divididas em mini-séries com pausas curtas',
+    'negativas': 'Enfase na fase excêntrica do movimento',
+    'isometrico': 'Contração muscular sem movimento articular',
+    'metodo-21': 'Série de 21 repetições (7 parciais + 7 parciais + 7 completas)',
+    'onda': 'Variação de repetições em padrão ondulatório',
+    'strip-set': 'Redução de carga sem pausa entre as mudanças'
+},
+
+// Técnicas por nível de experiência
+tecnicasPorNivel: {
+    iniciante: ['tempo-controlado', 'pausa-contracao'],
+    intermediario: ['pre-exaustao', 'pos-exaustao', 'drop-set', 'bi-set', 'tempo-controlado', 'pausa-contracao'],
+    avancado: ['pre-exaustao', 'pos-exaustao', 'bi-set', 'tri-set', 'drop-set', 'rest-pause', 'serie-queima', 'clusters', 'negativas', 'metodo-21', 'strip-set']
+},
+
+// =============================================
+// BASE DE DADOS DE EXERCÍCIOS
+// =============================================
+
+exerciseDatabase: {
+    peito: {
+        iniciante: [
+            { 
+                codigo: 'PEI001',
+                nome: 'Flexão de Braços', 
+                series: 3, 
+                repeticoes: '8-12', 
+                carga: 'Peso corporal', 
+                descricao: 'Posição de prancha, descer o peito até quase tocar o chão, manter core contraído',
+                gif: '/images/56.gif'
+            },
+            { 
+                codigo: 'PEI002',
+                nome: 'Supino com Halteres', 
+                series: 3, 
+                repeticoes: '10-12', 
+                carga: '12-15kg cada', 
+                descricao: 'Deitado no banco, empurrar halteres para cima, controlar a descida',
+                gif: '/images/104.gif'
+            },
+            { 
+                codigo: 'PEI003',
+                nome: 'Crucifixo com Halteres', 
+                series: 3, 
+                repeticoes: '12-15', 
+                carga: '8-10kg cada', 
+                descricao: 'Abrir e fechar os braços em movimento de abraço, leve flexão no cotovelo',
+                gif: '/images/38.gif'
+            }
+        ],
+        intermediario: [
+            { 
+                codigo: 'PEE004',
+                nome: 'Supino Reto com Barra', 
+                series: 4, 
+                repeticoes: '8-10', 
+                carga: '40-60kg', 
+                descricao: 'Exercício fundamental para desenvolvimento do peitoral, pegada média',
+                gif: '/images/106.gif'
+            },
+            { 
+                codigo: 'PEE005',
+                nome: 'Supino Inclinado', 
+                series: 3, 
+                repeticoes: '10-12', 
+                carga: '30-45kg', 
+                descricao: 'Trabalha a parte superior do peitoral, banco a 30-45 graus',
+                gif: '/images/107.gif'
+            },
+            { 
+                codigo: 'PEE006',
+                nome: 'Crossover', 
+                series: 3, 
+                repeticoes: '12-15', 
+                carga: '15-25kg', 
+                descricao: 'Movimento de cruz trabalhando definição, contração no final',
+                gif: '/images/34.gif'
+            }
+        ],
+        avancado: [
+            { 
+                codigo: 'PEA007',
+                nome: 'Supino Reto com Barra', 
+                series: 4, 
+                repeticoes: '6-8', 
+                carga: '60-80kg', 
+                descricao: 'Foco em força e massa muscular, execução controlada',
+                gif: '/images/106.gif'
+            },
+            { 
+                codigo: 'PEA008',
+                nome: 'Supino Inclinado com Halteres', 
+                series: 4, 
+                repeticoes: '8-10', 
+                carga: '22-28kg cada', 
+                descricao: 'Maior amplitude de movimento, rotação dos halteres',
+                gif: '/images/105.gif'
+            },
+            { 
+                codigo: 'PEA009',
+                nome: 'Mergulho em Paralelas', 
+                series: 3, 
+                repeticoes: '8-12', 
+                carga: 'Peso corporal + 10-20kg', 
+                descricao: 'Exercício composto para peitoral inferior, inclinação frontal',
+                gif: '/images/161.gif'
+            }
+        ]
+    },
+    costas: {
+        iniciante: [
+            { 
+                codigo: 'COI010',
+                nome: 'Puxada Frontal', 
+                series: 3, 
+                repeticoes: '10-12', 
+                carga: '30-40kg', 
+                descricao: 'Puxar barra até o peito, contrair escápulas, peito para fora',
+                gif: '/images/85.gif'
+            },
+            { 
+                codigo: 'COI011',
+                nome: 'Remada Baixa', 
+                series: 3, 
+                repeticoes: '10-12', 
+                carga: '25-35kg', 
+                descricao: 'Puxar cabo em direção ao abdômen, manter tronco ereto',
+                gif: '/images/251.gif'
+            },
+            { 
+                codigo: 'COI012',
+                nome: 'Remada com Halter', 
+                series: 3, 
+                repeticoes: '10-12', 
+                carga: '12-16kg', 
+                descricao: 'Apoiar joelho no banco, remar halter até o quadril',
+                gif: '/images/97.gif'
+            }
+        ],
+        intermediario: [
+            { 
+                codigo: 'COE013',
+                nome: 'Puxada Frontal', 
+                series: 4, 
+                repeticoes: '8-10', 
+                carga: '45-60kg', 
+                descricao: 'Desenvolvimento do latíssimo do dorso, pegada média',
+                gif: '/images/85.gif'
+            },
+            { 
+                codigo: 'COE014',
+                nome: 'Remada Curvada', 
+                series: 4, 
+                repeticoes: '8-10', 
+                carga: '35-50kg', 
+                descricao: 'Inclinar tronco a 45 graus, remar barra ao abdômen',
+                gif: '/images/93.gif'
+            },
+            { 
+                codigo: 'COE015',
+                nome: 'Pullover', 
+                series: 3, 
+                repeticoes: '12-15', 
+                carga: '15-20kg', 
+                descricao: 'Alongamento e contração do latíssimo, movimento arqueado',
+                gif: '/images/86.gif'
+            }
+        ],
+        avancado: [
+            { 
+                codigo: 'COA016',
+                nome: 'Barra Fixa', 
+                series: 4, 
+                repeticoes: '6-10', 
+                carga: 'Peso corporal + 10-20kg', 
+                descricao: 'Exercício funcional de peso corporal, pegada pronada',
+                gif: '/images/29.gif'
+            },
+            { 
+                codigo: 'COA017',
+                nome: 'Remada T-Bar', 
+                series: 4, 
+                repeticoes: '8-10', 
+                carga: '40-60kg', 
+                descricao: 'Trabalha espessura das costas, pegada neutra',
+                gif: '/images/93.gif'
+            },
+            { 
+                codigo: 'COA018',
+                nome: 'Levantamento Terra', 
+                series: 4, 
+                repeticoes: '6-8', 
+                carga: '80-120kg', 
+                descricao: 'Exercício completo para posterior, técnica perfeita essencial',
+                gif: '/images/_terra.gif'
+            }
+        ]
+    },
+    ombros: {
+        iniciante: [
+            { 
+                codigo: 'OMI019',
+                nome: 'Desenvolvimento com Halteres', 
+                series: 3, 
+                repeticoes: '10-12', 
+                carga: '8-12kg cada', 
+                descricao: 'Elevar halteres acima da cabeça, trajetória ligeiramente frontal',
+                gif: '/images/42.gif'
+            },
+            { 
+                codigo: 'OMI020',
+                nome: 'Elevação Lateral', 
+                series: 3, 
+                repeticoes: '12-15', 
+                carga: '4-6kg cada', 
+                descricao: 'Trabalha deltoide medial, cotovelos ligeiramente flexionados',
+                gif: '/images/52.gif'
+            },
+            { 
+                codigo: 'OMI021',
+                nome: 'Elevação Frontal', 
+                series: 3, 
+                repeticoes: '12-15', 
+                carga: '4-6kg cada', 
+                descricao: 'Foco no deltoide anterior, alternado ou simultâneo',
+                gif: '/images/51.gif'
+            }
+        ],
+        intermediario: [
+            { 
+                codigo: 'OME022',
+                nome: 'Desenvolvimento com Barra', 
+                series: 4, 
+                repeticoes: '8-10', 
+                carga: '25-35kg', 
+                descricao: 'Exercício base para ombros, pela frente ou atrás da nuca',
+                gif: '/images/40.gif'
+            },
+            { 
+                codigo: 'OME023',
+                nome: 'Elevação Lateral', 
+                series: 3, 
+                repeticoes: '12-15', 
+                carga: '6-8kg cada', 
+                descricao: 'Definição lateral dos ombros, controle excêntrico',
+                gif: '/images/52.gif'
+            },
+            { 
+                codigo: 'OME024',
+                nome: 'Elevação Posterior', 
+                series: 3, 
+                repeticoes: '12-15', 
+                carga: '4-6kg cada', 
+                descricao: 'Trabalha deltoide posterior, inclinado ou na polia',
+                gif: '/images/36.gif'
+            }
+        ],
+        avancado: [
+            { 
+                codigo: 'OMA025',
+                nome: 'Desenvolvimento Arnold', 
+                series: 4, 
+                repeticoes: '8-10', 
+                carga: '14-18kg cada', 
+                descricao: 'Movimento completo de rotação, combina frontal e lateral',
+                gif: '/images/42.gif'
+            },
+            { 
+                codigo: 'OMA026',
+                nome: 'Elevação Lateral 21', 
+                series: 3, 
+                repeticoes: '21 (7+7+7)', 
+                carga: '6-8kg cada', 
+                descricao: 'Método 21 para intensidade, 7 parciais + 7 parciais + 7 completas',
+                gif: '/images/52.gif'
+            },
+            { 
+                codigo: 'OMA027',
+                nome: 'Face Pull', 
+                series: 3, 
+                repeticoes: '15-20', 
+                carga: '15-25kg', 
+                descricao: 'Trabalha deltoide posterior e trapézio, corda no rosto',
+                gif: '/images/36.gif'
+            }
+        ]
+    },
+    biceps: {
+        iniciante: [
+            { 
+                codigo: 'BII028',
+                nome: 'Rosca Direta', 
+                series: 3, 
+                repeticoes: '10-12', 
+                carga: '15-20kg', 
+                descricao: 'Exercício básico para bíceps, pegada supinada, cotovelos fixos',
+                gif: '/images/102.gif'
+            },
+            { 
+                codigo: 'BII029',
+                nome: 'Rosca Alternada', 
+                series: 3, 
+                repeticoes: '10-12', 
+                carga: '8-10kg cada', 
+                descricao: 'Alternando braços para melhor controle e concentração',
+                gif: '/images/98.gif'
+            },
+            { 
+                codigo: 'BII030',
+                nome: 'Rosca Martelo', 
+                series: 3, 
+                repeticoes: '12-15', 
+                carga: '6-8kg cada', 
+                descricao: 'Trabalha bíceps e antebraço, pegada neutra',
+                gif: '/images/99.gif'
+            }
+        ],
+        intermediario: [
+            { 
+                codigo: 'BIE031',
+                nome: 'Rosca Direta', 
+                series: 4, 
+                repeticoes: '8-10', 
+                carga: '25-35kg', 
+                descricao: 'Foco em força e massa, execução estrita',
+                gif: '/images/102.gif'
+            },
+            { 
+                codigo: 'BIE032',
+                nome: 'Rosca Scott', 
+                series: 3, 
+                repeticoes: '10-12', 
+                carga: '20-25kg', 
+                descricao: 'Isolamento do bíceps no banco Scott, amplitude completa',
+                gif: '/images/103.gif'
+            },
+            { 
+                codigo: 'BIE033',
+                nome: 'Rosca 21', 
+                series: 3, 
+                repeticoes: '21 (7+7+7)', 
+                carga: '15-20kg', 
+                descricao: 'Método intenso: 7 meias inferiores + 7 superiores + 7 completas',
+                gif: '/images/102.gif'
+            }
+        ],
+        avancado: [
+            { 
+                codigo: 'BIA034',
+                nome: 'Rosca Direta Pegada Fechada', 
+                series: 4, 
+                repeticoes: '6-8', 
+                carga: '30-40kg', 
+                descricao: 'Variação para força máxima, pegada mais estreita',
+                gif: '/images/102.gif'
+            },
+            { 
+                codigo: 'BIA035',
+                nome: 'Rosca Spider', 
+                series: 3, 
+                repeticoes: '8-10', 
+                carga: '15-20kg', 
+                descricao: 'Isolamento total do bíceps, banco inclinado inverso',
+                gif: '/images/103.gif'
+            },
+            { 
+                codigo: 'BIA036',
+                nome: 'Rosca Drag Curl', 
+                series: 3, 
+                repeticoes: '10-12', 
+                carga: '20-25kg', 
+                descricao: 'Técnica avançada, barra "arrasta" no corpo',
+                gif: '/images/102.gif'
+            }
+        ]
+    },
+    triceps: {
+        iniciante: [
+            { 
+                codigo: 'TRI037',
+                nome: 'Tríceps Testa', 
+                series: 3, 
+                repeticoes: '10-12', 
+                carga: '15-20kg', 
+                descricao: 'Flexionar apenas antebraços, cotovelos fixos, barra W',
+                gif: '/images/121.gif'
+            },
+            { 
+                codigo: 'TRI038',
+                nome: 'Tríceps Pulley', 
+                series: 3, 
+                repeticoes: '12-15', 
+                carga: '20-25kg', 
+                descricao: 'Movimento de extensão no cabo, pegada pronada',
+                gif: '/images/118.gif'
+            },
+            { 
+                codigo: 'TRI039',
+                nome: 'Mergulho no Banco', 
+                series: 3, 
+                repeticoes: '8-12', 
+                carga: 'Peso corporal', 
+                descricao: 'Exercício funcional, mãos no banco, pés no chão',
+                gif: '/images/161.gif'
+            }
+        ],
+        intermediario: [
+            { 
+                codigo: 'TRE040',
+                nome: 'Tríceps Francês', 
+                series: 4, 
+                repeticoes: '8-10', 
+                carga: '20-30kg', 
+                descricao: 'Exercício clássico para tríceps, halter atrás da cabeça',
+                gif: '/images/119.gif'
+            },
+            { 
+                codigo: 'TRE041',
+                nome: 'Tríceps Corda', 
+                series: 3, 
+                repeticoes: '10-12', 
+                carga: '25-35kg', 
+                descricao: 'Maior amplitude de movimento, abertura na contração',
+                gif: '/images/120.gif'
+            },
+            { 
+                codigo: 'TRE042',
+                nome: 'Supino Fechado', 
+                series: 3, 
+                repeticoes: '8-10', 
+                carga: '30-40kg', 
+                descricao: 'Exercício composto, pegada fechada, cotovelos próximos',
+                gif: '/images/161.gif'
+            }
+        ],
+        avancado: [
+            { 
+                codigo: 'TRA043',
+                nome: 'Tríceps Francês com Halter', 
+                series: 4, 
+                repeticoes: '6-8', 
+                carga: '18-25kg', 
+                descricao: 'Variação unilateral, maior instabilidade e ativação',
+                gif: '/images/119.gif'
+            },
+            { 
+                codigo: 'TRA044',
+                nome: 'Mergulho em Paralelas', 
+                series: 4, 
+                repeticoes: '8-12', 
+                carga: 'Peso corporal + 10-15kg', 
+                descricao: 'Exercício funcional avançado, foco no tríceps',
+                gif: '/images/161.gif'
+            },
+            { 
+                codigo: 'TRA045',
+                nome: 'JM Press', 
+                series: 3, 
+                repeticoes: '8-10', 
+                carga: '25-35kg', 
+                descricao: 'Técnica específica para força, meio termo supino/testa',
+                gif: '/images/161.gif'
+            }
+        ]
+    },
+    quadriceps: {
+        iniciante: [
+            { 
+                codigo: 'QUI046',
+                nome: 'Agachamento Livre', 
+                series: 3, 
+                repeticoes: '12-15', 
+                carga: '20-30kg', 
+                descricao: 'Exercício fundamental para pernas, técnica perfeita essencial',
+                gif: '/images/9.gif'
+            },
+            { 
+                codigo: 'QUI047',
+                nome: 'Leg Press', 
+                series: 3, 
+                repeticoes: '12-15', 
+                carga: '80-100kg', 
+                descricao: 'Exercício seguro para iniciantes, amplitude controlada',
+                gif: '/images/72.gif'
+            },
+            { 
+                codigo: 'QUI048',
+                nome: 'Extensão de Pernas', 
+                series: 3, 
+                repeticoes: '15-20', 
+                carga: '20-30kg', 
+                descricao: 'Isolamento do quadríceps, sem sobrecarga na lombar',
+                gif: '/images/54.gif'
+            }
+        ],
+        intermediario: [
+            { 
+                codigo: 'QUE049',
+                nome: 'Agachamento Livre', 
+                series: 4, 
+                repeticoes: '8-12', 
+                carga: '40-60kg', 
+                descricao: 'Aumento de carga e intensidade, profundidade adequada',
+                gif: '/images/9.gif'
+            },
+            { 
+                codigo: 'QUE050',
+                nome: 'Leg Press 45°', 
+                series: 4, 
+                repeticoes: '10-12', 
+                carga: '120-160kg', 
+                descricao: 'Variação angular, pés na posição média',
+                gif: '/images/72.gif'
+            },
+            { 
+                codigo: 'QUE051',
+                nome: 'Afundo', 
+                series: 3, 
+                repeticoes: '12 cada perna', 
+                carga: '8-12kg cada', 
+                descricao: 'Exercício unilateral, trabalha equilíbrio',
+                gif: '/images/6.gif'
+            }
+        ],
+        avancado: [
+            { 
+                codigo: 'QUA052',
+                nome: 'Agachamento Livre', 
+                series: 4, 
+                repeticoes: '6-8', 
+                carga: '70-100kg', 
+                descricao: 'Foco em força máxima, técnica impecável obrigatória',
+                gif: '/images/9.gif'
+            },
+            { 
+                codigo: 'QUA053',
+                nome: 'Agachamento Frontal', 
+                series: 4, 
+                repeticoes: '8-10', 
+                carga: '40-60kg', 
+                descricao: 'Variação técnica avançada, barra na frente, core ativo',
+                gif: '/images/10.gif'
+            },
+            { 
+                codigo: 'QUA054',
+                nome: 'Agachamento Búlgaro', 
+                series: 3, 
+                repeticoes: '10-12 cada', 
+                carga: '12-16kg cada', 
+                descricao: 'Exercício unilateral desafiador, pé traseiro elevado',
+                gif: '/images/8.gif'
+            }
+        ]
+    },
+    posterior: {
+        iniciante: [
+            { 
+                codigo: 'POI055',
+                nome: 'Stiff', 
+                series: 3, 
+                repeticoes: '10-12', 
+                carga: '20-30kg', 
+                descricao: 'Exercício para posterior de coxa, joelhos levemente flexionados',
+                gif: '/images/115.gif'
+            },
+            { 
+                codigo: 'POI056',
+                nome: 'Flexão de Pernas', 
+                series: 3, 
+                repeticoes: '12-15', 
+                carga: '20-30kg', 
+                descricao: 'Isolamento dos isquiotibiais, contração no topo',
+                gif: '/images/57.gif'
+            },
+            { 
+                codigo: 'POI057',
+                nome: 'Elevação Pélvica', 
+                series: 3, 
+                repeticoes: '15-20', 
+                carga: 'Peso corporal', 
+                descricao: 'Trabalha glúteos, contração de 2 segundos no topo',
+                gif: '/images/_elevacao_pelvica.gif'
+            }
+        ],
+        intermediario: [
+            { 
+                codigo: 'POE058',
+                nome: 'Stiff com Barra', 
+                series: 4, 
+                repeticoes: '8-10', 
+                carga: '35-50kg', 
+                descricao: 'Versão mais intensa, manter lombar neutra',
+                gif: '/images/115.gif'
+            },
+            { 
+                codigo: 'POE059',
+                nome: 'Mesa Flexora', 
+                series: 3, 
+                repeticoes: '10-12', 
+                carga: '30-40kg', 
+                descricao: 'Isolamento na máquina, evitar compensações',
+                gif: '/images/57.gif'
+            },
+            { 
+                codigo: 'POE060',
+                nome: 'Good Morning', 
+                series: 3, 
+                repeticoes: '10-12', 
+                carga: '20-30kg', 
+                descricao: 'Exercício técnico, flexão apenas do quadril',
+                gif: '/images/71.gif'
+            }
+        ],
+        avancado: [
+            { 
+                codigo: 'POA061',
+                nome: 'Levantamento Terra', 
+                series: 4, 
+                repeticoes: '6-8', 
+                carga: '80-120kg', 
+                descricao: 'Exercício completo de força, técnica perfeita essencial',
+                gif: '/images/_terra.gif'
+            },
+            { 
+                codigo: 'POA062',
+                nome: 'Stiff Unilateral', 
+                series: 3, 
+                repeticoes: '10-12 cada', 
+                carga: '15-20kg cada', 
+                descricao: 'Versão unilateral, desafia equilíbrio e estabilidade',
+                gif: '/images/115.gif'
+            },
+            { 
+                codigo: 'POA063',
+                nome: 'Hip Thrust', 
+                series: 3, 
+                repeticoes: '10-12', 
+                carga: '40-60kg', 
+                descricao: 'Foco nos glúteos, amplitude completa de movimento',
+                gif: '/images/_hip_thrust.gif'
+            }
+        ]
+    },
+    panturrilha: {
+        iniciante: [
+            { 
+                codigo: 'PAI064',
+                nome: 'Panturrilha Sentado', 
+                series: 3, 
+                repeticoes: '15-20', 
+                carga: '20-30kg', 
+                descricao: 'Trabalha sóleo, amplitude completa de movimento',
+                gif: '/images/81.gif'
+            },
+            { 
+                codigo: 'PAI065',
+                nome: 'Panturrilha em Pé', 
+                series: 3, 
+                repeticoes: '15-20', 
+                carga: '40-60kg', 
+                descricao: 'Trabalha gastrocnêmio, contração no topo',
+                gif: '/images/80.gif'
+            }
+        ],
+        intermediario: [
+            { 
+                codigo: 'PAE066',
+                nome: 'Panturrilha Sentado', 
+                series: 4, 
+                repeticoes: '12-15', 
+                carga: '35-45kg', 
+                descricao: 'Maior intensidade, pausa de 1 segundo no topo',
+                gif: '/images/81.gif'
+            },
+            { 
+                codigo: 'PAE067',
+                nome: 'Panturrilha Leg Press', 
+                series: 3, 
+                repeticoes: '15-20', 
+                carga: '80-120kg', 
+                descricao: 'Variação no leg press, apenas dedos na plataforma',
+                gif: '/images/72.gif'
+            }
+        ],
+        avancado: [
+            { 
+                codigo: 'PAA068',
+                nome: 'Panturrilha Unilateral', 
+                series: 3, 
+                repeticoes: '12-15 cada', 
+                carga: '20-30kg cada', 
+                descricao: 'Trabalho unilateral, maior ativação neural',
+                gif: '/images/80.gif'
+            },
+            { 
+                codigo: 'PAA069',
+                nome: 'Panturrilha com Pausa', 
+                series: 4, 
+                repeticoes: '10-12', 
+                carga: '50-70kg', 
+                descricao: 'Técnica de pausa, 3 segundos na contração máxima',
+                gif: '/images/80.gif'
+            }
+        ]
+    }
+},
+
+// =============================================
+// CONFIGURAÇÃO DE GIFS
+// =============================================
+
+gifConfig: {
+    basePath: '/images/',
+    dimensions: '300x300',
+    format: 'gif',
     
-    // Manter a base hardcoded como fallback
-    exerciseDatabaseFallback: {
-        peito: {
-            iniciante: [
-                { nome: 'Supino com Halteres', series: 3, repeticoes: '10-12', carga: '15kg cada', descricao: 'Exercício básico para peitoral' },
-                { nome: 'Flexão de Braços', series: 3, repeticoes: '8-12', carga: 'Peso corporal', descricao: 'Exercício funcional básico' }
-            ]
-        },
-        costas: {
-            iniciante: [
-                { nome: 'Puxada Frontal', series: 3, repeticoes: '10-12', carga: '30kg', descricao: 'Exercício básico para latíssimo' },
-                { nome: 'Remada Baixa', series: 3, repeticoes: '10-12', carga: '25kg', descricao: 'Exercício para desenvolvimento das costas' }
-            ]
-        },
-        ombros: {
-            iniciante: [
-                { nome: 'Desenvolvimento com Halteres', series: 3, repeticoes: '10-12', carga: '8kg cada', descricao: 'Exercício básico para ombros' },
-                { nome: 'Elevação Lateral', series: 3, repeticoes: '12-15', carga: '4kg cada', descricao: 'Isolamento do deltoide medial' }
-            ]
-        }
+    // Função para obter GIF por código
+    getGifByCodigo: function(codigo) {
+        return `${this.basePath}${codigo}.${this.format}`;
     },
-
-    // =============================================
-    // BASE DE DADOS DE TÉCNICAS AVANÇADAS
-    // =============================================
-
-    tecnicasDatabase: {
-        'pre-exaustao': 'Exercício de isolamento antes do composto para pré-fadigar o músculo alvo',
-        'pos-exaustao': 'Exercício de isolamento após o composto para finalizar o músculo',
-        'bi-set': 'Dois exercícios executados em sequência sem descanso',
-        'tri-set': 'Três exercícios executados em sequência sem descanso',
-        'drop-set': 'Redução progressiva da carga na mesma série',
-        'rest-pause': 'Pause breves durante a série para completar mais repetições',
-        'serie-queima': 'Repetições parciais no final da série até a falha',
-        'tempo-controlado': 'Execução lenta e controlada (3-4 segundos na fase excêntrica)',
-        'pausa-contracao': 'Pausa de 1-2 segundos na contração máxima',
-        'unilateral-alternado': 'Execução alternada entre membros',
-        'piramide-crescente': 'Aumento progressivo da carga a cada série',
-        'piramide-decrescente': 'Diminuição progressiva da carga a cada série',
-        'clusters': 'Séries divididas em mini-séries com pausas curtas',
-        'negativas': 'Enfase na fase excêntrica do movimento',
-        'isometrico': 'Contração muscular sem movimento articular',
-        'metodo-21': 'Série de 21 repetições (7 parciais + 7 parciais + 7 completas)',
-        'onda': 'Variação de repetições em padrão ondulatório',
-        'strip-set': 'Redução de carga sem pausa entre as mudanças'
-    },
-
-    // Técnicas por nível de experiência
-    tecnicasPorNivel: {
-        iniciante: ['tempo-controlado', 'pausa-contracao'],
-        intermediario: ['pre-exaustao', 'pos-exaustao', 'drop-set', 'bi-set', 'tempo-controlado', 'pausa-contracao'],
-        avancado: ['pre-exaustao', 'pos-exaustao', 'bi-set', 'tri-set', 'drop-set', 'rest-pause', 'serie-queima', 'clusters', 'negativas', 'metodo-21', 'strip-set']
-    },
-
-    // =============================================
-    // CONFIGURAÇÃO DE GIFS
-    // =============================================
-
-    gifConfig: {
-        basePath: '/images/',
-        dimensions: '300x300',
-        format: 'gif',
-        
-        // Função para obter GIF por código
-        getGifByCodigo: function(codigo) {
-            return `${this.basePath}${codigo}.${this.format}`;
-        },
-        
-        // Função para exerciseDescriptions por código
-        findExerciseByCodigo: function(codigo) {
-            for (const muscleGroup in exerciseDatabase) {
-                for (const level in exerciseDatabase[muscleGroup]) {
-                    const exercise = exerciseDatabase[muscleGroup][level]
-                        .find(ex => ex.codigo === codigo);
-                    if (exercise) return exercise;
-                }
+    
+    // Função para buscar exercício por código
+    findExerciseByCodigo: function(codigo) {
+        for (const muscleGroup in exerciseDatabase) {
+            for (const level in exerciseDatabase[muscleGroup]) {
+                const exercise = exerciseDatabase[muscleGroup][level]
+                    .find(ex => ex.codigo === codigo);
+                if (exercise) return exercise;
             }
-            return null;
-        },
-        
-        // Função para listar todos os códigos
-        getAllCodigos: function() {
-            const codigos = [];
-            for (const muscleGroup in exerciseDatabase) {
-                for (const level in exerciseDatabase[muscleGroup]) {
-                    exerciseDatabase[muscleGroup][level].forEach(exercise => {
-                        codigos.push(exercise.codigo);
-                    });
-                }
-            }
-            return codigos.sort();
         }
+        return null;
     },
+    
+    // Função para listar todos os códigos
+    getAllCodigos: function() {
+        const codigos = [];
+        for (const muscleGroup in exerciseDatabase) {
+            for (const level in exerciseDatabase[muscleGroup]) {
+                exerciseDatabase[muscleGroup][level].forEach(exercise => {
+                    codigos.push(exercise.codigo);
+                });
+            }
+        }
+        return codigos.sort();
+    }
+},
 
-    // =============================================
-    // DESCRIÇÕES DE EXERCÍCIOS (mantidas)
-    // =============================================
+// =============================================
+// DESCRIÇÕES DE EXERCÍCIOS (mantidas)
+// =============================================
 
-    exerciseDescriptions: {
-        'Supino Reto com Barra': 'Exercício fundamental para desenvolvimento do peitoral. Deitado no banco, segure a barra com pegada média, desça controladamente até o peito e empurre para cima.',
-        'Supino Inclinado com Barra': 'Trabalha a parte superior do peitoral. Banco inclinado entre 30-45°, mesma execução do supino reto.',
-        'Supino Declinado com Barra': 'Foco no peitoral inferior. Banco declinado, pés presos, execução similar ao supino reto.',
-        'Supino com Halteres': 'Maior amplitude de movimento que a barra. Deitado no banco, empurre halteres para cima, controle a descida.',
-        'Supino Inclinado com Halteres': 'Versão inclinada com halteres. Permite rotação dos punhos para melhor ativação muscular.',
-        'Crucifixo com Halteres': 'Isolamento do peitoral. Movimento de abraço, mantenha cotovelos levemente flexionados.',
-        'Crucifixo Inclinado': 'Versão inclinada do crucifixo, trabalha fibras superiores do peitoral.',
-        'Crossover': 'Exercício no cabo, movimento cruzado. Excelente para definição e contração muscular.',
-        'Flexão de Braços': 'Exercício básico de peso corporal. Mantenha corpo alinhado, desça até quase tocar o peito no solo.',
-        'Mergulho em Paralelas': 'Exercício composto. Nas paralelas, desça flexionando os cotovelos, suba controladamente.',
-        
-        'Puxada Frontal': 'Exercício básico para latíssimo. Puxe a barra até o peito, retraia as escápulas.',
-        'Puxada Atrás da Nuca': 'Variação da puxada, cuidado com a amplitude para evitar lesões no ombro.',
-        'Barra Fixa': 'Exercício funcional clássico. Pegada pronada, puxe até o queixo passar da barra.',
-        'Remada Baixa': 'Exercício sentado no cabo. Puxe até o abdômen, mantenha tronco ereto.',
-        'Remada Curvada': 'Tronco inclinado, reme a barra até o abdômen. Mantenha lombar neutra.',
-        'Remada com Halter': 'Unilateral, apoie no banco. Reme o halter até o quadril, cotovelo próximo ao corpo.',
-        'Remada T-Bar': 'Exercício específico para espessura das costas. Use a máquina ou barra T.',
-        'Levantamento Terra': 'Exercício complexo e completo. Técnica perfeita é essencial para evitar lesões.',
-        'Pullover': 'Movimento arqueado, trabalha latíssimo e serrátil. Pode ser feito com halter ou barra.',
-        
-        'Desenvolvimento com Barra': 'Exercício base para ombros. Pode ser feito pela frente ou atrás da nuca.',
-        'Desenvolvimento com Halteres': 'Versão com halteres, maior estabilização. Trajetória ligeiramente frontal.',
-        'Desenvolvimento Arnold': 'Criado por Arnold Schwarzenegger. Combina rotação com desenvolvimento.',
-        'Elevação Lateral': 'Isolamento do deltoide medial. Eleve os halteres até a linha dos ombros.',
-        'Elevação Frontal': 'Trabalha deltoide anterior. Eleve à frente até a linha dos ombros.',
-        'Elevação Posterior': 'Para deltoide posterior. Pode ser feito inclinado ou na polia.',
-        'Encolhimento': 'Para trapézio. "Encolha" os ombros carregando peso.',
-        'Face Pull': 'Exercício no cabo, puxe até o rosto. Excelente para postura e ombros posteriores.',
-        
-        'Rosca Direta': 'Exercício básico para bíceps. Pegada supinada, cotovelos fixos.',
-        'Rosca Alternada': 'Versão alternada da rosca. Permite melhor concentração em cada braço.',
-        'Rosca Martelo': 'Pegada neutra, trabalha bíceps e braquiorradial.',
-        'Rosca Scott': 'No banco Scott, isolamento máximo do bíceps.',
-        'Rosca Concentrada': 'Sentado, cotovelo apoiado na coxa. Máxima concentração.',
-        'Rosca 21': 'Método especial: 7 parciais inferiores + 7 superiores + 7 completas.',
-        'Rosca Spider': 'No banco inclinado invertido, isolamento total.',
-        'Rosca no Cabo': 'Versão no cabo, tensão constante durante todo movimento.',
-        
-        'Tríceps Testa': 'Clássico para tríceps. Flexione apenas antebraços, cotovelos fixos.',
-        'Tríceps Francês': 'Com halter atrás da cabeça. Movimento apenas dos antebraços.',
-        'Tríceps Pulley': 'No cabo, extensão dos antebraços. Pegada pronada.',
-        'Tríceps Corda': 'Com corda, permite abertura na contração final.',
-        'Supino Fechado': 'Pegada fechada no supino, trabalha tríceps intensamente.',
-        'Mergulho no Banco': 'Mãos no banco, exercício funcional básico.',
-        
-        'Agachamento Livre': 'Rei dos exercícios. Técnica perfeita é fundamental.',
-        'Agachamento Frontal': 'Barra na frente, maior ativação do core e quadríceps.',
-        'Leg Press': 'Exercício seguro para iniciantes, permite cargas altas.',
-        'Extensão de Pernas': 'Isolamento do quadríceps, evite hiperextensão.',
-        'Afundo': 'Exercício unilateral, trabalha equilíbrio e coordenação.',
-        'Agachamento Búlgaro': 'Versão avançada do afundo, pé traseiro elevado.',
-        'Hack Squat': 'Na máquina específica, movimento guiado e seguro.',
-        
-        'Stiff': 'Para posterior de coxa. Flexione quadril, joelhos levemente flexionados.',
-        'Flexão de Pernas': 'Isolamento dos isquiotibiais. Contração forte no topo.',
-        'Mesa Flexora': 'Versão deitada da flexão de pernas.',
-        'Good Morning': 'Exercício técnico, flexão apenas do quadril.',
-        'Hip Thrust': 'Excelente para glúteos, ombros apoiados no banco.',
-        'Elevação Pélvica': 'Versão básica do hip thrust, no solo.',
-        
-        'Panturrilha em Pé': 'Para gastrocnêmio, pernas estendidas.',
-        'Panturrilha Sentado': 'Para sóleo, joelhos flexionados.',
-        'Panturrilha no Leg Press': 'Variação no leg press, apenas dedos na plataforma.',
-        
-        'Esteira': 'Aquecimento cardiovascular básico. 5-10 minutos em ritmo moderado.',
-        'Bicicleta': 'Aquecimento para membros inferiores. Baixa intensidade inicial.',
-        'Elíptico': 'Exercício completo de baixo impacto. Bom para aquecimento geral.',
-        'Aquecimento Articular': 'Movimentos articulares específicos para preparar o corpo.',
-        'Alongamento': 'Essencial para flexibilidade e recuperação muscular.'
-    },
+exerciseDescriptions: {
+    'Supino Reto com Barra': 'Exercício fundamental para desenvolvimento do peitoral. Deitado no banco, segure a barra com pegada média, desça controladamente até o peito e empurre para cima.',
+    'Supino Inclinado com Barra': 'Trabalha a parte superior do peitoral. Banco inclinado entre 30-45°, mesma execução do supino reto.',
+    'Supino Declinado com Barra': 'Foco no peitoral inferior. Banco declinado, pés presos, execução similar ao supino reto.',
+    'Supino com Halteres': 'Maior amplitude de movimento que a barra. Deitado no banco, empurre halteres para cima, controle a descida.',
+    'Supino Inclinado com Halteres': 'Versão inclinada com halteres. Permite rotação dos punhos para melhor ativação muscular.',
+    'Crucifixo com Halteres': 'Isolamento do peitoral. Movimento de abraço, mantenha cotovelos levemente flexionados.',
+    'Crucifixo Inclinado': 'Versão inclinada do crucifixo, trabalha fibras superiores do peitoral.',
+    'Crossover': 'Exercício no cabo, movimento cruzado. Excelente para definição e contração muscular.',
+    'Flexão de Braços': 'Exercício básico de peso corporal. Mantenha corpo alinhado, desça até quase tocar o peito no solo.',
+    'Mergulho em Paralelas': 'Exercício composto. Nas paralelas, desça flexionando os cotovelos, suba controladamente.',
+    
+    'Puxada Frontal': 'Exercício básico para latíssimo. Puxe a barra até o peito, retraia as escápulas.',
+    'Puxada Atrás da Nuca': 'Variação da puxada, cuidado com a amplitude para evitar lesões no ombro.',
+    'Barra Fixa': 'Exercício funcional clássico. Pegada pronada, puxe até o queixo passar da barra.',
+    'Remada Baixa': 'Exercício sentado no cabo. Puxe até o abdômen, mantenha tronco ereto.',
+    'Remada Curvada': 'Tronco inclinado, reme a barra até o abdômen. Mantenha lombar neutra.',
+    'Remada com Halter': 'Unilateral, apoie no banco. Reme o halter até o quadril, cotovelo próximo ao corpo.',
+    'Remada T-Bar': 'Exercício específico para espessura das costas. Use a máquina ou barra T.',
+    'Levantamento Terra': 'Exercício complexo e completo. Técnica perfeita é essencial para evitar lesões.',
+    'Pullover': 'Movimento arqueado, trabalha latíssimo e serrátil. Pode ser feito com halter ou barra.',
+    
+    'Desenvolvimento com Barra': 'Exercício base para ombros. Pode ser feito pela frente ou atrás da nuca.',
+    'Desenvolvimento com Halteres': 'Versão com halteres, maior estabilização. Trajetória ligeiramente frontal.',
+    'Desenvolvimento Arnold': 'Criado por Arnold Schwarzenegger. Combina rotação com desenvolvimento.',
+    'Elevação Lateral': 'Isolamento do deltoide medial. Eleve os halteres até a linha dos ombros.',
+    'Elevação Frontal': 'Trabalha deltoide anterior. Eleve à frente até a linha dos ombros.',
+    'Elevação Posterior': 'Para deltoide posterior. Pode ser feito inclinado ou na polia.',
+    'Encolhimento': 'Para trapézio. "Encolha" os ombros carregando peso.',
+    'Face Pull': 'Exercício no cabo, puxe até o rosto. Excelente para postura e ombros posteriores.',
+    
+    'Rosca Direta': 'Exercício básico para bíceps. Pegada supinada, cotovelos fixos.',
+    'Rosca Alternada': 'Versão alternada da rosca. Permite melhor concentração em cada braço.',
+    'Rosca Martelo': 'Pegada neutra, trabalha bíceps e braquiorradial.',
+    'Rosca Scott': 'No banco Scott, isolamento máximo do bíceps.',
+    'Rosca Concentrada': 'Sentado, cotovelo apoiado na coxa. Máxima concentração.',
+    'Rosca 21': 'Método especial: 7 parciais inferiores + 7 superiores + 7 completas.',
+    'Rosca Spider': 'No banco inclinado invertido, isolamento total.',
+    'Rosca no Cabo': 'Versão no cabo, tensão constante durante todo movimento.',
+    
+    'Tríceps Testa': 'Clássico para tríceps. Flexione apenas antebraços, cotovelos fixos.',
+    'Tríceps Francês': 'Com halter atrás da cabeça. Movimento apenas dos antebraços.',
+    'Tríceps Pulley': 'No cabo, extensão dos antebraços. Pegada pronada.',
+    'Tríceps Corda': 'Com corda, permite abertura na contração final.',
+    'Supino Fechado': 'Pegada fechada no supino, trabalha tríceps intensamente.',
+    'Mergulho no Banco': 'Mãos no banco, exercício funcional básico.',
+    
+    'Agachamento Livre': 'Rei dos exercícios. Técnica perfeita é fundamental.',
+    'Agachamento Frontal': 'Barra na frente, maior ativação do core e quadríceps.',
+    'Leg Press': 'Exercício seguro para iniciantes, permite cargas altas.',
+    'Extensão de Pernas': 'Isolamento do quadríceps, evite hiperextensão.',
+    'Afundo': 'Exercício unilateral, trabalha equilíbrio e coordenação.',
+    'Agachamento Búlgaro': 'Versão avançada do afundo, pé traseiro elevado.',
+    'Hack Squat': 'Na máquina específica, movimento guiado e seguro.',
+    
+    'Stiff': 'Para posterior de coxa. Flexione quadril, joelhos levemente flexionados.',
+    'Flexão de Pernas': 'Isolamento dos isquiotibiais. Contração forte no topo.',
+    'Mesa Flexora': 'Versão deitada da flexão de pernas.',
+    'Good Morning': 'Exercício técnico, flexão apenas do quadril.',
+    'Hip Thrust': 'Excelente para glúteos, ombros apoiados no banco.',
+    'Elevação Pélvica': 'Versão básica do hip thrust, no solo.',
+    
+    'Panturrilha em Pé': 'Para gastrocnêmio, pernas estendidas.',
+    'Panturrilha Sentado': 'Para sóleo, joelhos flexionados.',
+    'Panturrilha no Leg Press': 'Variação no leg press, apenas dedos na plataforma.',
+    
+    'Esteira': 'Aquecimento cardiovascular básico. 5-10 minutos em ritmo moderado.',
+    'Bicicleta': 'Aquecimento para membros inferiores. Baixa intensidade inicial.',
+    'Elíptico': 'Exercício completo de baixo impacto. Bom para aquecimento geral.',
+    'Aquecimento Articular': 'Movimentos articulares específicos para preparar o corpo.',
+    'Alongamento': 'Essencial para flexibilidade e recuperação muscular.'
+},
 
     // =============================================
     // ESTADO DA APLICAÇÃO
@@ -222,563 +889,6 @@ const app = {
     currentWorkoutIndex: null,
     selectedDays: 1,
     isEditing: false,
-
-    // =============================================
-    // INICIALIZAÇÃO DA APLICAÇÃO
-    // =============================================
-
-    async init() {
-        console.log('🚀 Inicializando JS Fit Personal App...');
-        
-        // Carregar configurações básicas
-        this.loadSavedPlans();
-        this.setDefaultDates();
-        this.setupEventListeners();
-        
-        // NOVO: Carregar base de exercícios primeiro
-        console.log('📄 Iniciando carregamento da base de exercícios...');
-        await this.loadExerciseDatabase();
-        
-        // Popular select inicial (caso o modal já esteja aberto)
-        this.populateExerciseSelect();
-        
-        // Mostrar interface
-        this.showPlanList();
-        
-        // Verificar API de compartilhamento em background
-        this.checkAPIStatus().then(status => {
-            console.log('Status da API de compartilhamento:', status ? 'Online' : 'Offline');
-        }).catch(() => {
-            console.log('API de compartilhamento não disponível');
-        });
-        
-        console.log('✅ Aplicação inicializada com sucesso');
-    },
-
-    setupEventListeners() {
-        // Close modal when clicking outside
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                }
-            });
-        });
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                this.closeAllModals();
-            }
-            if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                this.savePlan();
-            }
-            if (e.ctrlKey && e.key === 'n') {
-                e.preventDefault();
-                this.showPlanCreator();
-            }
-            if (e.ctrlKey && e.key === 'i') {
-                e.preventDefault();
-                this.showAIPlanCreator();
-            }
-        });
-
-        // Exercise name change handler
-        const exerciseSelect = document.getElementById('exerciseName');
-        if (exerciseSelect) {
-            exerciseSelect.addEventListener('change', this.updateExerciseDescription.bind(this));
-        }
-
-        // Technique change handler
-        const techniqueSelect = document.getElementById('exerciseTechnique');
-        if (techniqueSelect) {
-            techniqueSelect.addEventListener('change', this.updateTechniqueDescription.bind(this));
-        }
-
-        // NOVO: Observer para modal de exercício
-        const exerciseModal = document.getElementById('exerciseModal');
-        if (exerciseModal) {
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                        if (exerciseModal.classList.contains('active')) {
-                            // Aguardar um pouco para garantir que o modal esteja visível
-                            setTimeout(() => {
-                                this.populateGroupFilter();      // NOVO
-                                this.populateExerciseSelect();
-                            }, 100);
-                        }
-                    }
-                });
-            });
-            observer.observe(exerciseModal, { attributes: true });
-        }
-    },
-
-    closeAllModals() {
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach(modal => modal.classList.remove('active'));
-    },
-
-    setDefaultDates() {
-        const today = new Date();
-        const endDate = new Date();
-        endDate.setMonth(endDate.getMonth() + 6);
-        
-        const startInput = document.getElementById('planStartDate');
-        const endInput = document.getElementById('planEndDate');
-        
-        if (startInput) startInput.value = today.toISOString().split('T')[0];
-        if (endInput) endInput.value = endDate.toISOString().split('T')[0];
-    },
-
-    // =============================================
-    // CARREGAMENTO DA BASE DE EXERCÍCIOS
-    // =============================================
-
-    async loadExerciseDatabase() {
-        try {
-            console.log('📄 Carregando base de dados de exercícios...');
-            
-            // Tentar carregar DATABASE.JSON
-            const response = await fetch('data/DATABASE.JSON');
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
-            const data = await response.json();
-            
-            // Validar estrutura do arquivo
-            if (!Array.isArray(data)) {
-                throw new Error('DATABASE.JSON deve ser um array de exercícios');
-            }
-            
-            // Validar se tem exercícios
-            if (data.length === 0) {
-                throw new Error('DATABASE.JSON está vazio');
-            }
-            
-            // Validar estrutura básica de cada exercício
-            const invalidExercises = data.filter(ex => 
-                !ex.nome || !ex.Column4 || !ex.grupo
-            );
-            
-            if (invalidExercises.length > 0) {
-                console.warn(`⚠️ ${invalidExercises.length} exercícios com dados incompletos encontrados`);
-            }
-            
-            this.exerciseDatabase = data;
-            this.exerciseDatabaseLoaded = true;
-            console.log(`✅ ${data.length} exercícios carregados com sucesso`);
-            
-            // Mostrar estatísticas
-            this.logDatabaseStats();
-            
-            return true;
-            
-        } catch (error) {
-            console.error('❌ Erro ao carregar DATABASE.JSON:', error);
-            
-            // Fallback: usar base hardcoded
-            console.warn('🔄 Usando base de exercícios hardcoded como fallback');
-            this.exerciseDatabase = this.convertHardcodedToArray();
-            this.exerciseDatabaseLoaded = false;
-            
-            // Mostrar notificação para o usuário
-            this.showMessage(
-                '⚠️ Erro ao carregar base de exercícios atualizada. Usando dados locais.',
-                'warning'
-            );
-            
-            return false;
-        }
-    },
-
-    // Converter base hardcoded para formato array
-    convertHardcodedToArray() {
-        const exerciseArray = [];
-        let id = 1;
-        
-        Object.entries(this.exerciseDatabaseFallback).forEach(([grupo, niveis]) => {
-            Object.entries(niveis).forEach(([nivel, exercicios]) => {
-                exercicios.forEach(ex => {
-                    exerciseArray.push({
-                        id: id++,
-                        nome: ex.nome,
-                        Column4: ex.gif || '',
-                        grupo: grupo,
-                        nivel: nivel,
-                        descricao: ex.descricao || '',
-                        series: ex.series,
-                        repeticoes: ex.repeticoes,
-                        carga: ex.carga,
-                        codigo: ex.codigo
-                    });
-                });
-            });
-        });
-        
-        return exerciseArray;
-    },
-
-    // Mostrar estatísticas da base
-    logDatabaseStats() {
-        if (this.exerciseDatabase.length === 0) return;
-        
-        // Contar exercícios por grupo
-        const groupStats = {};
-        this.exerciseDatabase.forEach(ex => {
-            const grupo = ex.grupo || 'Sem grupo';
-            groupStats[grupo] = (groupStats[grupo] || 0) + 1;
-        });
-        
-        console.log('📊 Estatísticas da base de exercícios:');
-        console.log(`   Total: ${this.exerciseDatabase.length} exercícios`);
-        console.log('   Por grupo:');
-        Object.entries(groupStats).forEach(([grupo, count]) => {
-            console.log(`     ${grupo}: ${count} exercícios`);
-        });
-    },
-
-    // =============================================
-    // MÉTODOS DE BUSCA NA BASE DINÂMICA
-    // =============================================
-
-    // Buscar exercícios por grupo e nível
-    getExercisesByGroupAndLevel(grupo, nivel) {
-        if (!this.exerciseDatabaseLoaded || this.exerciseDatabase.length === 0) {
-            // Fallback para base hardcoded
-            return this.exerciseDatabaseFallback[grupo]?.[nivel] || [];
-        }
-        
-        return this.exerciseDatabase.filter(ex => 
-            ex.grupo.toLowerCase() === grupo.toLowerCase() &&
-            (ex.nivel?.toLowerCase() === nivel.toLowerCase() || !ex.nivel)
-        );
-    },
-
-    // Buscar exercício por nome
-    findExerciseByName(exerciseName) {
-        if (!this.exerciseDatabaseLoaded || this.exerciseDatabase.length === 0) {
-            return null;
-        }
-
-        const normalizedName = exerciseName.trim().toLowerCase();
-        
-        return this.exerciseDatabase.find(exercise => 
-            exercise.nome.toLowerCase() === normalizedName
-        );
-    },
-
-    // Buscar todos os grupos disponíveis
-    getAllExerciseGroups() {
-        if (!this.exerciseDatabaseLoaded || this.exerciseDatabase.length === 0) {
-            return Object.keys(this.exerciseDatabaseFallback);
-        }
-
-        const groups = new Set();
-        this.exerciseDatabase.forEach(exercise => {
-            if (exercise.grupo) {
-                groups.add(exercise.grupo);
-            }
-        });
-        
-        return Array.from(groups).sort();
-    },
-
-    // Obter GIF do exercício
-    getExerciseGif(exerciseName) {
-        const exercise = this.findExerciseByName(exerciseName);
-        return exercise ? exercise.Column4 : null;
-    },
-
-    // Verificar se exercício existe
-    exerciseExists(exerciseName) {
-        return this.findExerciseByName(exerciseName) !== null;
-    },
-
-    // =============================================
-    // SISTEMA DE FILTRO POR GRUPO MUSCULAR
-    // =============================================
-
-    // Popular filtro de grupos musculares
-    populateGroupFilter() {
-        const groupFilter = document.getElementById('exerciseGroupFilter');
-        if (!groupFilter) return;
-        
-        console.log('🎯 Populando filtro de grupos...');
-        
-        // Salvar valor atual
-        const currentValue = groupFilter.value;
-        
-        // Limpar opções (exceto "todos")
-        groupFilter.innerHTML = '<option value="todos">📋 Todos os Grupos</option>';
-        
-        if (this.exerciseDatabaseLoaded && this.exerciseDatabase.length > 0) {
-            // Obter grupos únicos da base dinâmica
-            const groups = [...new Set(this.exerciseDatabase.map(ex => ex.grupo))].filter(Boolean).sort();
-            
-            groups.forEach(grupo => {
-                const option = document.createElement('option');
-                option.value = grupo.toLowerCase();
-                option.textContent = `💪 ${this.capitalizeFirstLetter(grupo)}`;
-                groupFilter.appendChild(option);
-            });
-            
-            console.log(`✅ ${groups.length} grupos carregados no filtro`);
-        } else {
-            // Fallback para base hardcoded
-            const groups = Object.keys(this.exerciseDatabaseFallback || {});
-            groups.forEach(grupo => {
-                const option = document.createElement('option');
-                option.value = grupo.toLowerCase();
-                option.textContent = `💪 ${this.capitalizeFirstLetter(grupo)}`;
-                groupFilter.appendChild(option);
-            });
-        }
-        
-        // Adicionar opção de carregamento se necessário
-        if (!this.exerciseDatabaseLoaded) {
-            const loadingOption = document.createElement('option');
-            loadingOption.value = '';
-            loadingOption.disabled = true;
-            loadingOption.textContent = '⏳ Carregando grupos...';
-            groupFilter.appendChild(loadingOption);
-        }
-        
-        // Restaurar valor se ainda existe
-        if (currentValue && currentValue !== '') {
-            const optionExists = Array.from(groupFilter.options).some(opt => opt.value === currentValue);
-            if (optionExists) {
-                groupFilter.value = currentValue;
-            }
-        }
-    },
-
-    // Filtrar exercícios por grupo selecionado
-    filterExercisesByGroup() {
-        const groupFilter = document.getElementById('exerciseGroupFilter');
-        const selectedGroup = groupFilter ? groupFilter.value : 'todos';
-        
-        console.log(`🔍 Filtrando exercícios por grupo: ${selectedGroup}`);
-        
-        // Atualizar select de exercícios baseado no filtro
-        this.populateExerciseSelect(selectedGroup);
-    },
-
-    // Popular select de exercícios com filtro opcional
-    populateExerciseSelect(filterGroup = 'todos') {
-        const exerciseSelect = document.getElementById('exerciseName');
-        if (!exerciseSelect) return;
-        
-        console.log(`🔄 Populando select de exercícios (filtro: ${filterGroup})...`);
-        
-        // Salvar opção custom e valor atual
-        const currentValue = exerciseSelect.value;
-        
-        // Limpar todas as opções
-        exerciseSelect.innerHTML = '';
-        
-        // Recriar opção custom
-        const newCustomOption = document.createElement('option');
-        newCustomOption.value = 'custom';
-        newCustomOption.textContent = '✏️ Exercício Personalizado';
-        exerciseSelect.appendChild(newCustomOption);
-        
-        if (this.exerciseDatabaseLoaded && this.exerciseDatabase.length > 0) {
-            // Filtrar exercícios baseado no grupo selecionado
-            let exercisesToShow = this.exerciseDatabase;
-            
-            if (filterGroup && filterGroup !== 'todos') {
-                exercisesToShow = this.exerciseDatabase.filter(ex => 
-                    ex.grupo && ex.grupo.toLowerCase() === filterGroup.toLowerCase()
-                );
-            }
-            
-            if (filterGroup === 'todos') {
-                // Mostrar agrupado quando "todos" estiver selecionado
-                const groupedExercises = {};
-                exercisesToShow.forEach(ex => {
-                    const grupo = ex.grupo || 'Outros';
-                    if (!groupedExercises[grupo]) {
-                        groupedExercises[grupo] = [];
-                    }
-                    groupedExercises[grupo].push(ex);
-                });
-                
-                // Ordenar grupos
-                const sortedGroups = Object.keys(groupedExercises).sort();
-                
-                sortedGroups.forEach(grupo => {
-                    const optgroup = document.createElement('optgroup');
-                    optgroup.label = this.capitalizeFirstLetter(grupo);
-                    
-                    const exercicios = groupedExercises[grupo].sort((a, b) => 
-                        a.nome.localeCompare(b.nome, 'pt-BR')
-                    );
-                    
-                    exercicios.forEach(ex => {
-                        const option = document.createElement('option');
-                        option.value = ex.nome;
-                        option.textContent = ex.nome;
-                        
-                        if (ex.nivel) {
-                            option.textContent += ` (${ex.nivel})`;
-                        }
-                        
-                        optgroup.appendChild(option);
-                    });
-                    
-                    exerciseSelect.appendChild(optgroup);
-                });
-            } else {
-                // Mostrar apenas exercícios do grupo selecionado (sem agrupamento)
-                const sortedExercises = exercisesToShow.sort((a, b) => 
-                    a.nome.localeCompare(b.nome, 'pt-BR')
-                );
-                
-                sortedExercises.forEach(ex => {
-                    const option = document.createElement('option');
-                    option.value = ex.nome;
-                    option.textContent = ex.nome;
-                    
-                    if (ex.nivel) {
-                        option.textContent += ` (${ex.nivel})`;
-                    }
-                    
-                    exerciseSelect.appendChild(option);
-                });
-            }
-            
-            console.log(`✅ ${exercisesToShow.length} exercícios carregados (filtro: ${filterGroup})`);
-            
-        } else {
-            console.warn('⚠️ Base dinâmica não disponível, usando fallback hardcoded');
-            
-            // Fallback para base hardcoded com filtro
-            if (filterGroup === 'todos') {
-                // Mostrar todos os grupos
-                Object.entries(this.exerciseDatabaseFallback || {}).forEach(([grupo, niveis]) => {
-                    const optgroup = document.createElement('optgroup');
-                    optgroup.label = this.capitalizeFirstLetter(grupo);
-                    
-                    const allExercises = [];
-                    Object.values(niveis).forEach(exercicios => {
-                        allExercises.push(...exercicios);
-                    });
-                    
-                    const uniqueExercises = allExercises.filter((ex, index, arr) => 
-                        arr.findIndex(item => item.nome === ex.nome) === index
-                    );
-                    
-                    uniqueExercises.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
-                    
-                    uniqueExercises.forEach(ex => {
-                        const option = document.createElement('option');
-                        option.value = ex.nome;
-                        option.textContent = ex.nome;
-                        optgroup.appendChild(option);
-                    });
-                    
-                    exerciseSelect.appendChild(optgroup);
-                });
-            } else {
-                // Mostrar apenas grupo específico
-                const groupData = this.exerciseDatabaseFallback[filterGroup];
-                if (groupData) {
-                    const allExercises = [];
-                    Object.values(groupData).forEach(exercicios => {
-                        allExercises.push(...exercicios);
-                    });
-                    
-                    const uniqueExercises = allExercises.filter((ex, index, arr) => 
-                        arr.findIndex(item => item.nome === ex.nome) === index
-                    );
-                    
-                    uniqueExercises.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
-                    
-                    uniqueExercises.forEach(ex => {
-                        const option = document.createElement('option');
-                        option.value = ex.nome;
-                        option.textContent = ex.nome;
-                        exerciseSelect.appendChild(option);
-                    });
-                }
-            }
-        }
-        
-        // Adicionar opção de carregamento se necessário
-        if (!this.exerciseDatabaseLoaded) {
-            const loadingOption = document.createElement('option');
-            loadingOption.value = '';
-            loadingOption.disabled = true;
-            loadingOption.textContent = '⏳ Aguardando carregamento da base...';
-            exerciseSelect.appendChild(loadingOption);
-        }
-        
-        // Restaurar valor anterior se ainda existe
-        if (currentValue && currentValue !== '') {
-            const optionExists = Array.from(exerciseSelect.options).some(opt => opt.value === currentValue);
-            if (optionExists) {
-                exerciseSelect.value = currentValue;
-            }
-        }
-        
-        // Atualizar indicador de status
-        this.updateExerciseSelectStatus(filterGroup);
-    },
-
-    // Atualizar status com informação do filtro
-    updateExerciseSelectStatus(filterGroup = 'todos') {
-        const statusElement = document.getElementById('exerciseSelectStatus');
-        const countElement = document.getElementById('exerciseCount');
-        
-        if (!statusElement || !countElement) return;
-        
-        if (this.exerciseDatabaseLoaded && this.exerciseDatabase.length > 0) {
-            let exerciseCount = this.exerciseDatabase.length;
-            let groupCount = this.getAllExerciseGroups().length;
-            
-            // Calcular contagem filtrada
-            if (filterGroup && filterGroup !== 'todos') {
-                const filteredExercises = this.exerciseDatabase.filter(ex => 
-                    ex.grupo && ex.grupo.toLowerCase() === filterGroup.toLowerCase()
-                );
-                exerciseCount = filteredExercises.length;
-                groupCount = 1;
-            }
-            
-            statusElement.className = 'form-hint success';
-            if (filterGroup === 'todos') {
-                countElement.textContent = `✅ ${exerciseCount} exercícios em ${groupCount} grupos`;
-            } else {
-                const groupName = this.capitalizeFirstLetter(filterGroup);
-                countElement.textContent = `🎯 ${exerciseCount} exercícios de ${groupName}`;
-            }
-        } else if (this.exerciseDatabase.length > 0) {
-            statusElement.className = 'form-hint';
-            countElement.textContent = `📚 ${this.exerciseDatabase.length} exercícios (fallback)`;
-        } else {
-            statusElement.className = 'form-hint loading';
-            countElement.textContent = '⏳ Carregando exercícios...';
-        }
-    },
-
-    // Função auxiliar para capitalizar primeira letra
-    capitalizeFirstLetter(string) {
-        const exceptions = {
-            'biceps': 'Bíceps',
-            'triceps': 'Tríceps',
-            'quadriceps': 'Quadríceps',
-            'panturrilha': 'Panturrilha'
-        };
-        
-        return exceptions[string.toLowerCase()] || 
-               string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-    },
 
     // =============================================
     // FUNÇÕES DE API E COMPARTILHAMENTO
@@ -1183,6 +1293,83 @@ const app = {
     },
 
     // =============================================
+    // INICIALIZAÇÃO DA APLICAÇÃO
+    // =============================================
+
+    init() {
+        this.loadSavedPlans();
+        this.setDefaultDates();
+        this.showPlanList();
+        this.setupEventListeners();
+        
+        this.checkAPIStatus().then(status => {
+            console.log('Status da API de compartilhamento:', status ? 'Online' : 'Offline');
+        }).catch(() => {
+            console.log('API de compartilhamento não disponível');
+        });
+    },
+
+    setupEventListeners() {
+        // Close modal when clicking outside
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeAllModals();
+            }
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                this.savePlan();
+            }
+            if (e.ctrlKey && e.key === 'n') {
+                e.preventDefault();
+                this.showPlanCreator();
+            }
+            if (e.ctrlKey && e.key === 'i') {
+                e.preventDefault();
+                this.showAIPlanCreator();
+            }
+        });
+
+        // Exercise name change handler
+        const exerciseSelect = document.getElementById('exerciseName');
+        if (exerciseSelect) {
+            exerciseSelect.addEventListener('change', this.updateExerciseDescription.bind(this));
+        }
+
+        // Technique change handler
+        const techniqueSelect = document.getElementById('exerciseTechnique');
+        if (techniqueSelect) {
+            techniqueSelect.addEventListener('change', this.updateTechniqueDescription.bind(this));
+        }
+    },
+
+    closeAllModals() {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => modal.classList.remove('active'));
+    },
+
+    setDefaultDates() {
+        const today = new Date();
+        const endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + 6);
+        
+        const startInput = document.getElementById('planStartDate');
+        const endInput = document.getElementById('planEndDate');
+        
+        if (startInput) startInput.value = today.toISOString().split('T')[0];
+        if (endInput) endInput.value = endDate.toISOString().split('T')[0];
+    },
+
+    // =============================================
     // FUNÇÕES DE INTERFACE - IA
     // =============================================
 
@@ -1410,23 +1597,21 @@ const app = {
 
         // Exercícios por grupo muscular
         grupos.forEach(grupo => {
-            // NOVA IMPLEMENTAÇÃO: Usar base dinâmica
-            const groupExercises = this.getExercisesByGroupAndLevel(grupo, nivel);
-            
-            if (groupExercises.length > 0) {
+            if (this.exerciseDatabase[grupo] && this.exerciseDatabase[grupo][nivel]) {
+                const groupExercises = this.exerciseDatabase[grupo][nivel];
+                
                 const numExercises = grupos.length <= 2 ? 4 : (grupos.length <= 3 ? 3 : 2);
                 
                 for (let i = 0; i < Math.min(numExercises, groupExercises.length); i++) {
                     const baseExercise = groupExercises[i];
                     const tecnicaSelecionada = this.getTecnicaForExercise(i, nivel, grupo);
-                    
                     exercises.push({
                         id: exerciseId++,
                         nome: baseExercise.nome,
-                        descricao: findExerciseByName(baseExercise.nome),
-                        series: baseExercise.series || 3,
-                        repeticoes: baseExercise.repeticoes || '10-12',
-                        carga: this.adjustLoadForLevel(baseExercise.carga || 'A definir', nivel),
+                        descricao: baseExercise.descricao,
+                        series: baseExercise.series,
+                        repeticoes: baseExercise.repeticoes,
+                        carga: this.adjustLoadForLevel(baseExercise.carga, nivel),
                         descanso: this.getRestByObjective(objetivo),
                         observacoesEspeciais: this.getObservacaoEspecial(tecnicaSelecionada, baseExercise.nome),
                         tecnica: tecnicaSelecionada,
@@ -1801,46 +1986,46 @@ const app = {
     },
 
     editExercise(workoutIndex, exerciseIndex) {
-        this.currentWorkoutIndex = workoutIndex;
-        this.currentExerciseIndex = exerciseIndex;
-        
-        const exercise = this.currentPlan.treinos[workoutIndex].exercicios[exerciseIndex];
-        
-        // Configurar nome do exercício
-        const exerciseSelect = document.getElementById('exerciseName');
-        const customGroup = document.getElementById('customExerciseGroup');
-        const customInput = document.getElementById('customExerciseName');
-        
-        const option = Array.from(exerciseSelect.options).find(opt => opt.value === exercise.nome);
-        if (option) {
-            exerciseSelect.value = exercise.nome;
-            customGroup.style.display = 'none';
-        } else {
-            exerciseSelect.value = 'custom';
-            customGroup.style.display = 'block';
-            customInput.value = exercise.nome;
-        }
-        
-        // Configurar dados básicos
-        document.getElementById('exerciseSets').value = exercise.series;
-        document.getElementById('exerciseReps').value = exercise.repeticoes;
-        document.getElementById('exerciseWeight').value = exercise.carga;
-        document.getElementById('exerciseRest').value = exercise.descanso || '90 segundos';
-        document.getElementById('exerciseDescription').value = exercise.descricao;
-        
-        // Configurar técnica selecionada
-        const techniqueSelect = document.getElementById('exerciseTechnique');
-        if (exercise.tecnica && this.tecnicasDatabase[exercise.tecnica]) {
-            techniqueSelect.value = exercise.tecnica;
-            this.updateTechniqueDescription();
-        } else {
-            techniqueSelect.value = '';
-            this.updateTechniqueDescription();
-        }
-        
-        // Abrir modal
-        document.getElementById('exerciseModal').classList.add('active');
-    },
+    this.currentWorkoutIndex = workoutIndex;
+    this.currentExerciseIndex = exerciseIndex;
+    
+    const exercise = this.currentPlan.treinos[workoutIndex].exercicios[exerciseIndex];
+    
+    // Configurar nome do exercício
+    const exerciseSelect = document.getElementById('exerciseName');
+    const customGroup = document.getElementById('customExerciseGroup');
+    const customInput = document.getElementById('customExerciseName');
+    
+    const option = Array.from(exerciseSelect.options).find(opt => opt.value === exercise.nome);
+    if (option) {
+        exerciseSelect.value = exercise.nome;
+        customGroup.style.display = 'none';
+    } else {
+        exerciseSelect.value = 'custom';
+        customGroup.style.display = 'block';
+        customInput.value = exercise.nome;
+    }
+    
+    // Configurar dados básicos
+    document.getElementById('exerciseSets').value = exercise.series;
+    document.getElementById('exerciseReps').value = exercise.repeticoes;
+    document.getElementById('exerciseWeight').value = exercise.carga;
+    document.getElementById('exerciseRest').value = exercise.descanso || '90 segundos';
+    document.getElementById('exerciseDescription').value = exercise.descricao;
+    
+    // Configurar técnica selecionada
+    const techniqueSelect = document.getElementById('exerciseTechnique');
+    if (exercise.tecnica && this.tecnicasDatabase[exercise.tecnica]) {
+        techniqueSelect.value = exercise.tecnica;
+        this.updateTechniqueDescription();
+    } else {
+        techniqueSelect.value = '';
+        this.updateTechniqueDescription();
+    }
+    
+    // Abrir modal
+    document.getElementById('exerciseModal').classList.add('active');
+},
 
     updateTechniqueDescription() {
         const techniqueSelect = document.getElementById('exerciseTechnique');
@@ -1866,42 +2051,44 @@ const app = {
             descriptionTextarea.value = '';
         } else {
             customGroup.style.display = 'none';
-            const description =  this.findExerciseByName(exerciseSelect.value) || 'Descrição não disponível';
+            const description = this.exerciseDescriptions[exerciseSelect.value] || 'Descrição não disponível';
             descriptionTextarea.value = description;
         }
     },
 
+
+
     saveExercise() {
-        if (this.currentWorkoutIndex === null || this.currentExerciseIndex === null) return;
-        
-        const exercise = this.currentPlan.treinos[this.currentWorkoutIndex].exercicios[this.currentExerciseIndex];
-        
-        const exerciseSelect = document.getElementById('exerciseName');
-        const customName = document.getElementById('customExerciseName');
-        const techniqueSelect = document.getElementById('exerciseTechnique');
-        
-        // Atualizar dados básicos do exercício
-        exercise.nome = exerciseSelect.value === 'custom' ? customName.value : exerciseSelect.value;
-        exercise.series = parseInt(document.getElementById('exerciseSets').value) || 3;
-        exercise.repeticoes = document.getElementById('exerciseReps').value;
-        exercise.carga = document.getElementById('exerciseWeight').value;
-        exercise.descanso = document.getElementById('exerciseRest').value;
-        exercise.descricao = document.getElementById('exerciseDescription').value;
-        
-        // Configurar técnica selecionada
-        exercise.tecnica = techniqueSelect.value;
-        
-        // Gerar observações especiais automaticamente baseadas na técnica
-        if (exercise.tecnica && this.tecnicasDatabase[exercise.tecnica]) {
-            exercise.observacoesEspeciais = this.getObservacaoEspecial(exercise.tecnica, exercise.nome);
-        } else {
-            exercise.observacoesEspeciais = '';
-        }
-        
-        // Atualizar a lista de exercícios e fechar modal
-        this.updateExerciseList(this.currentWorkoutIndex);
-        this.closeExerciseModal();
-    },
+    if (this.currentWorkoutIndex === null || this.currentExerciseIndex === null) return;
+    
+    const exercise = this.currentPlan.treinos[this.currentWorkoutIndex].exercicios[this.currentExerciseIndex];
+    
+    const exerciseSelect = document.getElementById('exerciseName');
+    const customName = document.getElementById('customExerciseName');
+    const techniqueSelect = document.getElementById('exerciseTechnique');
+    
+    // Atualizar dados básicos do exercício
+    exercise.nome = exerciseSelect.value === 'custom' ? customName.value : exerciseSelect.value;
+    exercise.series = parseInt(document.getElementById('exerciseSets').value) || 3;
+    exercise.repeticoes = document.getElementById('exerciseReps').value;
+    exercise.carga = document.getElementById('exerciseWeight').value;
+    exercise.descanso = document.getElementById('exerciseRest').value;
+    exercise.descricao = document.getElementById('exerciseDescription').value;
+    
+    // Configurar técnica selecionada
+    exercise.tecnica = techniqueSelect.value;
+    
+    // Gerar observações especiais automaticamente baseadas na técnica
+    if (exercise.tecnica && this.tecnicasDatabase[exercise.tecnica]) {
+        exercise.observacoesEspeciais = this.getObservacaoEspecial(exercise.tecnica, exercise.nome);
+    } else {
+        exercise.observacoesEspeciais = '';
+    }
+    
+    // Atualizar a lista de exercícios e fechar modal
+    this.updateExerciseList(this.currentWorkoutIndex);
+    this.closeExerciseModal();
+},
 
     removeExercise(workoutIndex, exerciseIndex) {
         if (confirm('Tem certeza que deseja remover este exercício?')) {
@@ -2433,56 +2620,37 @@ const app = {
 
     showMessage(message, type = 'success') {
         // Remove any existing messages
-        const existingMessages = document.querySelectorAll('.message-success, .message-error, .message-warning, .message-info');
+        const existingMessages = document.querySelectorAll('.success-message, .error-message, .warning-message, .info-message');
         existingMessages.forEach(msg => msg.remove());
 
         // Create new message
         const messageDiv = document.createElement('div');
         messageDiv.className = `message-${type}`;
-        messageDiv.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 24px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 10000;
-            max-width: 400px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            animation: slideIn 0.3s ease-out;
-        `;
         
-        const colors = {
-            success: '#4caf50',
-            error: '#f44336',
-            warning: '#ff9800',
-            info: '#2196f3'
-        };
-        
-        const icons = {
+        const icon = {
             success: '✅',
             error: '❌',
             warning: '⚠️',
             info: 'ℹ️'
-        };
-        
-        messageDiv.style.backgroundColor = colors[type] || colors.info;
+        }[type] || 'ℹ️';
         
         messageDiv.innerHTML = `
-            <span style="margin-right: 8px;">${icons[type] || icons.info}</span>
+            <span>${icon}</span>
             <span>${message}</span>
         `;
 
-        document.body.appendChild(messageDiv);
-        
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            if (messageDiv.parentNode) {
-                messageDiv.style.animation = 'slideOut 0.3s ease-in forwards';
-                setTimeout(() => messageDiv.remove(), 300);
-            }
-        }, 5000);
+        // Insert after header
+        const header = document.querySelector('.header');
+        if (header) {
+            header.insertAdjacentElement('afterend', messageDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, 5000);
+        }
     }
 };
 
@@ -2501,30 +2669,3 @@ if (document.readyState === 'loading') {
 } else {
     app.init();
 }
-
-// CSS para animações das mensagens
-const messageStyles = document.createElement('style');
-messageStyles.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(messageStyles);
