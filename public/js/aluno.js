@@ -1552,23 +1552,7 @@ class JSFitStudentApp {
                             </div>
                             ` : ''}
                             
-                            <!-- NOVO: BOTÃO VER EXERCÍCIO -->
-                            <div class="spec-item view-exercise-item">
-                                <button onclick="app.showExerciseGif('${exercicio.nome.replace(/'/g, "\\'")}')" 
-                                        class="btn btn-view-exercise">
-                                    <div class="btn-icon">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                            <circle cx="12" cy="12" r="3"/>
-                                        </svg>
-                                    </div>
-                                    <div class="btn-text">
-                                        <div class="btn-label">Ver Exercício</div>
-                                        <div class="btn-subtitle">Demonstração</div>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
+                         </div>
                     </div>
                     
                     <!-- HISTÓRICO DE CARGA (se disponível) -->
@@ -1641,6 +1625,21 @@ class JSFitStudentApp {
     renderExerciseActions(exercicio, isWorkoutActive) {
         return `
             <div class="exercise-actions">
+                                       <!-- NOVO: BOTÃO VER EXERCÍCIO -->
+                               <button onclick="app.showExerciseGif('${exercicio.nome.replace(/'/g, "\\'")}')" 
+                                        class="btn btn-view-exercise">
+                                    <div class="btn-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                    </div>
+                                    <div class="btn-text">
+                                        <div class="btn-label">Ver Exercício</div>
+                                        <div class="btn-subtitle">Demonstração</div>
+                                    </div>
+                                </button>
+
                 <button onclick="app.startEditingWeight(${exercicio.id})" class="btn btn-secondary">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>

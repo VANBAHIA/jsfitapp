@@ -15,9 +15,142 @@
     <link rel="stylesheet" href="css/personal.css">
 
     <style>
-
-
-
+        /* Estilos para o filtro de grupos */
+        #exerciseGroupFilter {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            border: 2px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        #exerciseGroupFilter:focus {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+        
+        #exerciseGroupFilter option {
+            background: white;
+            color: #333;
+            font-weight: normal;
+        }
+        
+        /* Indicador de status - VERSÃO UNIFICADA */
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-secondary, #666);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-hint.loading {
+            color: #ff9800;
+            background: rgba(255, 152, 0, 0.1);
+        }
+        
+        .form-hint.success {
+            color: #4caf50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+        
+        .form-hint.error {
+            color: #f44336;
+            background: rgba(244, 67, 54, 0.1);
+        }
+        
+        /* Estilos da marca do app */
+        .app-branding {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            margin: var(--space-1);
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .app-branding::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(180deg); }
+        }
+        
+        .app-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .app-subtitle {
+            font-size: 16px;
+            margin: 0 0 16px 0;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .developer-info {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px 16px;
+            border: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .developer-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .developer-contact {
+            font-size: 13px;
+            margin: 0;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .developer-icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.8;
+        }
+        
+        .phone-icon {
+            width: 14px;
+            height: 14px;
+            opacity: 0.8;
+        }
         </style>
         
 </head>
@@ -133,46 +266,7 @@
                         </select>
                     </div>
                 </div>
-
             </div>
-            <div class="form-section">
-                <h2>⚙️ Configuração de Grupos Musculares</h2>
-                <div class="form-group">
-                    <label class="form-label">
-                        Personalizar quais músculos trabalhar em cada dia de treino
-                    </label>
-                    <div class="muscle-config-toggle">
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="aiUseCustomMuscleConfig" 
-                                   onchange="app.toggleAIMuscleConfig()">
-                            <span>🎯 Ativar configuração personalizada de músculos</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div id="aiMuscleConfigSection" class="muscle-config-section" style="display: none;">
-                    <div class="config-header">
-                        <h3>🏋️ Configure seus Treinos</h3>
-                        <p>Selecione quais grupos musculares trabalhar em cada dia:</p>
-                    </div>
-                    
-                    <div id="aiWorkoutConfigGrid" class="workout-config-grid">
-                        <!-- Será preenchido dinamicamente pelo JavaScript -->
-                    </div>
-                    
-                    <div class="config-actions">
-                        <button type="button" class="btn btn-secondary btn-small" 
-                                onclick="app.loadAIPresetConfig()">
-                            📋 Usar Configuração Padrão
-                        </button>
-                        <button type="button" class="btn btn-outline btn-small" 
-                                onclick="app.resetAIMuscleConfig()">
-                            🔄 Limpar Tudo
-                        </button>
-                    </div>
-                </div>
-            </div>
-
 
             <div class="form-section">
                 <h2>🏋️ Preferências de Treino</h2>
@@ -290,56 +384,35 @@
                 </div>
             </div>
 
-<!-- Seção de Tipo de Plano Atualizada -->
-<div class="form-section">
-    <h2>📅 Tipo de Plano</h2>
-    <p class="form-hint">
-        <span>Selecione quantos dias de treino deseja e configure os grupos musculares para cada treino</span>
-    </p>
-    
-    <div class="plan-type-selector" id="planTypeSelector">
-        <div class="plan-type-btn active" onclick="app.selectPlanType(1, 'A', this)">
-            <div style="font-size: 1.2rem; margin-bottom: 5px;">A</div>
-            <div style="font-size: 0.9rem;">1 Dia</div>
-            <div class="plan-configured-indicator" style="display: none;"></div>
-        </div>
-        <div class="plan-type-btn" onclick="app.selectPlanType(2, 'AB', this)">
-            <div style="font-size: 1.2rem; margin-bottom: 5px;">AB</div>
-            <div style="font-size: 0.9rem;">2 Dias</div>
-            <div class="plan-configured-indicator" style="display: none;"></div>
-        </div>
-        <div class="plan-type-btn" onclick="app.selectPlanType(3, 'ABC', this)">
-            <div style="font-size: 1.2rem; margin-bottom: 5px;">ABC</div>
-            <div style="font-size: 0.9rem;">3 Dias</div>
-            <div class="plan-configured-indicator" style="display: none;"></div>
-        </div>
-        <div class="plan-type-btn" onclick="app.selectPlanType(4, 'ABCD', this)">
-            <div style="font-size: 1.2rem; margin-bottom: 5px;">ABCD</div>
-            <div style="font-size: 0.9rem;">4 Dias</div>
-            <div class="plan-configured-indicator" style="display: none;"></div>
-        </div>
-        <div class="plan-type-btn" onclick="app.selectPlanType(5, 'ABCDE', this)">
-            <div style="font-size: 1.2rem; margin-bottom: 5px;">ABCDE</div>
-            <div style="font-size: 0.9rem;">5 Dias</div>
-            <div class="plan-configured-indicator" style="display: none;"></div>
-        </div>
-        <div class="plan-type-btn" onclick="app.selectPlanType(6, 'ABCDEF', this)">
-            <div style="font-size: 1.2rem; margin-bottom: 5px;">ABCDEF</div>
-            <div style="font-size: 0.9rem;">6 Dias</div>
-            <div class="plan-configured-indicator" style="display: none;"></div>
-        </div>
-    </div>
-    
-    <!-- Botão para configuração avançada -->
-    <div class="plan-config-actions" style="text-align: center; margin-top: 15px;">
-        <button class="btn btn-secondary btn-small" onclick="app.showPlanTypeConfiguration()" style="display: none;" id="advancedConfigBtn">
-            ⚙️ Configuração Avançada
-        </button>
-        <div class="form-hint" id="planConfigStatus">
-            <span>💡 Clique em um tipo de plano para configurar os grupos musculares</span>
-        </div>
-    </div>
-</div>
+            <div class="form-section">
+                <h2>📅 Tipo de Plano</h2>
+                <div class="plan-type-selector" id="planTypeSelector">
+                    <div class="plan-type-btn active" onclick="app.selectPlanType(1, 'A', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">A</div>
+                        <div style="font-size: 0.9rem;">1 Dia</div>
+                    </div>
+                    <div class="plan-type-btn" onclick="app.selectPlanType(2, 'AB', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">AB</div>
+                        <div style="font-size: 0.9rem;">2 Dias</div>
+                    </div>
+                    <div class="plan-type-btn" onclick="app.selectPlanType(3, 'ABC', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">ABC</div>
+                        <div style="font-size: 0.9rem;">3 Dias</div>
+                    </div>
+                    <div class="plan-type-btn" onclick="app.selectPlanType(4, 'ABCD', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">ABCD</div>
+                        <div style="font-size: 0.9rem;">4 Dias</div>
+                    </div>
+                    <div class="plan-type-btn" onclick="app.selectPlanType(5, 'ABCDE', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">ABCDE</div>
+                        <div style="font-size: 0.9rem;">5 Dias</div>
+                    </div>
+                    <div class="plan-type-btn" onclick="app.selectPlanType(6, 'ABCDEF', this)">
+                        <div style="font-size: 1.2rem; margin-bottom: 5px;">ABCDEF</div>
+                        <div style="font-size: 0.9rem;">6 Dias</div>
+                    </div>
+                </div>
+            </div>
 
             <div id="workoutEditor">
                 <!-- Workouts will be generated here -->
@@ -492,39 +565,11 @@
     </div>
 </div>
 
-<div id="quickPlanConfigModal" class="modal">
-    <div class="modal-content" style="max-width: 600px;">
-        <div class="modal-header">
-            <h2>⚙️ Configuração Rápida de Treino</h2>
-            <button class="close-btn" onclick="app.closeQuickPlanConfigModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="alert alert-info">
-                <strong>💡 Configure rapidamente:</strong> Selecione os grupos musculares que cada treino deve trabalhar.
-            </div>
-            
-            <div id="quickConfigContent">
-                <!-- Conteúdo será gerado dinamicamente -->
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-primary" onclick="app.saveQuickPlanConfig()">
-                ✅ Aplicar
-            </button>
-            <button class="btn btn-outline" onclick="app.closeQuickPlanConfigModal()">
-                ❌ Cancelar
-            </button>
-        </div>
-    </div>
-</div>
-
     <!-- Hidden file input -->
     <input type="file" id="importFile" style="display: none;" accept=".json" onchange="app.importPlan(event)">
 
     <!-- JavaScript -->
     <script src="js/personal.js">
-
-
 
 	</script>
 </body>

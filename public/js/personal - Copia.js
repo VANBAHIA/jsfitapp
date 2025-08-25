@@ -44,6 +44,67 @@ const app = {
                 { nome: 'Remada Baixa', series: 3, repeticoes: '10-12', carga: '25kg', descricao: 'Exercício para desenvolvimento das costas' }
             ]
         },
+        // =============================================
+// CONFIGURAÇÕES DE TIPOS DE PLANO
+// =============================================
+planTypeConfiguration: {
+    days: 3,
+    configuration: {},
+    muscleGroups: [
+        { id: 'antebraco', name: 'ANTEBRAÇO', icon: '💪' },
+        { id: 'abdome', name: 'ABDOME', icon: '🎯' },
+        { id: 'biceps', name: 'BÍCEPS', icon: '💪' },
+        { id: 'triceps', name: 'TRÍCEPS', icon: '🔥' },
+        { id: 'peito', name: 'PEITO', icon: '💥' },
+        { id: 'perna', name: 'PERNA', icon: '🦵' },
+        { id: 'gluteo', name: 'GLÚTEO', icon: '🍑' },
+        { id: 'costas', name: 'COSTAS', icon: '🏔️' },
+        { id: 'ombro', name: 'OMBRO', icon: '👐' },
+        { id: 'corpo', name: 'CORPO TODO', icon: '🏋️' }
+    ],
+    
+    presetConfigurations: {
+        1: {
+            A: { name: 'Treino Corpo Inteiro', groups: ['peito', 'costas', 'perna', 'ombro', 'biceps', 'triceps'] }
+        },
+        2: {
+            A: { name: 'Membros Superiores', groups: ['peito', 'costas', 'ombro', 'biceps', 'triceps'] },
+            B: { name: 'Membros Inferiores', groups: ['perna', 'gluteo', 'abdome'] }
+        },
+        3: {
+            A: { name: 'Peito e Tríceps', groups: ['peito', 'triceps'] },
+            B: { name: 'Costas e Bíceps', groups: ['costas', 'biceps'] },
+            C: { name: 'Pernas e Ombros', groups: ['perna', 'gluteo', 'ombro', 'abdome'] }
+        },
+        4: {
+            A: { name: 'Peito e Tríceps', groups: ['peito', 'triceps'] },
+            B: { name: 'Costas e Bíceps', groups: ['costas', 'biceps'] },
+            C: { name: 'Ombros e Abdome', groups: ['ombro', 'abdome'] },
+            D: { name: 'Pernas e Glúteos', groups: ['perna', 'gluteo'] }
+        },
+        5: {
+            A: { name: 'Peito', groups: ['peito'] },
+            B: { name: 'Costas', groups: ['costas'] },
+            C: { name: 'Ombros', groups: ['ombro'] },
+            D: { name: 'Braços', groups: ['biceps', 'triceps', 'antebraco'] },
+            E: { name: 'Pernas', groups: ['perna', 'gluteo', 'abdome'] }
+        },
+        6: {
+            A: { name: 'Peito', groups: ['peito'] },
+            B: { name: 'Costas', groups: ['costas'] },
+            C: { name: 'Ombros', groups: ['ombro'] },
+            D: { name: 'Bíceps', groups: ['biceps', 'antebraco'] },
+            E: { name: 'Tríceps', groups: ['triceps'] },
+            F: { name: 'Pernas', groups: ['perna', 'gluteo', 'abdome'] }
+        }
+    }
+},
+        ombros: {
+            iniciante: [
+                { nome: 'Desenvolvimento com Halteres', series: 3, repeticoes: '10-12', carga: '8kg cada', descricao: 'Exercício básico para ombros' },
+                { nome: 'Elevação Lateral', series: 3, repeticoes: '12-15', carga: '4kg cada', descricao: 'Isolamento do deltoide medial' }
+            ]
+        }
     },
 
     // =============================================
@@ -1794,607 +1855,73 @@ applySuggestedConfiguration(suggestion) {
         return age;
     },
 
-// SUBSTITUIR a função enerateAIPlan() existente por esta versão atualizada:
+    generateAIPlan() {
+        const aiData = {
+            nome: document.getElementById('aiStudentName').value,
+            dataNascimento: document.getElementById('aiStudentBirthDate').value,
+            cpf: document.getElementById('aiStudentCpf').value,
+            altura: document.getElementById('aiStudentHeight').value || '1,75m',
+            peso: document.getElementById('aiStudentWeight').value || '75kg',
+            objetivo: document.getElementById('aiPlanObjective').value,
+            nivel: document.getElementById('aiExperienceLevel').value,
+            dias: parseInt(document.getElementById('aiAvailableDays').value),
+            tempo: parseInt(document.getElementById('aiSessionTime').value),
+            equipamentos: document.getElementById('aiEquipment').value,
+            foco: document.getElementById('aiMusclePreference').value,
+            limitacoes: document.getElementById('aiLimitations').value,
+            observacoes: document.getElementById('aiSpecialNotes').value
+        };
 
-generateAIPlan() {
-    const aiData = {
-        nome: document.getElementById('aiStudentName').value,
-        dataNascimento: document.getElementById('aiStudentBirthDate').value,
-        cpf: document.getElementById('aiStudentCpf').value,
-        altura: document.getElementById('aiStudentHeight').value || '1,75m',
-        peso: document.getElementById('aiStudentWeight').value || '75kg',
-        objetivo: document.getElementById('aiPlanObjective').value,
-        nivel: document.getElementById('aiExperienceLevel').value,
-        dias: parseInt(document.getElementById('aiAvailableDays').value),
-        tempo: parseInt(document.getElementById('aiSessionTime').value),
-        equipamentos: document.getElementById('aiEquipment').value,
-        foco: document.getElementById('aiMusclePreference').value,
-        limitacoes: document.getElementById('aiLimitations').value,
-        observacoes: document.getElementById('aiSpecialNotes').value
-    };
+        aiData.idade = aiData.dataNascimento ? this.calculateAge(aiData.dataNascimento) : 25;
 
-    aiData.idade = aiData.dataNascimento ? this.calculateAge(aiData.dataNascimento) : 25;
-
-    if (!aiData.nome) {
-        this.showMessage('Por favor, preencha o nome do aluno', 'error');
-        return;
-    }
-
-    // NOVA VALIDAÇÃO: Verificar se configuração personalizada está habilitada
-    if (this.aiMuscleConfig.enabled) {
-        if (!this.validateAICompleteConfig()) {
-            return; // Interrompe se configuração inválida
-        }
-        
-        console.log('🎯 Usando configuração personalizada de músculos na IA');
-        
-        // Aplicar configuração personalizada ao sistema
-        this.planTypeConfiguration.days = aiData.dias;
-        this.planTypeConfiguration.configuration = { ...this.aiMuscleConfig.workouts };
-        this.savePlanTypeConfiguration();
-        
-    } else {
-        // Lógica original: usar configuração padrão baseada no número de dias
-        const hasCustomConfig = this.planTypeConfiguration.days === aiData.dias && 
-                               Object.keys(this.planTypeConfiguration.configuration).length > 0;
-
-        if (!hasCustomConfig) {
-            console.log(`📋 Criando configuração padrão para ${aiData.dias} dias`);
-            this.planTypeConfiguration.days = aiData.dias;
-            this.planTypeConfiguration.configuration = this.planTypeConfiguration.presetConfigurations[aiData.dias] || {};
-            this.savePlanTypeConfiguration();
-        }
-    }
-
-    // Mostrar indicador de progresso
-    const indicator = document.getElementById('generatingIndicator');
-    const progressFill = document.getElementById('progressFill');
-    indicator.classList.add('active');
-
-    let progress = 0;
-    const progressInterval = setInterval(() => {
-        progress += Math.random() * 15;
-        if (progress > 90) progress = 90;
-        progressFill.style.width = progress + '%';
-    }, 200);
-
-    // Simular processamento da IA
-    setTimeout(() => {
-        clearInterval(progressInterval);
-        progressFill.style.width = '100%';
-
-        try {
-            const aiGeneratedPlan = this.createAIPlanWithCustomConfig(aiData);
-            
-            // Adicionar informação sobre configuração personalizada usada
-            if (this.aiMuscleConfig.enabled) {
-                aiGeneratedPlan.configuracao_personalizada_ia = {
-                    habilitada: true,
-                    configuracao_aplicada: { ...this.aiMuscleConfig.workouts },
-                    gerado_em: new Date().toISOString()
-                };
-            }
-            
-            const existingIndex = this.savedPlans.findIndex(p => p.id === aiGeneratedPlan.id);
-            if (existingIndex >= 0) {
-                this.savedPlans[existingIndex] = { ...aiGeneratedPlan };
-            } else {
-                this.savedPlans.push({ ...aiGeneratedPlan });
-            }
-
-            this.savePlansToStorage();
-            
-            indicator.classList.remove('active');
-            
-            // Resetar configuração temporária se foi usada
-            if (this.aiMuscleConfig.enabled) {
-                this.resetAIMuscleConfigAfterGeneration();
-            }
-            
-            this.showMessage('Plano gerado com sucesso pela IA! ✨', 'success');
-            
-            setTimeout(() => {
-                this.showPlanList();
-            }, 1500);
-
-        } catch (error) {
-            console.error('Erro ao gerar plano:', error);
-            indicator.classList.remove('active');
-            this.showMessage('Erro ao gerar plano. Tente novamente.', 'error');
+        if (!aiData.nome) {
+            this.showMessage('Por favor, preencha o nome do aluno', 'error');
+            return;
         }
 
-    }, 2000 + Math.random() * 2000);
-},
+        const indicator = document.getElementById('generatingIndicator');
+        const progressFill = document.getElementById('progressFill');
+        indicator.classList.add('active');
 
-// Resetar configuração de músculos após geração
-resetAIMuscleConfigAfterGeneration() {
-    const checkbox = document.getElementById('aiUseCustomMuscleConfig');
-    const section = document.getElementById('aiMuscleConfigSection');
-    
-    if (checkbox) checkbox.checked = false;
-    if (section) {
-        section.style.display = 'none';
-        section.classList.remove('active');
-    }
-    
-    this.aiMuscleConfig.enabled = false;
-    this.aiMuscleConfig.workouts = {};
-    
-    console.log('🔄 Configuração de músculos IA resetada após geração');
-},
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 90) progress = 90;
+            progressFill.style.width = progress + '%';
+        }, 200);
 
+        setTimeout(() => {
+            clearInterval(progressInterval);
+            progressFill.style.width = '100%';
 
-// Adicionar na função setupEventListeners() existente:
-
-setupEventListeners() {
-    // ... código existente ...
-
-    // NOVO: Event listener para mudança no número de dias na IA
-    const aiAvailableDays = document.getElementById('aiAvailableDays');
-    if (aiAvailableDays) {
-        aiAvailableDays.addEventListener('change', () => {
-            if (this.aiMuscleConfig.enabled) {
-                console.log('🔄 Número de dias alterado, regenerando interface...');
-                this.generateAIMuscleConfigInterface();
-            }
-        });
-    }
-
-    // NOVO: Event listener para mostrar/ocultar seção IA quando voltar à tela
-    const aiPlanCreator = document.getElementById('aiPlanCreator');
-    if (aiPlanCreator) {
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                    if (aiPlanCreator.style.display === 'block') {
-                        // Resetar estado quando voltar à tela IA
-                        this.resetAIMuscleConfigState();
-                    }
-                }
-            });
-        });
-        observer.observe(aiPlanCreator, { attributes: true });
-    }
-
-    // ... resto do código existente ...
-},
-
-// Resetar estado da configuração de músculos
-resetAIMuscleConfigState() {
-    const checkbox = document.getElementById('aiUseCustomMuscleConfig');
-    const section = document.getElementById('aiMuscleConfigSection');
-    
-    if (checkbox && !checkbox.checked) {
-        this.aiMuscleConfig.enabled = false;
-        this.aiMuscleConfig.workouts = {};
-        
-        if (section) {
-            section.style.display = 'none';
-            section.classList.remove('active');
-        }
-    }
-},
-
-    // =============================================
-// NOVA FUNÇÃO: createAIPlanWithCustomConfig
-// Cria plano com integração completa ao sistema de configuração
-// =============================================
-
-createAIPlanWithCustomConfig(aiData) {
-    const plan = {
-        id: Date.now(),
-        nome: `${aiData.nome} - Treino ${this.getWorkoutLetters(aiData.dias)} (${aiData.nivel.charAt(0).toUpperCase() + aiData.nivel.slice(1)}) ${aiData.objetivo.split(' ')[0]}`,
-        aluno: {
-            nome: aiData.nome,
-            dataNascimento: aiData.dataNascimento,
-            cpf: aiData.cpf,
-            idade: aiData.idade,
-            altura: aiData.altura,
-            peso: aiData.peso
-        },
-        dias: aiData.dias,
-        dataInicio: new Date().toISOString().split('T')[0],
-        dataFim: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        perfil: {
-            idade: aiData.idade,
-            altura: aiData.altura,
-            peso: aiData.peso,
-            porte: this.calculateBodyType(aiData.altura, aiData.peso),
-            objetivo: aiData.objetivo
-        },
-        treinos: this.generateAIWorkoutsWithCustomConfig(aiData),
-        observacoes: this.generateObservations(aiData),
-        tecnicas_aplicadas: this.getUsedTechniques(aiData.nivel),
-        // NOVO: Salvar configuração utilizada
-        configuracao_utilizada: {
-            ...this.planTypeConfiguration.configuration,
-            dias: aiData.dias,
-            gerado_em: new Date().toISOString()
-        }
-    };
-
-    return plan;
-},
-
-// =============================================
-// NOVA FUNÇÃO: createAIPlanWithCustomConfig
-// Cria plano com integração completa ao sistema de configuração
-// =============================================
-
-createAIPlanWithCustomConfig(aiData) {
-    const plan = {
-        id: Date.now(),
-        nome: `${aiData.nome} - Treino ${this.getWorkoutLetters(aiData.dias)} (${aiData.nivel.charAt(0).toUpperCase() + aiData.nivel.slice(1)}) ${aiData.objetivo.split(' ')[0]}`,
-        aluno: {
-            nome: aiData.nome,
-            dataNascimento: aiData.dataNascimento,
-            cpf: aiData.cpf,
-            idade: aiData.idade,
-            altura: aiData.altura,
-            peso: aiData.peso
-        },
-        dias: aiData.dias,
-        dataInicio: new Date().toISOString().split('T')[0],
-        dataFim: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        perfil: {
-            idade: aiData.idade,
-            altura: aiData.altura,
-            peso: aiData.peso,
-            porte: this.calculateBodyType(aiData.altura, aiData.peso),
-            objetivo: aiData.objetivo
-        },
-        treinos: this.generateAIWorkoutsWithCustomConfig(aiData),
-        observacoes: this.generateObservations(aiData),
-        tecnicas_aplicadas: this.getUsedTechniques(aiData.nivel),
-        // NOVO: Salvar configuração utilizada
-        configuracao_utilizada: {
-            ...this.planTypeConfiguration.configuration,
-            dias: aiData.dias,
-            gerado_em: new Date().toISOString()
-        }
-    };
-
-    return plan;
-},
-
-// =============================================
-// FUNÇÃO ATUALIZADA: generateAIWorkoutsWithCustomConfig
-// Gera treinos baseado na configuração personalizada
-// =============================================
-
-generateAIWorkoutsWithCustomConfig(aiData) {
-    const workouts = [];
-    const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
-    const config = this.planTypeConfiguration.configuration;
-    
-    console.log(`🎯 Gerando treinos IA com configuração personalizada para ${aiData.dias} dias`);
-    console.log('📋 Configuração utilizada:', config);
-
-    // Iterar sobre cada dia configurado
-    for (let i = 0; i < aiData.dias; i++) {
-        const letter = letters[i];
-        const workoutConfig = config[letter];
-        
-        if (!workoutConfig) {
-            console.warn(`⚠️ Configuração não encontrada para treino ${letter}`);
-            continue;
-        }
-
-        console.log(`🏋️ Criando treino ${letter}: ${workoutConfig.name}`);
-        console.log(`💪 Grupos musculares: ${workoutConfig.groups.join(', ')}`);
-
-        const exercises = this.generateExercisesForAIWithCustomGroups(
-            workoutConfig.groups,
-            aiData.nivel,
-            aiData.objetivo,
-            aiData.equipamentos,
-            aiData.foco,
-            aiData.limitacoes,
-            i + 1
-        );
-
-        workouts.push({
-            id: letter,
-            nome: workoutConfig.name,
-            foco: this.generateWorkoutFocusFromGroups(workoutConfig.groups),
-            exercicios: exercises,
-            gruposMusculares: workoutConfig.groups, // Manter referência dos grupos
-            configuracao_original: workoutConfig, // Para referência futura
-            concluido: false,
-            execucoes: 0
-        });
-    }
-
-    console.log(`✅ ${workouts.length} treinos gerados com sucesso`);
-    return workouts;
-},
-
-// =============================================
-// NOVA FUNÇÃO: generateExercisesForAIWithCustomGroups
-// Gera exercícios inteligentes baseados nos grupos personalizados
-// =============================================
-
-generateExercisesForAIWithCustomGroups(customGroups, nivel, objetivo, equipamentos, foco, limitacoes, workoutNumber) {
-    const exercises = [];
-    let exerciseId = workoutNumber * 10;
-
-    console.log(`🎯 Gerando exercícios para grupos: ${customGroups.join(', ')}`);
-
-    // 1. AQUECIMENTO ESPECÍFICO
-    exercises.push({
-        id: exerciseId++,
-        nome: this.getSmartWarmupForGroups(customGroups, equipamentos),
-        descricao: this.getWarmupDescriptionForGroups(customGroups),
-        series: 1,
-        repeticoes: "8-10 min",
-        carga: this.getWarmupIntensity(),
-        descanso: '0',
-        observacoesEspeciais: 'Aquecimento progressivo e específico',
-        tecnica: '',
-        concluido: false,
-        categoria: 'aquecimento'
-    });
-
-    // 2. EXERCÍCIOS PRINCIPAIS POR GRUPO
-    const exerciseDistribution = this.calculateExerciseDistribution(customGroups, objetivo, foco);
-    
-    customGroups.forEach((grupoId, index) => {
-        const mappedGroup = this.mapCustomGroupToSystemGroup(grupoId);
-        const numExercises = exerciseDistribution[grupoId] || 2;
-        
-        console.log(`💪 Adicionando ${numExercises} exercícios para ${grupoId} (${mappedGroup})`);
-        
-        // Obter exercícios do grupo
-        const groupExercises = this.getExercisesByGroupAndLevel(mappedGroup, nivel);
-        
-        if (groupExercises.length > 0) {
-            // Selecionar exercícios de forma inteligente
-            const selectedExercises = this.selectSmartExercises(
-                groupExercises, 
-                numExercises, 
-                objetivo, 
-                equipamentos,
-                limitacoes,
-                index === 0 // Primeiro grupo = exercício principal
-            );
-
-            selectedExercises.forEach((baseExercise, exIndex) => {
-                const tecnicaSelecionada = this.getTecnicaForExercise(
-                    exercises.length - 1, // Posição atual na sequência
-                    nivel, 
-                    mappedGroup
-                );
+            try {
+                const aiGeneratedPlan = this.createAIPlan(aiData);
                 
-                exercises.push({
-                    id: exerciseId++,
-                    nome: baseExercise.nome,
-                    descricao: this.findExerciseByName(baseExercise.nome) || 'Descrição não disponível',
-                    series: this.getSmartSeries(baseExercise, objetivo, nivel, exIndex === 0),
-                    repeticoes: this.getSmartReps(baseExercise, objetivo, nivel),
-                    carga: this.adjustLoadForLevel(baseExercise.carga || 'A definir', nivel),
-                    descanso: this.getSmartRest(objetivo, tecnicaSelecionada),
-                    observacoesEspeciais: this.getObservacaoEspecial(tecnicaSelecionada, baseExercise.nome),
-                    tecnica: tecnicaSelecionada,
-                    concluido: false,
-                    grupo_muscular: grupoId,
-                    categoria: exIndex === 0 ? 'principal' : 'auxiliar'
-                });
-            });
-        } else {
-            console.warn(`⚠️ Nenhum exercício encontrado para grupo ${mappedGroup}`);
-            
-            // Exercício fallback
-            exercises.push({
-                id: exerciseId++,
-                nome: this.getFallbackExercise(grupoId),
-                descricao: `Exercício básico para ${grupoId}`,
-                series: 3,
-                repeticoes: '10-12',
-                carga: 'A definir',
-                descanso: this.getRestByObjective(objetivo),
-                observacoesEspeciais: 'Exercício substituto - ajustar conforme necessário',
-                tecnica: '',
-                concluido: false,
-                grupo_muscular: grupoId,
-                categoria: 'substituto'
-            });
-        }
-    });
+                const existingIndex = this.savedPlans.findIndex(p => p.id === aiGeneratedPlan.id);
+                if (existingIndex >= 0) {
+                    this.savedPlans[existingIndex] = { ...aiGeneratedPlan };
+                } else {
+                    this.savedPlans.push({ ...aiGeneratedPlan });
+                }
 
-    // 3. ALONGAMENTO ESPECÍFICO
-    if (exercises.length > 1) {
-        exercises.push({
-            id: exerciseId++,
-            nome: this.getSmartCooldownForGroups(customGroups),
-            descricao: "Relaxamento e flexibilidade dos grupos musculares trabalhados",
-            series: 1,
-            repeticoes: "8-10 min",
-            carga: "Peso corporal",
-            descanso: '0',
-            observacoesEspeciais: 'Foco nos grupos trabalhados no treino',
-            tecnica: '',
-            concluido: false,
-            categoria: 'alongamento'
-        });
-    }
+                this.savePlansToStorage();
+                
+                indicator.classList.remove('active');
+                
+                this.showMessage('Plano gerado com sucesso pela IA! ✨', 'success');
+                
+                setTimeout(() => {
+                    this.showPlanList();
+                }, 1500);
 
-    console.log(`✅ ${exercises.length} exercícios criados (${exercises.filter(e => e.categoria === 'principal').length} principais)`);
-    return exercises;
-},
+            } catch (error) {
+                console.error('Erro ao gerar plano:', error);
+                indicator.classList.remove('active');
+                this.showMessage('Erro ao gerar plano. Tente novamente.', 'error');
+            }
 
-// =============================================
-// FUNÇÕES AUXILIARES INTELIGENTES
-// =============================================
-
-// Calcular distribuição inteligente de exercícios
-calculateExerciseDistribution(groups, objetivo, foco) {
-    const distribution = {};
-    const totalGroups = groups.length;
-    
-    // Base: 2-4 exercícios por grupo dependendo do total
-    let baseExercises = totalGroups <= 2 ? 4 : totalGroups <= 3 ? 3 : 2;
-    
-    // Ajustar baseado no objetivo
-    if (objetivo.includes('Hipertrofia')) {
-        baseExercises = Math.max(baseExercises, 3);
-    } else if (objetivo.includes('Força')) {
-        baseExercises = Math.max(baseExercises, 2);
-    }
-    
-    groups.forEach(group => {
-        distribution[group] = baseExercises;
-        
-        // Ajustes específicos por foco
-        if (foco === 'superior' && ['peito', 'costas', 'ombro', 'biceps', 'triceps'].includes(group)) {
-            distribution[group] += 1;
-        } else if (foco === 'inferior' && ['perna', 'gluteo'].includes(group)) {
-            distribution[group] += 1;
-        }
-        
-        // Grupos grandes merecem mais exercícios
-        if (['peito', 'costas', 'perna'].includes(group)) {
-            distribution[group] = Math.max(distribution[group], 3);
-        }
-    });
-    
-    return distribution;
-},
-
-// Seleção inteligente de exercícios
-selectSmartExercises(availableExercises, numNeeded, objetivo, equipamentos, limitacoes, isPrimaryGroup) {
-    let selected = [];
-    const limitations = limitacoes ? limitacoes.toLowerCase() : '';
-    
-    // Filtrar exercícios baseado em limitações
-    let filteredExercises = availableExercises.filter(ex => {
-        if (!limitations) return true;
-        
-        const exerciseName = ex.nome.toLowerCase();
-        // Lógica de filtro baseada em limitações comuns
-        if (limitations.includes('joelho') && exerciseName.includes('agachamento')) return false;
-        if (limitations.includes('ombro') && exerciseName.includes('desenvolvimento')) return false;
-        if (limitations.includes('lombar') && exerciseName.includes('terra')) return false;
-        
-        return true;
-    });
-    
-    if (filteredExercises.length === 0) filteredExercises = availableExercises;
-    
-    // Priorizar exercícios compostos para grupo principal
-    if (isPrimaryGroup) {
-        const compostos = filteredExercises.filter(ex => 
-            ex.nome.includes('Supino') || ex.nome.includes('Agachamento') || 
-            ex.nome.includes('Terra') || ex.nome.includes('Remada') ||
-            ex.nome.includes('Desenvolvimento')
-        );
-        
-        if (compostos.length > 0) {
-            selected.push(compostos[0]);
-            numNeeded--;
-        }
-    }
-    
-    // Adicionar exercícios restantes variando os tipos
-    const remaining = filteredExercises.filter(ex => 
-        !selected.some(sel => sel.nome === ex.nome)
-    );
-    
-    for (let i = 0; i < Math.min(numNeeded, remaining.length); i++) {
-        selected.push(remaining[i]);
-    }
-    
-    return selected;
-},
-
-// Séries inteligentes
-getSmartSeries(exercise, objetivo, nivel, isPrimary) {
-    let baseSeries = exercise.series || 3;
-    
-    if (objetivo.includes('Força')) {
-        baseSeries = isPrimary ? 5 : 3;
-    } else if (objetivo.includes('Hipertrofia')) {
-        baseSeries = isPrimary ? 4 : 3;
-    } else if (objetivo.includes('Resistência')) {
-        baseSeries = 2;
-    }
-    
-    // Ajuste por nível
-    if (nivel === 'iniciante') {
-        baseSeries = Math.max(2, baseSeries - 1);
-    } else if (nivel === 'avancado') {
-        baseSeries = Math.min(5, baseSeries + 1);
-    }
-    
-    return baseSeries;
-},
-
-// Repetições inteligentes
-getSmartReps(exercise, objetivo, nivel) {
-    if (objetivo.includes('Força')) {
-        return nivel === 'iniciante' ? '6-8' : '4-6';
-    } else if (objetivo.includes('Hipertrofia')) {
-        return '8-12';
-    } else if (objetivo.includes('Resistência')) {
-        return '12-15';
-    } else if (objetivo.includes('Perda de peso')) {
-        return '10-15';
-    }
-    
-    return exercise.repeticoes || '10-12';
-},
-
-// Descanso inteligente
-getSmartRest(objetivo, tecnica) {
-    let baseRest = this.getRestByObjective(objetivo);
-    
-    // Ajustar baseado na técnica
-    if (tecnica && ['drop-set', 'rest-pause', 'bi-set', 'tri-set'].includes(tecnica)) {
-        return '120-180 segundos';
-    }
-    
-    return baseRest;
-},
-
-// Aquecimento inteligente
-getSmartWarmupForGroups(groups, equipamentos) {
-    if (groups.includes('perna') || groups.includes('gluteo')) {
-        return equipamentos === 'peso_corporal' ? 'Aquecimento Dinâmico de Pernas' : 'Bicicleta Ergométrica';
-    } else if (groups.includes('costas')) {
-        return equipamentos === 'peso_corporal' ? 'Mobilização de Ombros' : 'Remo Ergômetro';
-    } else if (groups.includes('peito')) {
-        return equipamentos === 'peso_corporal' ? 'Aquecimento Dinâmico Superior' : 'Esteira';
-    }
-    
-    return equipamentos === 'peso_corporal' ? 'Aquecimento Dinâmico Geral' : 'Esteira';
-},
-
-// Alongamento inteligente
-getSmartCooldownForGroups(groups) {
-    const groupNames = groups.map(g => {
-        const group = this.planTypeConfiguration.muscleGroups.find(mg => mg.id === g);
-        return group ? group.name.toLowerCase() : g;
-    });
-    
-    return `Alongamento - ${groupNames.join(', ')}`;
-},
-
-// Exercício de fallback
-getFallbackExercise(grupoId) {
-    const fallbacks = {
-        'peito': 'Flexão de Braços',
-        'costas': 'Remada com Elástico',
-        'ombro': 'Elevação Lateral',
-        'biceps': 'Rosca Direta',
-        'triceps': 'Tríceps Pulley',
-        'perna': 'Agachamento Livre',
-        'gluteo': 'Hip Thrust',
-        'abdome': 'Abdominal Tradicional',
-        'antebraco': 'Rosca Punho'
-    };
-    
-    return fallbacks[grupoId] || 'Exercício Personalizado';
-},
-
+        }, 2000 + Math.random() * 2000);
+    },
 
     createAIPlan(aiData) {
         const plan = {
@@ -4181,292 +3708,6 @@ getWarmupDescriptionForGroups(groups) {
         const date = new Date(dateString);
         return date.toLocaleDateString('pt-BR');
     },
-// =============================================
-// CONFIGURAÇÃO DE MÚSCULOS NA CRIAÇÃO IA
-// =============================================
-
-// Estado da configuração de músculos da IA
-aiMuscleConfig: {
-    enabled: false,
-    days: 3,
-    workouts: {}
-},
-
-// Alternar configuração de músculos na IA
-toggleAIMuscleConfig() {
-    const checkbox = document.getElementById('aiUseCustomMuscleConfig');
-    const section = document.getElementById('aiMuscleConfigSection');
-    
-    this.aiMuscleConfig.enabled = checkbox.checked;
-    
-    if (checkbox.checked) {
-        section.style.display = 'block';
-        section.classList.add('active');
-        this.generateAIMuscleConfigInterface();
-    } else {
-        section.style.display = 'none';
-        section.classList.remove('active');
-        this.aiMuscleConfig.workouts = {};
-    }
-    
-    console.log('🎯 Configuração de músculos IA:', this.aiMuscleConfig.enabled ? 'ATIVADA' : 'DESATIVADA');
-},
-
-// Gerar interface de configuração de músculos para IA (VERSÃO CORRIGIDA)
-generateAIMuscleConfigInterface() {
-    const grid = document.getElementById('aiWorkoutConfigGrid');
-    const days = parseInt(document.getElementById('aiAvailableDays').value) || 3;
-    
-    if (!grid) {
-        console.error('❌ Elemento aiWorkoutConfigGrid não encontrado');
-        return;
-    }
-    
-    this.aiMuscleConfig.days = days;
-    
-    const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
-    let html = '';
-    
-    console.log(`🏋️ Gerando interface para ${days} dias de treino`);
-    
-    for (let i = 0; i < days; i++) {
-        const letter = letters[i];
-        const workout = this.aiMuscleConfig.workouts[letter] || {
-            name: `Treino ${letter}`,
-            groups: []
-        };
-        
-        // Garantir que planTypeConfiguration.muscleGroups existe
-        const muscleGroups = this.planTypeConfiguration?.muscleGroups || [
-            { id: 'antebraco', name: 'ANTEBRAÇO', icon: '💪' },
-            { id: 'abdome', name: 'ABDOME', icon: '🎯' },
-            { id: 'biceps', name: 'BÍCEPS', icon: '💪' },
-            { id: 'triceps', name: 'TRÍCEPS', icon: '🔥' },
-            { id: 'peito', name: 'PEITO', icon: '💥' },
-            { id: 'perna', name: 'PERNA', icon: '🦵' },
-            { id: 'gluteo', name: 'GLÚTEO', icon: '🍑' },
-            { id: 'costas', name: 'COSTAS', icon: '🗻' },
-            { id: 'ombro', name: 'OMBRO', icon: '👑' },
-            { id: 'corpo', name: 'CORPO TODO', icon: '🏋️' }
-        ];
-        
-        html += `
-            <div class="ai-workout-config" id="aiWorkout${letter}">
-                <div class="ai-workout-header">
-                    <div class="ai-workout-letter">${letter}</div>
-                    <div class="ai-workout-name">
-                        <input type="text" 
-                               placeholder="Nome do Treino ${letter}"
-                               value="${workout.name}"
-                               onchange="app.updateAIWorkoutName('${letter}', this.value)"
-                               onfocus="console.log('Input focado para treino ${letter}')">
-                    </div>
-                </div>
-                
-                <div class="ai-muscle-groups">
-                    ${muscleGroups.map(group => `
-                        <div class="ai-muscle-group-item">
-                            <input type="checkbox" 
-                                   id="aiMuscle-${letter}-${group.id}"
-                                   ${workout.groups.includes(group.id) ? 'checked' : ''}
-                                   onchange="app.updateAIMuscleGroups('${letter}')"
-                                   onclick="console.log('Checkbox clicked:', '${group.id}', 'for workout:', '${letter}')">
-                            <label for="aiMuscle-${letter}-${group.id}">
-                                ${group.icon} ${group.name}
-                            </label>
-                        </div>
-                    `).join('')}
-                </div>
-                
-                <div class="selected-groups-preview" id="aiPreview${letter}">
-                    ${this.generateAIGroupsPreview(letter, workout.groups)}
-                </div>
-            </div>
-        `;
-    }
-    
-    // Inserir HTML no grid
-    grid.innerHTML = html;
-    
-    // Validar cada treino após inserir
-    for (let i = 0; i < days; i++) {
-        const letter = letters[i];
-        this.validateAIWorkoutConfig(letter);
-    }
-    
-    console.log(`✅ Interface gerada com sucesso para ${days} treinos`);
-    console.log('🔍 HTML gerado:', html.substring(0, 200) + '...');
-},
-
-// Atualizar nome do treino na configuração IA
-updateAIWorkoutName(letter, name) {
-    if (!this.aiMuscleConfig.workouts[letter]) {
-        this.aiMuscleConfig.workouts[letter] = { name: '', groups: [] };
-    }
-    this.aiMuscleConfig.workouts[letter].name = name;
-    console.log(`📝 Treino ${letter} renomeado para: ${name}`);
-},
-
-// Atualizar grupos musculares na configuração IA
-updateAIMuscleGroups(letter) {
-    const selectedGroups = [];
-    
-    this.planTypeConfiguration.muscleGroups.forEach(group => {
-        const checkbox = document.getElementById(`aiMuscle-${letter}-${group.id}`);
-        if (checkbox && checkbox.checked) {
-            selectedGroups.push(group.id);
-        }
-    });
-    
-    if (!this.aiMuscleConfig.workouts[letter]) {
-        this.aiMuscleConfig.workouts[letter] = { name: `Treino ${letter}`, groups: [] };
-    }
-    this.aiMuscleConfig.workouts[letter].groups = selectedGroups;
-    
-    // Atualizar preview
-    const preview = document.getElementById(`aiPreview${letter}`);
-    if (preview) {
-        preview.innerHTML = this.generateAIGroupsPreview(letter, selectedGroups);
-    }
-    
-    // Validar configuração
-    this.validateAIWorkoutConfig(letter);
-    
-    console.log(`💪 Treino ${letter} - Grupos: ${selectedGroups.join(', ')}`);
-},
-
-// Gerar preview dos grupos selecionados
-generateAIGroupsPreview(letter, groups) {
-    if (groups.length === 0) {
-        return '⚠️ Nenhum grupo muscular selecionado';
-    }
-    
-    const groupNames = groups.map(groupId => {
-        const group = this.planTypeConfiguration.muscleGroups.find(g => g.id === groupId);
-        return group ? `${group.icon} ${group.name}` : groupId;
-    });
-    
-    return `✅ Trabalhando: ${groupNames.join(', ')}`;
-},
-
-// Validar configuração do treino
-validateAIWorkoutConfig(letter) {
-    const workoutElement = document.getElementById(`aiWorkout${letter}`);
-    const workout = this.aiMuscleConfig.workouts[letter];
-    
-    if (!workoutElement) return;
-    
-    // Remover classes existentes
-    workoutElement.classList.remove('valid', 'invalid');
-    
-    // Validar
-    if (workout && workout.groups.length > 0) {
-        workoutElement.classList.add('valid');
-    } else {
-        workoutElement.classList.add('invalid');
-    }
-},
-
-// Carregar configuração padrão na IA
-loadAIPresetConfig() {
-    const days = this.aiMuscleConfig.days;
-    const preset = this.planTypeConfiguration.presetConfigurations[days];
-    
-    if (!preset) {
-        this.showMessage('❌ Não há configuração padrão para este número de dias', 'warning');
-        return;
-    }
-    
-    // Aplicar configuração padrão
-    this.aiMuscleConfig.workouts = JSON.parse(JSON.stringify(preset));
-    
-    // Atualizar interface
-    Object.entries(preset).forEach(([letter, config]) => {
-        // Atualizar nome
-        const nameInput = document.querySelector(`#aiWorkout${letter} input[type="text"]`);
-        if (nameInput) {
-            nameInput.value = config.name;
-        }
-        
-        // Atualizar checkboxes
-        this.planTypeConfiguration.muscleGroups.forEach(group => {
-            const checkbox = document.getElementById(`aiMuscle-${letter}-${group.id}`);
-            if (checkbox) {
-                checkbox.checked = config.groups.includes(group.id);
-            }
-        });
-        
-        // Atualizar preview
-        const preview = document.getElementById(`aiPreview${letter}`);
-        if (preview) {
-            preview.innerHTML = this.generateAIGroupsPreview(letter, config.groups);
-        }
-        
-        // Validar
-        this.validateAIWorkoutConfig(letter);
-    });
-    
-    this.showMessage('📋 Configuração padrão aplicada!', 'success');
-    console.log('📋 Configuração padrão carregada na IA:', preset);
-},
-
-// Resetar configuração de músculos na IA
-resetAIMuscleConfig() {
-    if (!confirm('Tem certeza que deseja limpar toda a configuração de músculos?')) {
-        return;
-    }
-    
-    this.aiMuscleConfig.workouts = {};
-    
-    // Limpar interface
-    const grid = document.getElementById('aiWorkoutConfigGrid');
-    if (grid) {
-        const checkboxes = grid.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(cb => cb.checked = false);
-        
-        const nameInputs = grid.querySelectorAll('input[type="text"]');
-        nameInputs.forEach(input => {
-            const letter = input.closest('.ai-workout-config').id.replace('aiWorkout', '');
-            input.value = `Treino ${letter}`;
-        });
-        
-        const previews = grid.querySelectorAll('.selected-groups-preview');
-        previews.forEach(preview => {
-            preview.innerHTML = '⚠️ Nenhum grupo muscular selecionado';
-        });
-        
-        // Remover validações
-        const workouts = grid.querySelectorAll('.ai-workout-config');
-        workouts.forEach(workout => {
-            workout.classList.remove('valid', 'invalid');
-        });
-    }
-    
-    this.showMessage('🔄 Configuração resetada!', 'info');
-    console.log('🔄 Configuração de músculos IA resetada');
-},
-
-// Validar configuração completa antes de gerar
-validateAICompleteConfig() {
-    if (!this.aiMuscleConfig.enabled) {
-        return true; // Se não está usando configuração personalizada, está válido
-    }
-    
-    const letters = Object.keys(this.aiMuscleConfig.workouts);
-    const expectedDays = this.aiMuscleConfig.days;
-    const expectedLetters = ['A', 'B', 'C', 'D', 'E', 'F'].slice(0, expectedDays);
-    
-    // Verificar se todos os treinos esperados estão configurados
-    for (const letter of expectedLetters) {
-        const workout = this.aiMuscleConfig.workouts[letter];
-        if (!workout || !workout.groups || workout.groups.length === 0) {
-            this.showMessage(`❌ Treino ${letter} não tem grupos musculares selecionados!`, 'error');
-            return false;
-        }
-    }
-    
-    return true;
-},
 
     // =============================================
     // FUNÇÕES DE MENSAGENS
@@ -4526,7 +3767,6 @@ validateAICompleteConfig() {
         }, 5000);
     }
 };
-
 
 // =============================================
 // INICIALIZAÇÃO DA APLICAÇÃO
